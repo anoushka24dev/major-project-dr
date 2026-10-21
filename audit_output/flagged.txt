@@ -1,0 +1,300 @@
+11.Normal Fundus/100.jpg	very_dark	w=2124	h=2056	lum=27.9/17.44	sat=55.68	edge=2.238	dark=0.1963	bright=0.0
+11.Normal Fundus/103.jpg	very_dark	w=2124	h=2056	lum=24.56/13.11	sat=100.66	edge=1.272	dark=0.1953	bright=0.0
+11.Normal Fundus/104.jpg	very_dark	w=2124	h=2056	lum=24.18/14.94	sat=118.62	edge=1.225	dark=0.2659	bright=0.0
+11.Normal Fundus/105.jpg	very_dark	w=2124	h=2056	lum=27.62/17.3	sat=101.74	edge=1.763	dark=0.196	bright=0.0
+11.Normal Fundus/106.jpg	very_dark	w=2124	h=2056	lum=26.75/17.19	sat=74.98	edge=1.647	dark=0.1967	bright=0.0
+11.Normal Fundus/107.jpg	very_dark	w=2124	h=2056	lum=24.68/14.88	sat=69.36	edge=1.291	dark=0.1954	bright=0.0
+11.Normal Fundus/108.jpg	very_dark	w=2124	h=2056	lum=24.67/13.21	sat=108.98	edge=1.316	dark=0.1941	bright=0.0
+11.Normal Fundus/109.jpg	low_texture,very_dark	w=2124	h=2056	lum=27.08/14.66	sat=71.12	edge=1.15	dark=0.1949	bright=0.0
+11.Normal Fundus/110.jpg	very_dark	w=2124	h=2056	lum=28.26/14.49	sat=66.36	edge=1.708	dark=0.1948	bright=0.0
+11.Normal Fundus/111.jpg	very_dark	w=2124	h=2056	lum=27.68/15.47	sat=106.55	edge=1.677	dark=0.1968	bright=0.0
+11.Normal Fundus/113.jpg	very_dark	w=2124	h=2056	lum=29.77/16.76	sat=54.53	edge=1.889	dark=0.1942	bright=0.0
+11.Normal Fundus/116.jpg	very_dark	w=2124	h=2056	lum=29.74/16.23	sat=47.0	edge=2.034	dark=0.1956	bright=0.0
+11.Normal Fundus/117.jpg	very_dark	w=2124	h=2056	lum=28.01/16.01	sat=65.19	edge=1.842	dark=0.1956	bright=0.0
+11.Normal Fundus/118.jpg	very_dark	w=2124	h=2056	lum=26.18/13.83	sat=67.54	edge=1.37	dark=0.1951	bright=0.0
+11.Normal Fundus/119.jpg	very_dark	w=2124	h=2056	lum=28.67/16.35	sat=67.7	edge=1.858	dark=0.195	bright=0.0
+11.Normal Fundus/121.jpg	very_dark	w=2124	h=2056	lum=26.89/15.23	sat=94.39	edge=1.752	dark=0.195	bright=0.0
+11.Normal Fundus/124.jpg	very_dark	w=2124	h=2056	lum=27.18/15.35	sat=97.99	edge=1.765	dark=0.1951	bright=0.0
+11.Normal Fundus/125.jpg	very_dark	w=2124	h=2056	lum=29.13/16.77	sat=67.46	edge=2.129	dark=0.1934	bright=0.0
+11.Normal Fundus/130.jpg	very_dark	w=2124	h=2056	lum=29.27/15.63	sat=99.99	edge=1.628	dark=0.1945	bright=0.0
+11.Normal Fundus/138.jpg	very_dark	w=2124	h=2056	lum=28.97/15.2	sat=138.11	edge=1.361	dark=0.1951	bright=0.0
+11.Normal Fundus/142.jpg	very_dark	w=2124	h=2056	lum=29.95/16.93	sat=90.61	edge=1.969	dark=0.1943	bright=0.0
+11.Normal Fundus/143.jpg	very_dark	w=2124	h=2056	lum=27.49/20.16	sat=85.49	edge=2.08	dark=0.1965	bright=0.0
+11.Normal Fundus/144.jpg	very_dark	w=2124	h=2056	lum=28.21/15.93	sat=82.77	edge=1.972	dark=0.1954	bright=0.0
+11.Normal Fundus/145.jpg	very_dark	w=2124	h=2056	lum=27.49/17.04	sat=56.1	edge=1.883	dark=0.1957	bright=0.0
+11.Normal Fundus/146.jpg	very_dark	w=2124	h=2056	lum=26.45/16.18	sat=77.1	edge=1.808	dark=0.1961	bright=0.0
+11.Normal Fundus/148.jpg	very_dark	w=2124	h=2056	lum=29.35/16.48	sat=107.86	edge=1.723	dark=0.1937	bright=0.0
+11.Normal Fundus/149.jpg	very_dark	w=2124	h=2056	lum=28.18/14.12	sat=107.75	edge=1.323	dark=0.1938	bright=0.0
+11.Normal Fundus/152.jpg	very_dark	w=2124	h=2056	lum=23.59/12.62	sat=100.25	edge=1.236	dark=0.1989	bright=0.0
+11.Normal Fundus/153.jpg	very_dark	w=2124	h=2056	lum=23.41/13.21	sat=102.56	edge=1.282	dark=0.2	bright=0.0
+11.Normal Fundus/154.jpg	very_dark	w=2124	h=2056	lum=29.31/16.63	sat=85.39	edge=1.826	dark=0.1944	bright=0.0
+11.Normal Fundus/155.jpg	very_dark	w=2124	h=2056	lum=29.12/17.03	sat=83.65	edge=1.783	dark=0.195	bright=0.0
+11.Normal Fundus/156.jpg	very_dark	w=2124	h=2056	lum=28.42/14.95	sat=82.58	edge=1.697	dark=0.1948	bright=0.0
+11.Normal Fundus/158.jpg	very_dark	w=2124	h=2056	lum=28.79/14.67	sat=135.29	edge=1.428	dark=0.1936	bright=0.0
+11.Normal Fundus/159.jpg	very_dark	w=2124	h=2056	lum=25.62/15.22	sat=137.89	edge=1.348	dark=0.1969	bright=0.0
+11.Normal Fundus/168.jpg	very_dark	w=2124	h=2056	lum=27.6/16.12	sat=142.1	edge=1.762	dark=0.1948	bright=0.0
+11.Normal Fundus/169.jpg	very_dark	w=2124	h=2056	lum=25.84/13.36	sat=134.48	edge=1.567	dark=0.1954	bright=0.0
+11.Normal Fundus/171.jpg	very_dark	w=2124	h=2056	lum=27.58/16.0	sat=41.25	edge=1.642	dark=0.1959	bright=0.0
+11.Normal Fundus/173.jpg	very_dark	w=2124	h=2056	lum=28.14/15.25	sat=80.72	edge=1.928	dark=0.1956	bright=0.0
+11.Normal Fundus/174.jpg	very_dark	w=2124	h=2056	lum=27.93/14.76	sat=91.94	edge=1.53	dark=0.1938	bright=0.0
+11.Normal Fundus/175.jpg	very_dark	w=2124	h=2056	lum=26.91/14.19	sat=93.87	edge=1.533	dark=0.1946	bright=0.0
+11.Normal Fundus/176.jpg	very_dark	w=2124	h=2056	lum=26.73/14.39	sat=94.1	edge=1.599	dark=0.1945	bright=0.0
+11.Normal Fundus/177.jpg	very_dark	w=2124	h=2056	lum=27.01/14.52	sat=110.79	edge=1.672	dark=0.1957	bright=0.0
+11.Normal Fundus/179.jpg	very_dark	w=2124	h=2056	lum=24.88/17.06	sat=84.71	edge=1.847	dark=0.2004	bright=0.0
+11.Normal Fundus/181.jpg	very_dark	w=2124	h=2056	lum=27.81/17.36	sat=67.98	edge=1.942	dark=0.1959	bright=0.0
+11.Normal Fundus/182.jpg	very_dark	w=2124	h=2056	lum=27.46/16.45	sat=71.35	edge=1.882	dark=0.1969	bright=0.0
+11.Normal Fundus/184.jpg	very_dark	w=2124	h=2056	lum=29.7/16.93	sat=53.62	edge=2.056	dark=0.1948	bright=0.0
+11.Normal Fundus/186.jpg	very_dark	w=2124	h=2056	lum=29.87/17.16	sat=67.35	edge=2.04	dark=0.1945	bright=0.0
+11.Normal Fundus/31.jpg	very_dark	w=2124	h=2056	lum=27.94/15.49	sat=108.53	edge=1.767	dark=0.1948	bright=0.0
+11.Normal Fundus/32.jpg	very_dark	w=2124	h=2056	lum=26.84/14.19	sat=150.71	edge=1.568	dark=0.1959	bright=0.0
+11.Normal Fundus/36.jpg	very_dark	w=2124	h=2056	lum=27.77/14.59	sat=80.2	edge=1.801	dark=0.1954	bright=0.0
+11.Normal Fundus/37.jpg	very_dark	w=2124	h=2056	lum=27.68/14.88	sat=81.94	edge=1.836	dark=0.1971	bright=0.0
+11.Normal Fundus/38.jpg	very_dark	w=2124	h=2056	lum=26.14/13.81	sat=82.24	edge=1.623	dark=0.1984	bright=0.0
+11.Normal Fundus/39.jpg	very_dark	w=2124	h=2056	lum=28.4/18.84	sat=119.6	edge=1.815	dark=0.1945	bright=0.0
+11.Normal Fundus/41.jpg	very_dark	w=2124	h=2056	lum=29.49/16.68	sat=117.09	edge=1.727	dark=0.194	bright=0.0
+11.Normal Fundus/42.jpg	very_dark	w=2124	h=2056	lum=27.59/15.33	sat=116.78	edge=1.616	dark=0.1945	bright=0.0
+11.Normal Fundus/44.jpg	very_dark	w=2124	h=2056	lum=28.75/14.67	sat=80.99	edge=1.53	dark=0.1942	bright=0.0
+11.Normal Fundus/45.jpg	very_dark	w=2124	h=2056	lum=28.7/14.47	sat=80.95	edge=1.747	dark=0.1934	bright=0.0
+11.Normal Fundus/48.jpg	low_texture,very_dark	w=2124	h=2056	lum=29.51/15.13	sat=148.13	edge=1.126	dark=0.1939	bright=0.0
+11.Normal Fundus/49.jpg	low_texture,very_dark	w=2124	h=2056	lum=29.88/14.87	sat=159.79	edge=1.109	dark=0.1936	bright=0.0
+11.Normal Fundus/50.jpg	very_dark	w=2124	h=2056	lum=29.76/16.2	sat=60.05	edge=1.975	dark=0.1946	bright=0.0
+11.Normal Fundus/51.jpg	very_dark	w=2124	h=2056	lum=29.33/15.58	sat=84.87	edge=2.151	dark=0.1945	bright=0.0
+11.Normal Fundus/52.jpg	very_dark	w=2124	h=2056	lum=29.36/15.3	sat=139.42	edge=1.825	dark=0.1946	bright=0.0
+11.Normal Fundus/53.jpg	very_dark	w=2124	h=2056	lum=28.27/17.28	sat=155.1	edge=1.504	dark=0.1981	bright=0.0
+11.Normal Fundus/54.jpg	very_dark	w=2124	h=2056	lum=27.65/15.57	sat=79.84	edge=1.638	dark=0.1953	bright=0.0
+11.Normal Fundus/56.jpg	very_dark	w=2124	h=2056	lum=29.65/15.2	sat=78.12	edge=1.688	dark=0.1937	bright=0.0
+11.Normal Fundus/58.jpg	very_dark	w=2124	h=2056	lum=29.9/16.04	sat=78.03	edge=1.748	dark=0.194	bright=0.0
+11.Normal Fundus/59.jpg	very_dark	w=2124	h=2056	lum=27.45/15.3	sat=71.01	edge=1.499	dark=0.1957	bright=0.0
+11.Normal Fundus/61.jpg	very_dark	w=2124	h=2056	lum=29.5/16.34	sat=104.89	edge=1.604	dark=0.1942	bright=0.0
+11.Normal Fundus/64.jpg	very_dark	w=2124	h=2056	lum=27.88/14.11	sat=86.92	edge=1.313	dark=0.194	bright=0.0
+11.Normal Fundus/66.jpg	very_dark	w=2124	h=2056	lum=29.15/16.71	sat=73.33	edge=1.533	dark=0.1953	bright=0.0
+11.Normal Fundus/67.jpg	very_dark	w=2124	h=2056	lum=24.6/13.63	sat=115.59	edge=1.432	dark=0.1979	bright=0.0
+11.Normal Fundus/69.jpg	very_dark	w=2124	h=2056	lum=29.16/15.59	sat=136.71	edge=1.555	dark=0.1935	bright=0.0
+11.Normal Fundus/72.jpg	very_dark	w=2124	h=2056	lum=28.26/16.07	sat=108.19	edge=1.321	dark=0.194	bright=0.0
+11.Normal Fundus/83.jpg	very_dark	w=2124	h=2056	lum=29.75/15.93	sat=94.31	edge=1.548	dark=0.1956	bright=0.0
+11.Normal Fundus/85.jpg	very_dark	w=2124	h=2056	lum=29.71/15.29	sat=102.2	edge=1.654	dark=0.1954	bright=0.0
+11.Normal Fundus/86.jpg	very_dark	w=2124	h=2056	lum=27.89/14.6	sat=99.88	edge=1.56	dark=0.1959	bright=0.0
+11.Normal Fundus/87.jpg	very_dark	w=2124	h=2056	lum=28.59/16.1	sat=91.97	edge=1.848	dark=0.1955	bright=0.0
+11.Normal Fundus/88.jpg	very_dark	w=2124	h=2056	lum=28.45/15.01	sat=90.26	edge=1.716	dark=0.1954	bright=0.0
+11.Normal Fundus/89.jpg	very_dark	w=2124	h=2056	lum=27.95/15.73	sat=93.0	edge=1.859	dark=0.1952	bright=0.0
+11.Normal Fundus/98.jpg	very_dark	w=2124	h=2056	lum=27.79/13.96	sat=127.9	edge=1.356	dark=0.1941	bright=0.0
+12. Advanced PDR/692.jpg	very_dark	w=2124	h=2056	lum=25.22/13.08	sat=136.88	edge=1.289	dark=0.1959	bright=0.0
+12. Advanced PDR/694.jpg	very_dark	w=2124	h=2056	lum=28.48/16.4	sat=125.72	edge=1.578	dark=0.1949	bright=0.0
+12. Advanced PDR/695.jpg	very_dark	w=2124	h=2056	lum=27.31/14.98	sat=125.16	edge=1.481	dark=0.196	bright=0.0
+12. Advanced PDR/696.jpg	very_dark	w=2124	h=2056	lum=28.39/18.07	sat=64.22	edge=1.59	dark=0.1964	bright=0.0
+12. Advanced PDR/697.jpg	very_dark	w=2124	h=2056	lum=26.12/17.19	sat=66.56	edge=1.614	dark=0.1979	bright=0.0
+12. Advanced PDR/698.jpg	very_dark	w=2124	h=2056	lum=29.73/18.22	sat=70.39	edge=1.741	dark=0.1953	bright=0.0
+12. Advanced PDR/699.jpg	very_dark	w=2124	h=2056	lum=25.29/12.6	sat=101.8	edge=1.281	dark=0.1947	bright=0.0
+12. Advanced PDR/700.jpg	very_dark	w=2124	h=2056	lum=24.93/12.93	sat=86.87	edge=1.236	dark=0.1954	bright=0.0
+12. Advanced PDR/701.jpg	low_texture,very_dark	w=2124	h=2056	lum=26.32/14.52	sat=62.8	edge=1.143	dark=0.1956	bright=0.0
+12. Advanced PDR/702.jpg	low_texture,very_dark	w=2124	h=2056	lum=28.82/16.02	sat=60.84	edge=1.18	dark=0.1942	bright=0.0
+12. Advanced PDR/703.jpg	low_texture	w=2124	h=2056	lum=30.09/15.98	sat=46.82	edge=1.198	dark=0.1942	bright=0.0
+12. Advanced PDR/704.jpg	low_texture,very_dark	w=2124	h=2056	lum=28.88/15.06	sat=64.13	edge=1.195	dark=0.194	bright=0.0
+12. Advanced PDR/705.jpg	low_texture,very_dark	w=2124	h=2056	lum=20.74/12.14	sat=132.38	edge=1.175	dark=0.2038	bright=0.0
+12. Advanced PDR/710.jpg	low_texture,very_dark	w=2124	h=2056	lum=26.38/15.25	sat=65.88	edge=1.107	dark=0.209	bright=0.0
+12. Advanced PDR/712.jpg	very_dark	w=2124	h=2056	lum=28.08/15.67	sat=101.57	edge=1.462	dark=0.1943	bright=0.0
+12. Advanced PDR/713.jpg	very_dark	w=2124	h=2056	lum=28.88/15.28	sat=111.36	edge=1.453	dark=0.1938	bright=0.0
+12. Advanced PDR/715.jpg	very_dark	w=2124	h=2056	lum=27.21/14.78	sat=99.15	edge=1.383	dark=0.1944	bright=0.0
+12. Advanced PDR/716.jpg	very_dark	w=2124	h=2056	lum=28.22/16.57	sat=104.73	edge=1.505	dark=0.1964	bright=0.0
+12. Advanced PDR/717.jpg	very_dark	w=2124	h=2056	lum=28.69/15.53	sat=104.29	edge=1.376	dark=0.1945	bright=0.0
+12. Advanced PDR/720.jpg	very_dark	w=2124	h=2056	lum=28.45/14.95	sat=116.11	edge=1.41	dark=0.1952	bright=0.0
+12. Advanced PDR/721.jpg	very_dark	w=2124	h=2056	lum=29.91/16.05	sat=104.99	edge=1.535	dark=0.194	bright=0.0
+12. Advanced PDR/722.jpg	very_dark	w=2124	h=2056	lum=29.13/15.04	sat=107.47	edge=1.443	dark=0.1944	bright=0.0
+12. Advanced PDR/723.jpg	very_dark	w=2124	h=2056	lum=27.86/15.61	sat=95.44	edge=1.321	dark=0.1948	bright=0.0
+12. Advanced PDR/725.jpg	low_texture,very_dark	w=2124	h=2056	lum=28.95/15.79	sat=74.77	edge=1.191	dark=0.1943	bright=0.0
+12. Advanced PDR/727.jpg	very_dark	w=2124	h=2056	lum=29.98/19.19	sat=101.01	edge=1.502	dark=0.1957	bright=0.0
+12. Advanced PDR/729.jpg	very_dark	w=2124	h=2056	lum=25.68/14.09	sat=107.27	edge=1.271	dark=0.1967	bright=0.0
+12. Advanced PDR/731.jpg	very_dark	w=2124	h=2056	lum=27.19/14.38	sat=118.41	edge=1.414	dark=0.1953	bright=0.0
+12. Advanced PDR/732.jpg	very_dark	w=2124	h=2056	lum=26.1/14.23	sat=130.25	edge=1.356	dark=0.1957	bright=0.0
+12. Advanced PDR/741.jpg	very_dark	w=2124	h=2056	lum=26.6/14.56	sat=71.81	edge=1.227	dark=0.1962	bright=0.0
+12. Advanced PDR/743.jpg	very_dark	w=2124	h=2056	lum=28.26/14.49	sat=66.36	edge=1.708	dark=0.1948	bright=0.0
+12. Advanced PDR/746.jpg	black_border,very_dark	w=2124	h=2056	lum=25.92/19.51	sat=84.11	edge=1.433	dark=0.1992	bright=0.0
+12. Advanced PDR/747.jpg	very_dark	w=2124	h=2056	lum=25.04/13.43	sat=135.55	edge=1.358	dark=0.1971	bright=0.0
+12. Advanced PDR/748.jpg	very_dark	w=2124	h=2056	lum=26.24/14.33	sat=100.71	edge=1.311	dark=0.1959	bright=0.0
+12. Advanced PDR/753.jpg	very_dark	w=2124	h=2056	lum=26.84/14.1	sat=119.09	edge=1.431	dark=0.195	bright=0.0
+12. Advanced PDR/754.jpg	very_dark	w=2124	h=2056	lum=28.16/14.5	sat=130.02	edge=1.224	dark=0.1933	bright=0.0
+12. Advanced PDR/755.jpg	very_dark	w=2124	h=2056	lum=29.41/14.83	sat=141.53	edge=1.304	dark=0.1932	bright=0.0
+12. Advanced PDR/756.jpg	low_texture,very_dark	w=2124	h=2056	lum=27.02/14.03	sat=130.39	edge=1.042	dark=0.1941	bright=0.0
+12. Advanced PDR/757.jpg	very_dark	w=2124	h=2056	lum=25.22/13.07	sat=136.79	edge=1.291	dark=0.1959	bright=0.0
+13. Very Severe NPDR/448.jpg	very_dark	w=2124	h=2056	lum=27.68/16.32	sat=157.12	edge=1.79	dark=0.1946	bright=0.0
+13. Very Severe NPDR/500.jpg	very_dark	w=2124	h=2056	lum=26.97/15.88	sat=127.78	edge=1.692	dark=0.196	bright=0.0
+13. Very Severe NPDR/501.jpg	very_dark	w=2124	h=2056	lum=29.69/15.97	sat=124.3	edge=1.704	dark=0.1945	bright=0.0
+13. Very Severe NPDR/502.jpg	very_dark	w=2124	h=2056	lum=28.66/15.22	sat=127.24	edge=1.676	dark=0.1943	bright=0.0
+13. Very Severe NPDR/503.jpg	very_dark	w=2124	h=2056	lum=24.89/13.43	sat=84.96	edge=1.234	dark=0.1974	bright=0.0
+13. Very Severe NPDR/504.jpg	very_dark	w=2124	h=2056	lum=26.65/14.09	sat=89.57	edge=1.296	dark=0.1971	bright=0.0
+13. Very Severe NPDR/505.jpg	very_dark	w=2124	h=2056	lum=28.17/15.08	sat=80.89	edge=1.519	dark=0.1959	bright=0.0
+13. Very Severe NPDR/506.jpg	very_dark	w=2124	h=2056	lum=27.15/15.39	sat=64.91	edge=1.461	dark=0.196	bright=0.0
+13. Very Severe NPDR/507.jpg	very_dark	w=2124	h=2056	lum=26.91/15.0	sat=128.84	edge=1.843	dark=0.1953	bright=0.0
+13. Very Severe NPDR/508.jpg	very_dark	w=2124	h=2056	lum=28.25/15.76	sat=127.45	edge=1.932	dark=0.1949	bright=0.0
+13. Very Severe NPDR/509.jpg	very_dark	w=2124	h=2056	lum=27.67/16.32	sat=157.12	edge=1.789	dark=0.1946	bright=0.0
+13. Very Severe NPDR/530.jpg	very_dark	w=2124	h=2056	lum=29.0/16.15	sat=140.76	edge=1.53	dark=0.1938	bright=0.0
+13. Very Severe NPDR/531.jpg	very_dark	w=2124	h=2056	lum=25.74/13.15	sat=130.62	edge=1.495	dark=0.1946	bright=0.0
+13. Very Severe NPDR/533.jpg	very_dark	w=2124	h=2056	lum=28.71/15.76	sat=111.55	edge=1.609	dark=0.1949	bright=0.0
+13. Very Severe NPDR/537.jpg	very_dark	w=2124	h=2056	lum=28.27/16.18	sat=149.82	edge=1.913	dark=0.2155	bright=0.0
+13. Very Severe NPDR/539.jpg	low_texture,very_dark	w=2124	h=2056	lum=25.87/13.57	sat=116.74	edge=1.122	dark=0.1967	bright=0.0
+13. Very Severe NPDR/540.jpg	very_dark	w=2124	h=2056	lum=27.68/14.31	sat=128.32	edge=1.244	dark=0.1937	bright=0.0
+13. Very Severe NPDR/541.jpg	very_dark	w=2124	h=2056	lum=26.85/13.86	sat=140.76	edge=1.611	dark=0.1944	bright=0.0
+13. Very Severe NPDR/543.jpg	very_dark	w=2124	h=2056	lum=24.53/12.78	sat=143.55	edge=1.244	dark=0.1969	bright=0.0
+13. Very Severe NPDR/547.jpg	very_dark	w=2124	h=2056	lum=28.65/14.47	sat=164.62	edge=1.47	dark=0.1942	bright=0.0
+13. Very Severe NPDR/548.jpg	very_dark	w=2124	h=2056	lum=28.1/14.22	sat=168.09	edge=1.435	dark=0.1947	bright=0.0
+13. Very Severe NPDR/549.jpg	black_border,very_dark	w=2124	h=2056	lum=24.96/16.44	sat=76.97	edge=1.532	dark=0.2592	bright=0.0
+13. Very Severe NPDR/550.jpg	very_dark	w=2124	h=2056	lum=29.7/18.67	sat=82.62	edge=1.815	dark=0.2064	bright=0.0
+13. Very Severe NPDR/551.jpg	black_border,very_dark	w=2124	h=2056	lum=24.2/14.87	sat=61.81	edge=1.302	dark=0.202	bright=0.0
+13. Very Severe NPDR/552.jpg	very_dark	w=2124	h=2056	lum=25.25/14.93	sat=57.95	edge=1.41	dark=0.1998	bright=0.0
+13. Very Severe NPDR/553.jpg	very_dark	w=2124	h=2056	lum=26.39/16.91	sat=84.29	edge=1.504	dark=0.238	bright=0.0
+13. Very Severe NPDR/554.jpg	very_dark	w=2124	h=2056	lum=28.16/15.86	sat=74.57	edge=1.489	dark=0.1985	bright=0.0
+3.Mild DR/21149_left.jpeg	near_grayscale	w=1024	h=830	lum=127.92/18.67	sat=16.12	edge=6.942	dark=0.0002	bright=0.0003
+3.Mild DR/29020_left.jpeg	near_grayscale	w=1024	h=1010	lum=127.29/15.96	sat=10.76	edge=5.319	dark=0.0	bright=0.0042
+3.Mild DR/4831_right.jpeg	near_grayscale	w=1024	h=928	lum=130.97/57.0	sat=9.82	edge=10.092	dark=0.0809	bright=0.0928
+3.Mild DR/8342_right.jpeg	near_grayscale	w=1024	h=1024	lum=127.73/21.55	sat=16.51	edge=8.0	dark=0.0012	bright=0.0058
+3.Mild DR/9116_left.jpeg	near_grayscale	w=1024	h=768	lum=128.06/13.95	sat=16.48	edge=4.391	dark=0.0	bright=0.0
+4.Moderate DR/10645_left.jpeg	near_grayscale	w=1024	h=1024	lum=130.72/56.02	sat=15.27	edge=14.087	dark=0.0747	bright=0.0825
+4.Moderate DR/11384_right.jpeg	near_grayscale	w=1024	h=1024	lum=127.76/19.31	sat=17.2	edge=8.734	dark=0.0001	bright=0.0023
+4.Moderate DR/11648_left.jpeg	near_grayscale	w=1024	h=1024	lum=128.01/12.51	sat=11.74	edge=4.816	dark=0.0	bright=0.0
+4.Moderate DR/1178_left.jpeg	near_grayscale	w=1024	h=1024	lum=128.01/20.25	sat=16.55	edge=8.295	dark=0.0	bright=0.0
+4.Moderate DR/12329_right.jpeg	near_uniform_low_std,near_grayscale	w=1024	h=955	lum=128.02/10.57	sat=12.98	edge=4.079	dark=0.0	bright=0.0
+4.Moderate DR/13534_right.jpeg	near_grayscale	w=1024	h=1024	lum=127.94/17.99	sat=14.13	edge=6.373	dark=0.0	bright=0.0008
+4.Moderate DR/13627_left.jpeg	near_grayscale	w=1024	h=932	lum=127.77/12.86	sat=12.41	edge=4.216	dark=0.0	bright=0.0029
+4.Moderate DR/14160_right.jpeg	near_grayscale	w=1024	h=1024	lum=127.78/18.15	sat=17.0	edge=6.879	dark=0.0	bright=0.0024
+4.Moderate DR/1475_left.jpeg	near_grayscale	w=1024	h=931	lum=128.04/13.35	sat=9.54	edge=3.895	dark=0.0002	bright=0.0
+4.Moderate DR/14915_right.jpeg	near_uniform_low_std,near_grayscale	w=1024	h=1024	lum=128.04/4.94	sat=8.86	edge=2.309	dark=0.0	bright=0.0
+4.Moderate DR/15302_left.jpeg	near_uniform_low_std	w=1024	h=862	lum=128.0/10.92	sat=20.92	edge=4.115	dark=0.0	bright=0.0
+4.Moderate DR/1675_left.jpeg	near_grayscale	w=1024	h=1024	lum=129.71/52.82	sat=13.47	edge=14.936	dark=0.0621	bright=0.0656
+4.Moderate DR/20824_right.jpeg	near_uniform_low_std,near_grayscale	w=1024	h=998	lum=128.04/11.0	sat=12.91	edge=3.699	dark=0.0	bright=0.0
+4.Moderate DR/20878_left.jpeg	near_grayscale	w=1024	h=1024	lum=127.94/26.73	sat=15.5	edge=9.668	dark=0.0035	bright=0.0023
+4.Moderate DR/20977_right.jpeg	near_grayscale	w=1024	h=1024	lum=128.18/42.3	sat=17.75	edge=16.215	dark=0.0289	bright=0.0219
+4.Moderate DR/21345_left.jpeg	near_grayscale	w=1024	h=1024	lum=127.69/23.11	sat=12.4	edge=6.899	dark=0.0034	bright=0.0037
+4.Moderate DR/23325_left.jpeg	near_uniform_low_std,near_grayscale	w=1024	h=1024	lum=127.99/11.89	sat=14.8	edge=4.455	dark=0.0	bright=0.0
+4.Moderate DR/23761_left.jpeg	near_grayscale	w=1024	h=1024	lum=127.97/19.5	sat=15.96	edge=7.123	dark=0.0004	bright=0.0003
+4.Moderate DR/238.jpg	very_dark	w=2124	h=2056	lum=28.77/15.88	sat=113.81	edge=1.644	dark=0.1956	bright=0.0
+4.Moderate DR/239.jpg	very_dark	w=2124	h=2056	lum=26.55/14.56	sat=97.49	edge=1.294	dark=0.1959	bright=0.0
+4.Moderate DR/240.jpg	very_dark	w=2124	h=2056	lum=29.87/15.65	sat=121.22	edge=1.722	dark=0.1951	bright=0.0
+4.Moderate DR/24074_left.jpeg	near_grayscale	w=1024	h=1024	lum=129.2/52.43	sat=17.09	edge=15.575	dark=0.0561	bright=0.0588
+4.Moderate DR/241.jpg	very_dark	w=2124	h=2056	lum=26.16/13.67	sat=124.22	edge=1.532	dark=0.1965	bright=0.0
+4.Moderate DR/242.jpg	very_dark	w=2124	h=2056	lum=26.59/14.95	sat=110.64	edge=1.454	dark=0.197	bright=0.0
+4.Moderate DR/243.jpg	very_dark	w=2124	h=2056	lum=27.55/14.7	sat=134.19	edge=1.615	dark=0.1943	bright=0.0
+4.Moderate DR/244.jpg	very_dark	w=2124	h=2056	lum=23.66/13.2	sat=137.11	edge=1.486	dark=0.1965	bright=0.0
+4.Moderate DR/245.jpg	very_dark	w=2124	h=2056	lum=27.55/14.7	sat=134.19	edge=1.616	dark=0.1943	bright=0.0
+4.Moderate DR/246.jpg	very_dark	w=2124	h=2056	lum=27.55/14.7	sat=134.19	edge=1.616	dark=0.1943	bright=0.0
+4.Moderate DR/247.jpg	very_dark	w=2124	h=2056	lum=27.31/14.47	sat=97.04	edge=1.823	dark=0.1973	bright=0.0
+4.Moderate DR/251.jpg	very_dark	w=2124	h=2056	lum=29.14/14.71	sat=120.24	edge=1.374	dark=0.194	bright=0.0
+4.Moderate DR/252.jpg	very_dark	w=2124	h=2056	lum=28.82/14.51	sat=120.57	edge=1.369	dark=0.1943	bright=0.0
+4.Moderate DR/25291_left.jpeg	near_grayscale	w=1024	h=921	lum=127.88/14.73	sat=15.1	edge=4.572	dark=0.0	bright=0.0001
+4.Moderate DR/256.jpg	very_dark	w=2124	h=2056	lum=29.7/15.75	sat=103.49	edge=2.004	dark=0.1967	bright=0.0
+4.Moderate DR/25620_left.jpeg	near_grayscale	w=1024	h=1024	lum=127.97/21.19	sat=17.28	edge=8.451	dark=0.0001	bright=0.0001
+4.Moderate DR/257.jpg	very_dark	w=2124	h=2056	lum=29.1/15.19	sat=98.15	edge=1.925	dark=0.1962	bright=0.0
+4.Moderate DR/258.jpg	very_dark	w=2124	h=2056	lum=28.26/15.86	sat=90.69	edge=1.659	dark=0.196	bright=0.0
+4.Moderate DR/260.jpg	low_texture,very_dark	w=2124	h=2056	lum=24.42/12.9	sat=156.14	edge=1.153	dark=0.1962	bright=0.0
+4.Moderate DR/261.jpg	very_dark	w=2124	h=2056	lum=28.18/16.7	sat=141.65	edge=1.273	dark=0.1951	bright=0.0
+4.Moderate DR/262.jpg	low_texture,very_dark	w=2124	h=2056	lum=24.91/12.59	sat=154.39	edge=1.091	dark=0.1953	bright=0.0
+4.Moderate DR/263.jpg	very_dark	w=2124	h=2056	lum=25.03/14.92	sat=157.64	edge=1.285	dark=0.1965	bright=0.0
+4.Moderate DR/264.jpg	very_dark	w=2124	h=2056	lum=24.33/14.14	sat=154.99	edge=1.233	dark=0.1975	bright=0.0
+4.Moderate DR/265.jpg	very_dark	w=2124	h=2056	lum=25.42/13.52	sat=156.78	edge=1.217	dark=0.1958	bright=0.0
+4.Moderate DR/266.jpg	very_dark	w=2124	h=2056	lum=28.01/16.01	sat=65.19	edge=1.843	dark=0.1956	bright=0.0
+4.Moderate DR/28772_right.jpeg	near_grayscale	w=1024	h=1024	lum=127.9/23.73	sat=15.58	edge=8.708	dark=0.0013	bright=0.0015
+4.Moderate DR/30277_left.jpeg	near_grayscale	w=1024	h=929	lum=127.89/19.45	sat=16.94	edge=7.036	dark=0.0001	bright=0.0015
+4.Moderate DR/30277_right.jpeg	near_grayscale	w=1024	h=929	lum=127.91/20.62	sat=16.82	edge=7.232	dark=0.0	bright=0.0015
+4.Moderate DR/31160_left.jpeg	near_grayscale	w=1024	h=963	lum=126.66/19.09	sat=15.68	edge=5.382	dark=0.0035	bright=0.0038
+4.Moderate DR/31945_left.jpeg	near_grayscale	w=1024	h=815	lum=127.89/14.01	sat=17.04	edge=4.808	dark=0.0002	bright=0.002
+4.Moderate DR/31945_right.jpeg	near_uniform_low_std,near_grayscale	w=1024	h=819	lum=127.99/8.17	sat=12.58	edge=3.354	dark=0.0	bright=0.0
+4.Moderate DR/32230_left.jpeg	near_grayscale	w=1024	h=1024	lum=127.74/26.49	sat=16.68	edge=9.854	dark=0.0022	bright=0.0037
+4.Moderate DR/34284_left.jpeg	near_grayscale	w=1024	h=1024	lum=127.98/16.46	sat=15.26	edge=5.713	dark=0.0005	bright=0.0007
+4.Moderate DR/34442_left.jpeg	near_grayscale	w=1024	h=948	lum=127.42/24.63	sat=17.32	edge=6.052	dark=0.0099	bright=0.0089
+4.Moderate DR/39530_left.jpeg	near_grayscale	w=1024	h=924	lum=127.96/15.99	sat=13.37	edge=5.783	dark=0.0	bright=0.0009
+4.Moderate DR/39983_left.jpeg	near_grayscale	w=1024	h=1024	lum=128.04/29.16	sat=15.92	edge=10.157	dark=0.0056	bright=0.0007
+4.Moderate DR/40341_left.jpeg	near_grayscale	w=1024	h=1024	lum=127.93/21.83	sat=15.06	edge=6.949	dark=0.0028	bright=0.003
+4.Moderate DR/42832_left.jpeg	near_grayscale	w=1024	h=1024	lum=127.92/14.58	sat=10.75	edge=5.077	dark=0.0	bright=0.0
+4.Moderate DR/43921_left.jpeg	near_uniform_low_std,near_grayscale	w=1024	h=933	lum=127.93/11.5	sat=12.26	edge=3.961	dark=0.0	bright=0.0009
+4.Moderate DR/6014_left.jpeg	near_grayscale	w=1024	h=867	lum=128.0/20.74	sat=15.01	edge=5.931	dark=0.0055	bright=0.0048
+4.Moderate DR/6684_left.jpeg	near_grayscale	w=1024	h=1024	lum=127.92/22.93	sat=17.7	edge=6.735	dark=0.0022	bright=0.0027
+4.Moderate DR/9569_left.jpeg	near_grayscale	w=1024	h=1024	lum=127.36/32.46	sat=17.74	edge=15.75	dark=0.0052	bright=0.0082
+5.Severe DR/346.jpg	very_dark	w=2124	h=2056	lum=29.14/14.71	sat=120.3	edge=1.375	dark=0.194	bright=0.0
+5.Severe DR/347.jpg	very_dark	w=2124	h=2056	lum=28.82/14.51	sat=120.46	edge=1.367	dark=0.1943	bright=0.0
+5.Severe DR/348.jpg	very_dark	w=2124	h=2056	lum=28.41/16.06	sat=145.4	edge=1.815	dark=0.1951	bright=0.0
+5.Severe DR/351.jpg	very_dark	w=2124	h=2056	lum=29.86/16.14	sat=117.26	edge=1.52	dark=0.1946	bright=0.0
+5.Severe DR/352.jpg	very_dark	w=2124	h=2056	lum=28.21/15.33	sat=116.04	edge=1.428	dark=0.1954	bright=0.0
+5.Severe DR/353.jpg	very_dark	w=2124	h=2056	lum=25.15/15.13	sat=143.4	edge=1.41	dark=0.2277	bright=0.0
+5.Severe DR/354.jpg	very_dark	w=2124	h=2056	lum=28.5/18.98	sat=115.42	edge=1.851	dark=0.1948	bright=0.0
+5.Severe DR/355.jpg	very_dark	w=2124	h=2056	lum=28.21/14.32	sat=141.76	edge=1.286	dark=0.1944	bright=0.0
+5.Severe DR/388.jpg	very_dark	w=2124	h=2056	lum=27.13/14.75	sat=143.76	edge=1.638	dark=0.1952	bright=0.0
+5.Severe DR/389.jpg	very_dark	w=2124	h=2056	lum=26.98/14.58	sat=146.19	edge=1.636	dark=0.195	bright=0.0
+5.Severe DR/434.jpg	very_dark	w=2124	h=2056	lum=28.41/16.06	sat=145.46	edge=1.815	dark=0.195	bright=0.0
+5.Severe DR/435.jpg	very_dark	w=2124	h=2056	lum=29.16/15.21	sat=107.6	edge=1.816	dark=0.1938	bright=0.0
+5.Severe DR/436.jpg	very_dark	w=2124	h=2056	lum=25.52/13.85	sat=92.65	edge=1.41	dark=0.1959	bright=0.0
+5.Severe DR/442.jpg	very_dark	w=2124	h=2056	lum=29.94/16.17	sat=101.95	edge=1.837	dark=0.1935	bright=0.0
+5.Severe DR/443.jpg	very_dark	w=2124	h=2056	lum=28.65/14.47	sat=164.62	edge=1.47	dark=0.1942	bright=0.0
+5.Severe DR/444.jpg	very_dark	w=2124	h=2056	lum=28.1/14.22	sat=168.09	edge=1.435	dark=0.1947	bright=0.0
+5.Severe DR/445.jpg	very_dark	w=2124	h=2056	lum=28.38/19.13	sat=78.92	edge=1.721	dark=0.2081	bright=0.0
+5.Severe DR/446.jpg	very_dark	w=2124	h=2056	lum=26.91/17.25	sat=75.92	edge=1.605	dark=0.201	bright=0.0
+5.Severe DR/Severe DR13022_left_0_403.jpeg	near_grayscale	w=1024	h=1024	lum=127.75/29.01	sat=17.02	edge=8.334	dark=0.011	bright=0.0095
+5.Severe DR/Severe DR31202_right_0_2249.jpeg	near_grayscale	w=1024	h=901	lum=131.81/60.42	sat=8.03	edge=9.276	dark=0.0889	bright=0.1077
+5.Severe DR/Severe DR31202_right_0_5108.jpeg	near_grayscale	w=1024	h=901	lum=122.91/64.18	sat=13.94	edge=9.87	dark=0.1272	bright=0.0931
+5.Severe DR/Severe DR31647_left_0_3802.jpeg	near_grayscale	w=1024	h=1024	lum=129.02/56.56	sat=17.05	edge=13.598	dark=0.0767	bright=0.0722
+5.Severe DR/Severe DR31647_left_0_3853.jpeg	near_grayscale	w=1024	h=1024	lum=127.52/58.89	sat=17.95	edge=12.834	dark=0.09	bright=0.0743
+5.Severe DR/Severe DR8363_left_0_8389.jpeg	near_grayscale	w=1024	h=932	lum=126.09/21.69	sat=15.79	edge=5.8	dark=0.0046	bright=0.0061
+6.Proliferate DR/577.jpg	very_dark	w=2124	h=2056	lum=27.55/14.7	sat=134.19	edge=1.615	dark=0.1943	bright=0.0
+6.Proliferate DR/578.jpg	very_dark	w=2124	h=2056	lum=23.66/13.2	sat=137.11	edge=1.486	dark=0.1965	bright=0.0
+6.Proliferate DR/579.jpg	very_dark	w=2124	h=2056	lum=27.55/14.7	sat=134.19	edge=1.616	dark=0.1943	bright=0.0
+6.Proliferate DR/580.jpg	very_dark	w=2124	h=2056	lum=27.55/14.7	sat=134.2	edge=1.616	dark=0.1943	bright=0.0
+6.Proliferate DR/581.jpg	very_dark	w=2124	h=2056	lum=29.18/15.34	sat=153.42	edge=1.564	dark=0.1943	bright=0.0
+6.Proliferate DR/582.jpg	very_dark	w=2124	h=2056	lum=29.62/15.3	sat=158.56	edge=1.699	dark=0.1942	bright=0.0
+6.Proliferate DR/583.jpg	very_dark	w=2124	h=2056	lum=27.17/14.13	sat=155.83	edge=1.235	dark=0.1948	bright=0.0
+6.Proliferate DR/584.jpg	very_dark	w=2124	h=2056	lum=27.88/15.78	sat=107.52	edge=1.358	dark=0.1932	bright=0.0
+6.Proliferate DR/585.jpg	very_dark	w=2124	h=2056	lum=27.75/14.18	sat=150.07	edge=1.266	dark=0.1946	bright=0.0
+6.Proliferate DR/586.jpg	very_dark	w=2124	h=2056	lum=28.21/14.32	sat=141.77	edge=1.286	dark=0.1944	bright=0.0
+6.Proliferate DR/587.jpg	very_dark	w=2124	h=2056	lum=27.01/14.13	sat=156.09	edge=1.285	dark=0.195	bright=0.0
+6.Proliferate DR/588.jpg	very_dark	w=2124	h=2056	lum=26.41/13.42	sat=149.85	edge=1.222	dark=0.1951	bright=0.0
+6.Proliferate DR/589.jpg	low_texture,very_dark	w=2124	h=2056	lum=24.42/12.89	sat=156.14	edge=1.154	dark=0.1962	bright=0.0
+6.Proliferate DR/590.jpg	very_dark	w=2124	h=2056	lum=28.18/16.71	sat=141.64	edge=1.275	dark=0.195	bright=0.0
+6.Proliferate DR/591.jpg	low_texture,very_dark	w=2124	h=2056	lum=24.91/12.59	sat=154.38	edge=1.09	dark=0.1952	bright=0.0
+6.Proliferate DR/592.jpg	very_dark	w=2124	h=2056	lum=25.04/14.93	sat=157.64	edge=1.284	dark=0.1967	bright=0.0
+6.Proliferate DR/593.jpg	very_dark	w=2124	h=2056	lum=24.33/14.14	sat=154.98	edge=1.235	dark=0.1976	bright=0.0
+6.Proliferate DR/594.jpg	very_dark	w=2124	h=2056	lum=25.42/13.52	sat=156.66	edge=1.218	dark=0.1958	bright=0.0
+6.Proliferate DR/595.jpg	very_dark	w=2124	h=2056	lum=27.0/14.07	sat=158.49	edge=1.245	dark=0.1956	bright=0.0
+6.Proliferate DR/597.jpg	low_texture,very_dark	w=2124	h=2056	lum=24.9/14.09	sat=103.83	edge=1.194	dark=0.199	bright=0.0
+6.Proliferate DR/598.jpg	very_dark	w=2124	h=2056	lum=25.49/14.31	sat=103.59	edge=1.552	dark=0.197	bright=0.0
+6.Proliferate DR/599.jpg	very_dark	w=2124	h=2056	lum=29.15/15.59	sat=106.62	edge=1.745	dark=0.1943	bright=0.0
+6.Proliferate DR/600.jpg	very_dark	w=2124	h=2056	lum=26.46/15.31	sat=91.33	edge=1.369	dark=0.1977	bright=0.0
+6.Proliferate DR/601.jpg	very_dark	w=2124	h=2056	lum=24.81/14.58	sat=81.58	edge=1.858	dark=0.1974	bright=0.0
+6.Proliferate DR/603.jpg	very_dark	w=2124	h=2056	lum=27.0/14.07	sat=158.5	edge=1.248	dark=0.1955	bright=0.0
+6.Proliferate DR/604.jpg	very_dark	w=2124	h=2056	lum=27.65/14.28	sat=137.91	edge=1.289	dark=0.1943	bright=0.0
+6.Proliferate DR/605.jpg	very_dark	w=2124	h=2056	lum=28.06/14.83	sat=137.18	edge=1.283	dark=0.1943	bright=0.0
+6.Proliferate DR/606.jpg	very_dark	w=2124	h=2056	lum=28.82/15.38	sat=139.26	edge=1.366	dark=0.1942	bright=0.0
+6.Proliferate DR/613.jpg	very_dark	w=2124	h=2056	lum=29.25/15.32	sat=102.52	edge=2.024	dark=0.1945	bright=0.0
+6.Proliferate DR/614.jpg	very_dark	w=2124	h=2056	lum=23.66/14.13	sat=132.93	edge=1.424	dark=0.1974	bright=0.0
+6.Proliferate DR/615.jpg	very_dark	w=2124	h=2056	lum=26.4/13.92	sat=125.68	edge=1.386	dark=0.1951	bright=0.0
+6.Proliferate DR/616.jpg	very_dark	w=2124	h=2056	lum=27.84/15.83	sat=87.08	edge=1.314	dark=0.1957	bright=0.0
+6.Proliferate DR/617.jpg	low_texture,very_dark	w=2124	h=2056	lum=25.11/13.27	sat=127.43	edge=1.081	dark=0.1957	bright=0.0
+6.Proliferate DR/618.jpg	very_dark	w=2124	h=2056	lum=25.4/13.44	sat=134.33	edge=1.256	dark=0.1955	bright=0.0
+6.Proliferate DR/619.jpg	very_dark	w=2124	h=2056	lum=25.67/14.7	sat=143.0	edge=1.421	dark=0.196	bright=0.0
+6.Proliferate DR/620.jpg	low_texture,very_dark	w=2124	h=2056	lum=27.24/13.95	sat=73.12	edge=1.016	dark=0.1943	bright=0.0
+6.Proliferate DR/623.jpg	low_texture,very_dark	w=2124	h=2056	lum=26.43/13.97	sat=100.42	edge=1.136	dark=0.1951	bright=0.0
+6.Proliferate DR/624.jpg	low_texture,very_dark	w=2124	h=2056	lum=25.97/14.02	sat=137.42	edge=1.167	dark=0.1964	bright=0.0
+6.Proliferate DR/627.jpg	very_dark	w=2124	h=2056	lum=29.45/15.57	sat=124.35	edge=1.594	dark=0.1933	bright=0.0
+6.Proliferate DR/628.jpg	very_dark	w=2124	h=2056	lum=24.04/14.16	sat=124.42	edge=1.377	dark=0.1984	bright=0.0
+6.Proliferate DR/629.jpg	very_dark	w=2124	h=2056	lum=29.96/15.55	sat=113.33	edge=1.641	dark=0.1932	bright=0.0
+6.Proliferate DR/630.jpg	very_dark	w=2124	h=2056	lum=29.87/15.65	sat=114.41	edge=1.659	dark=0.1937	bright=0.0
+6.Proliferate DR/631.jpg	very_dark	w=2124	h=2056	lum=26.84/13.38	sat=157.06	edge=1.46	dark=0.1945	bright=0.0
+6.Proliferate DR/635.jpg	very_dark	w=2124	h=2056	lum=29.72/17.99	sat=65.56	edge=1.641	dark=0.195	bright=0.0
+6.Proliferate DR/636.jpg	very_dark	w=2124	h=2056	lum=28.39/18.07	sat=64.28	edge=1.59	dark=0.1962	bright=0.0
+6.Proliferate DR/637.jpg	very_dark	w=2124	h=2056	lum=26.12/17.19	sat=66.69	edge=1.614	dark=0.1978	bright=0.0
+6.Proliferate DR/638.jpg	very_dark	w=2124	h=2056	lum=29.73/18.23	sat=70.43	edge=1.741	dark=0.1953	bright=0.0
+6.Proliferate DR/Proliferate DR21788_right_0_1827.jpeg	near_grayscale	w=1024	h=1024	lum=127.34/19.04	sat=16.63	edge=6.022	dark=0.0001	bright=0.0
+6.Proliferate DR/Proliferate DR30675_left_0_3335.jpeg	near_grayscale	w=1024	h=809	lum=127.72/18.43	sat=16.43	edge=6.208	dark=0.0017	bright=0.0003
+6.Proliferate DR/Proliferate DR30723_left_0_66.jpeg	near_uniform_low_std	w=1024	h=873	lum=126.91/11.06	sat=23.93	edge=4.659	dark=0.0	bright=0.0
+6.Proliferate DR/Proliferate DR31659_right_0_5572.jpeg	near_grayscale	w=1024	h=821	lum=128.7/16.0	sat=16.45	edge=5.358	dark=0.0	bright=0.0013
+6.Proliferate DR/Proliferate DR32230_right_0_3640.jpeg	near_grayscale	w=1024	h=1024	lum=122.7/29.84	sat=16.09	edge=8.247	dark=0.0093	bright=0.0002
+6.Proliferate DR/Proliferate DR32230_right_0_4378.jpeg	near_grayscale	w=1024	h=1024	lum=126.25/26.1	sat=14.68	edge=8.367	dark=0.0081	bright=0.0007
+6.Proliferate DR/Proliferate DR40178_left_0_6185.jpeg	near_grayscale	w=1024	h=1024	lum=126.54/16.05	sat=11.83	edge=4.698	dark=0.0028	bright=0.0
+6.Proliferate DR/Proliferate DR40178_left_0_9023.jpeg	near_grayscale	w=1024	h=1024	lum=126.32/16.08	sat=11.34	edge=4.865	dark=0.0026	bright=0.0
+6.Proliferate DR/Proliferate DR9353_left_0_520.jpeg	near_grayscale	w=1024	h=1024	lum=126.66/29.29	sat=16.51	edge=8.067	dark=0.0104	bright=0.0033
+6.Proliferate DR/Proliferate DR9353_right_0_3898.jpeg	near_grayscale	w=1024	h=1024	lum=128.18/26.68	sat=17.83	edge=10.787	dark=0.0036	bright=0.0046
+7.Cataract/Cataract2123_left_0_1703.jpeg	near_grayscale	w=512	h=512	lum=129.22/83.31	sat=16.01	edge=10.688	dark=0.2031	bright=0.1729
+7.Cataract/Cataract2123_left_0_2014.jpeg	near_grayscale	w=512	h=512	lum=127.27/81.57	sat=15.94	edge=10.935	dark=0.198	bright=0.1613
+7.Cataract/Cataract2123_left_0_2693.jpeg	near_grayscale	w=512	h=512	lum=130.23/83.48	sat=17.19	edge=10.802	dark=0.2023	bright=0.1747
+7.Cataract/Cataract2123_left_0_6730.jpeg	near_grayscale	w=512	h=512	lum=137.32/77.62	sat=16.38	edge=10.105	dark=0.1489	bright=0.1769
+7.Cataract/Cataract2150_right_0_1926.jpeg	near_grayscale	w=512	h=512	lum=142.06/70.5	sat=17.64	edge=9.141	dark=0.1086	bright=0.1522
+7.Cataract/Cataract2150_right_0_3311.jpeg	near_grayscale	w=512	h=512	lum=140.5/72.28	sat=16.57	edge=8.045	dark=0.1306	bright=0.1463
+7.Cataract/Cataract2168_left_0_3387.jpeg	near_grayscale	w=512	h=512	lum=149.92/73.83	sat=17.59	edge=7.88	dark=0.1104	bright=0.2002
+7.Cataract/Cataract2215_left_0_4489.jpeg	near_uniform_low_std	w=512	h=512	lum=127.86/11.84	sat=63.91	edge=4.415	dark=0.0	bright=0.0
+7.Cataract/Cataract2215_left_0_7320.jpeg	near_uniform_low_std	w=512	h=512	lum=128.3/11.79	sat=61.07	edge=4.457	dark=0.0	bright=0.0

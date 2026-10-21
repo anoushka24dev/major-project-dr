@@ -1,0 +1,100 @@
+stats rows: 22453
+families: {'prefixed': 11097, 'plain': 10599, 'zenodo_v02': 757}
+zenodo .jpg confirmed byte-identical to v0.2 zip: 757/757
+exact groups: 16 files: 33
+strong near-dup pairs (d<=4 & a<=6): 149
+strong near-dup unique files: 205
+cross-class strong pairs: 54 files: 73
+strong pairs: within_class=95 same_patient=13 cross_patient=3 unknown(zenodo)=133
+example 4.Moderate DR/243.jpg <-> 6.Proliferate DR/577.jpg: in strong tier=True  in cross-class file=True
+example 4.Moderate DR/243.jpg <-> 6.Proliferate DR/579.jpg: in strong tier=True  in cross-class file=True
+example 4.Moderate DR/243.jpg <-> 6.Proliferate DR/580.jpg: in strong tier=True  in cross-class file=True
+example 11.Normal Fundus/110.jpg <-> 12. Advanced PDR/743.jpg: in strong tier=True  in cross-class file=True
+example 13. Very Severe NPDR/547.jpg <-> 5.Severe DR/443.jpg: in strong tier=True  in cross-class file=True
+duplicate components: 103 files: 238
+cross-label components: 26 files: 80
+quality-flagged files: 300
+flag tallies: {'very_dark': 231, 'low_texture': 21, 'black_border': 3, 'near_grayscale': 64, 'near_uniform_low_std': 10}
+register: 168 pair rows, 238 unique files, 103 components, conflict rows=55, conflict files=75
+quality register rows: 300
+manifest rows: 22453
+{
+ "11.Normal Fundus": {
+  "primary_label": "No apparent DR",
+  "total": 3061,
+  "quality_flagged": 80,
+  "conflict_involved": 13,
+  "provisional_eligible": 2973,
+  "unique_groups": 1951,
+  "multi_image_groups": 1022,
+  "both_eye_groups": 1022,
+  "zenodo_ungrouped": 99
+ },
+ "3.Mild DR": {
+  "primary_label": "Mild NPDR",
+  "total": 2441,
+  "quality_flagged": 5,
+  "conflict_involved": 0,
+  "provisional_eligible": 2436,
+  "unique_groups": 1842,
+  "multi_image_groups": 594,
+  "both_eye_groups": 594,
+  "zenodo_ungrouped": 4
+ },
+ "4.Moderate DR": {
+  "primary_label": "Moderate NPDR",
+  "total": 5368,
+  "quality_flagged": 60,
+  "conflict_involved": 20,
+  "provisional_eligible": 5303,
+  "unique_groups": 3338,
+  "multi_image_groups": 1965,
+  "both_eye_groups": 1965,
+  "zenodo_ungrouped": 53
+ },
+ "5.Severe DR": {
+  "primary_label": "Severe NPDR",
+  "total": 1918,
+  "quality_flagged": 24,
+  "conflict_involved": 7,
+  "provisional_eligible": 1893,
+  "unique_groups": 722,
+  "multi_image_groups": 561,
+  "both_eye_groups": 305,
+  "zenodo_ungrouped": 157
+ },
+ "13. Very Severe NPDR": {
+  "primary_label": "Severe NPDR (merged candidate)",
+  "total": 108,
+  "quality_flagged": 27,
+  "conflict_involved": 5,
+  "provisional_eligible": 78,
+  "unique_groups": 78,
+  "multi_image_groups": 0,
+  "both_eye_groups": 0,
+  "zenodo_ungrouped": 78
+ },
+ "6.Proliferate DR": {
+  "primary_label": "PDR",
+  "total": 1504,
+  "quality_flagged": 57,
+  "conflict_involved": 21,
+  "provisional_eligible": 1443,
+  "unique_groups": 481,
+  "multi_image_groups": 444,
+  "both_eye_groups": 262,
+  "zenodo_ungrouped": 37
+ },
+ "12. Advanced PDR": {
+  "primary_label": "PDR (merged candidate)",
+  "total": 114,
+  "quality_flagged": 38,
+  "conflict_involved": 5,
+  "provisional_eligible": 75,
+  "unique_groups": 75,
+  "multi_image_groups": 0,
+  "both_eye_groups": 0,
+  "zenodo_ungrouped": 75
+ }
+}
+wrote build_summary.json

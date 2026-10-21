@@ -1,0 +1,76 @@
+image_path,task,partition,primary_class,group_id,source_family,patient_key_available,zenodo_unlinked,eligibility_snapshot,manifest_version,split_seed
+11.Normal Fundus/0_right.jpeg,primary,train,No apparent DR,11.Normal Fundus/0_right.jpeg,plain,True,False,eligible_provisional,,12345
+11.Normal Fundus/10.jpg,primary,train,No apparent DR,11.Normal Fundus/10.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+11.Normal Fundus/1005_right.jpeg,primary,train,No apparent DR,11.Normal Fundus/1005_right.jpeg,plain,True,False,eligible_provisional,,12345
+11.Normal Fundus/1006_left.jpeg,primary,validation,No apparent DR,11.Normal Fundus/1006_left.jpeg,plain,True,False,eligible_provisional,,12345
+11.Normal Fundus/100_right.jpeg,primary,validation,No apparent DR,11.Normal Fundus/100_right.jpeg,plain,True,False,eligible_provisional,,12345
+11.Normal Fundus/101.jpg,primary,train,No apparent DR,11.Normal Fundus/101.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+11.Normal Fundus/1010_left.jpeg,primary,train,No apparent DR,11.Normal Fundus/1010_left.jpeg,plain,True,False,eligible_provisional,,12345
+11.Normal Fundus/1011_left.jpeg,primary,train,No apparent DR,11.Normal Fundus/1011_left.jpeg,plain,True,False,eligible_provisional,,12345
+11.Normal Fundus/1013_left.jpeg,primary,train,No apparent DR,11.Normal Fundus/1013_left.jpeg,plain,True,False,eligible_provisional,,12345
+11.Normal Fundus/1014_right.jpeg,primary,validation,No apparent DR,11.Normal Fundus/1014_right.jpeg,plain,True,False,eligible_provisional,,12345
+11.Normal Fundus/1016_left.jpeg,primary,train,No apparent DR,11.Normal Fundus/1016_left.jpeg,plain,True,False,eligible_provisional,,12345
+11.Normal Fundus/1018_right.jpeg,primary,train,No apparent DR,11.Normal Fundus/1018_right.jpeg,plain,True,False,eligible_provisional,,12345
+11.Normal Fundus/1019_right.jpeg,primary,train,No apparent DR,11.Normal Fundus/1019_right.jpeg,plain,True,False,eligible_provisional,,12345
+11.Normal Fundus/1039_right.jpeg,primary,validation,No apparent DR,11.Normal Fundus/1039_right.jpeg,plain,True,False,eligible_provisional,,12345
+11.Normal Fundus/1060_left.jpeg,primary,validation,No apparent DR,11.Normal Fundus/1060_left.jpeg,plain,True,False,eligible_provisional,,12345
+12. Advanced PDR/644.jpg,primary,train,PDR,12. Advanced PDR/644.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/646.jpg,primary,train,PDR,12. Advanced PDR/646.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/647.jpg,primary,train,PDR,12. Advanced PDR/647.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/649.jpg,primary,train,PDR,12. Advanced PDR/649.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/650.jpg,primary,train,PDR,12. Advanced PDR/650.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/651.jpg,primary,validation,PDR,12. Advanced PDR/651.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/652.jpg,primary,validation,PDR,12. Advanced PDR/652.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/653.jpg,primary,train,PDR,12. Advanced PDR/653.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/654.jpg,primary,train,PDR,"12. Advanced PDR/654.jpg,12. Advanced PDR/655.jpg",zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/655.jpg,primary,train,PDR,"12. Advanced PDR/654.jpg,12. Advanced PDR/655.jpg",zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/656.jpg,primary,train,PDR,"12. Advanced PDR/656.jpg,12. Advanced PDR/658.jpg",zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/658.jpg,primary,train,PDR,"12. Advanced PDR/656.jpg,12. Advanced PDR/658.jpg",zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/657.jpg,primary,validation,PDR,12. Advanced PDR/657.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/659.jpg,primary,validation,PDR,12. Advanced PDR/659.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+12. Advanced PDR/661.jpg,primary,validation,PDR,12. Advanced PDR/661.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/449.jpg,primary,train,Severe NPDR,13. Very Severe NPDR/449.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/451.jpg,primary,train,Severe NPDR,13. Very Severe NPDR/451.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/452.jpg,primary,train,Severe NPDR,13. Very Severe NPDR/452.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/453.jpg,primary,train,Severe NPDR,13. Very Severe NPDR/453.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/454.jpg,primary,train,Severe NPDR,13. Very Severe NPDR/454.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/455.jpg,primary,train,Severe NPDR,13. Very Severe NPDR/455.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/456.jpg,primary,train,Severe NPDR,13. Very Severe NPDR/456.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/457.jpg,primary,train,Severe NPDR,13. Very Severe NPDR/457.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/458.jpg,primary,validation,Severe NPDR,13. Very Severe NPDR/458.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/459.jpg,primary,train,Severe NPDR,13. Very Severe NPDR/459.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/461.jpg,primary,train,Severe NPDR,13. Very Severe NPDR/461.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/464.jpg,primary,validation,Severe NPDR,13. Very Severe NPDR/464.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/472.jpg,primary,validation,Severe NPDR,13. Very Severe NPDR/472.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/479.jpg,primary,validation,Severe NPDR,13. Very Severe NPDR/479.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+13. Very Severe NPDR/488.jpg,primary,validation,Severe NPDR,13. Very Severe NPDR/488.jpg,zenodo_v02,False,True,eligible_provisional,,12345
+3.Mild DR/10030_left.jpeg,primary,validation,Mild NPDR,3.Mild DR/10030_left.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/10030_right.jpeg,primary,train,Mild NPDR,3.Mild DR/10030_right.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/10085_left.jpeg,primary,train,Mild NPDR,3.Mild DR/10085_left.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/10085_right.jpeg,primary,train,Mild NPDR,3.Mild DR/10085_right.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/10150_right.jpeg,primary,train,Mild NPDR,3.Mild DR/10150_right.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/10177_left.jpeg,primary,validation,Mild NPDR,3.Mild DR/10177_left.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/10177_right.jpeg,primary,train,Mild NPDR,3.Mild DR/10177_right.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/1020_left.jpeg,primary,validation,Mild NPDR,3.Mild DR/1020_left.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/10220_left.jpeg,primary,validation,Mild NPDR,3.Mild DR/10220_left.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/10221_right.jpeg,primary,train,Mild NPDR,3.Mild DR/10221_right.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/10232_right.jpeg,primary,train,Mild NPDR,3.Mild DR/10232_right.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/10233_left.jpeg,primary,train,Mild NPDR,3.Mild DR/10233_left.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/10269_left.jpeg,primary,train,Mild NPDR,3.Mild DR/10269_left.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/1027_left.jpeg,primary,train,Mild NPDR,3.Mild DR/1027_left.jpeg,plain,True,False,eligible_provisional,,12345
+3.Mild DR/10320_right.jpeg,primary,validation,Mild NPDR,3.Mild DR/10320_right.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10043_left.jpeg,primary,train,Moderate NPDR,4.Moderate DR/10043_left.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10043_right.jpeg,primary,train,Moderate NPDR,4.Moderate DR/10043_right.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10109_right.jpeg,primary,validation,Moderate NPDR,4.Moderate DR/10109_right.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10120_right.jpeg,primary,train,Moderate NPDR,4.Moderate DR/10120_right.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10131_left.jpeg,primary,train,Moderate NPDR,4.Moderate DR/10131_left.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10135_left.jpeg,primary,validation,Moderate NPDR,4.Moderate DR/10135_left.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10135_right.jpeg,primary,train,Moderate NPDR,4.Moderate DR/10135_right.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10147_left.jpeg,primary,train,Moderate NPDR,4.Moderate DR/10147_left.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10147_right.jpeg,primary,validation,Moderate NPDR,4.Moderate DR/10147_right.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10150_left.jpeg,primary,train,Moderate NPDR,4.Moderate DR/10150_left.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10156_left.jpeg,primary,validation,Moderate NPDR,4.Moderate DR/10156_left.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10156_right.jpeg,primary,train,Moderate NPDR,4.Moderate DR/10156_right.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10159_left.jpeg,primary,train,Moderate NPDR,4.Moderate DR/10159_left.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10160_left.jpeg,primary,train,Moderate NPDR,4.Moderate DR/10160_left.jpeg,plain,True,False,eligible_provisional,,12345
+4.Moderate DR/10160_right.jpeg,primary,validation,Moderate NPDR,4.Moderate DR/10160_right.jpeg,plain,True,False,eligible_provisional,,12345

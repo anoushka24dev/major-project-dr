@@ -1,0 +1,156 @@
+{
+ "primary": {
+  "1.Dry AMD": {
+   "excluded_non_dr_primary": 1359,
+   "excluded_non_dr_primary_and_label_conflict_quarantine": 1,
+   "eligible_groups": 0
+  },
+  "10.Glaucoma": {
+   "excluded_non_dr_primary": 1876,
+   "excluded_non_dr_primary_and_label_conflict_quarantine": 2,
+   "eligible_groups": 0
+  },
+  "11.Normal Fundus": {
+   "eligible_provisional": 2973,
+   "quarantined_quality_review": 75,
+   "quarantined_conflict_and_quality": 5,
+   "quarantined_label_conflict": 8,
+   "eligible_groups": 1942
+  },
+  "12. Advanced PDR": {
+   "eligible_provisional": 75,
+   "quarantined_quality_review": 34,
+   "quarantined_conflict_and_quality": 4,
+   "quarantined_label_conflict": 1,
+   "eligible_groups": 71
+  },
+  "13. Very Severe NPDR": {
+   "quarantined_quality_review": 25,
+   "eligible_provisional": 78,
+   "quarantined_label_conflict": 3,
+   "quarantined_conflict_and_quality": 2,
+   "eligible_groups": 75
+  },
+  "2.Wet AMD": {
+   "excluded_non_dr_primary": 586,
+   "excluded_non_dr_primary_and_label_conflict_quarantine": 1,
+   "eligible_groups": 0
+  },
+  "3.Mild DR": {
+   "eligible_provisional": 2436,
+   "quarantined_quality_review": 5,
+   "eligible_groups": 1842
+  },
+  "4.Moderate DR": {
+   "eligible_provisional": 5303,
+   "quarantined_quality_review": 45,
+   "quarantined_conflict_and_quality": 15,
+   "quarantined_label_conflict": 5,
+   "eligible_groups": 3319
+  },
+  "5.Severe DR": {
+   "eligible_provisional": 1893,
+   "quarantined_conflict_and_quality": 6,
+   "quarantined_quality_review": 18,
+   "quarantined_label_conflict": 1,
+   "eligible_groups": 701
+  },
+  "6.Proliferate DR": {
+   "eligible_provisional": 1443,
+   "quarantined_conflict_and_quality": 17,
+   "quarantined_quality_review": 40,
+   "quarantined_label_conflict": 4,
+   "eligible_groups": 480
+  },
+  "7.Cataract": {
+   "excluded_non_dr_primary": 1496,
+   "excluded_non_dr_primary_and_quality_quarantine": 9,
+   "eligible_groups": 0
+  },
+  "8.Hypertensive Retinopathy": {
+   "excluded_non_dr_primary": 1344,
+   "eligible_groups": 0
+  },
+  "9.Pathological Myopia": {
+   "excluded_non_dr_primary": 1265,
+   "eligible_groups": 0
+  }
+ },
+ "secondary": {
+  "1.Dry AMD": {
+   "eligible_provisional": 1359,
+   "quarantined_label_conflict": 1,
+   "eligible_groups": 135
+  },
+  "10.Glaucoma": {
+   "eligible_provisional": 1876,
+   "quarantined_label_conflict": 2,
+   "eligible_groups": 204
+  },
+  "11.Normal Fundus": {
+   "eligible_provisional": 2973,
+   "quarantined_quality_review": 75,
+   "quarantined_conflict_and_quality": 5,
+   "quarantined_label_conflict": 8,
+   "eligible_groups": 1942
+  },
+  "12. Advanced PDR": {
+   "eligible_provisional": 75,
+   "quarantined_quality_review": 34,
+   "quarantined_conflict_and_quality": 4,
+   "quarantined_label_conflict": 1,
+   "eligible_groups": 71
+  },
+  "13. Very Severe NPDR": {
+   "quarantined_quality_review": 25,
+   "eligible_provisional": 78,
+   "quarantined_label_conflict": 3,
+   "quarantined_conflict_and_quality": 2,
+   "eligible_groups": 75
+  },
+  "2.Wet AMD": {
+   "eligible_provisional": 586,
+   "quarantined_label_conflict": 1,
+   "eligible_groups": 46
+  },
+  "3.Mild DR": {
+   "eligible_provisional": 2436,
+   "quarantined_quality_review": 5,
+   "eligible_groups": 1842
+  },
+  "4.Moderate DR": {
+   "eligible_provisional": 5303,
+   "quarantined_quality_review": 45,
+   "quarantined_conflict_and_quality": 15,
+   "quarantined_label_conflict": 5,
+   "eligible_groups": 3319
+  },
+  "5.Severe DR": {
+   "eligible_provisional": 1893,
+   "quarantined_conflict_and_quality": 6,
+   "quarantined_quality_review": 18,
+   "quarantined_label_conflict": 1,
+   "eligible_groups": 701
+  },
+  "6.Proliferate DR": {
+   "eligible_provisional": 1443,
+   "quarantined_conflict_and_quality": 17,
+   "quarantined_quality_review": 40,
+   "quarantined_label_conflict": 4,
+   "eligible_groups": 480
+  },
+  "7.Cataract": {
+   "eligible_provisional": 1496,
+   "quarantined_quality_review": 9,
+   "eligible_groups": 208
+  },
+  "8.Hypertensive Retinopathy": {
+   "eligible_provisional": 1344,
+   "eligible_groups": 103
+  },
+  "9.Pathological Myopia": {
+   "eligible_provisional": 1265,
+   "eligible_groups": 166
+  }
+ }
+}

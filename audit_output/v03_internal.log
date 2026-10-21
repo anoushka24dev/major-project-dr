@@ -1,0 +1,40 @@
+V03 images: 1437
+  hashed 0/1437
+  hashed 300/1437
+  hashed 600/1437
+  hashed 900/1437
+  hashed 1200/1437
+candidate pairs (dhash<=4): 696
+  pixel-checked 0/696
+  pixel-checked 200/696
+  pixel-checked 400/696
+  pixel-checked 600/696
+pixel-SAME pairs inside V03: 304
+V03 same-image clusters >1: 117 files involved: 324
+CROSS-LABEL clusters inside V03: 24 files: 125
+   cluster (54 files, labels={'No DR signs': 28, 'Mild (or early) NPDR': 1, 'Moderate NPDR': 9, 'Severe NPDR': 6, 'Very Severe NPDR': 4, 'PDR': 6}): 715.jpg[Mild (or early) NPDR], 766.jpg[Moderate NPDR], 770.jpg[Moderate NPDR], 780.jpg[Moderate NPDR], 786.jpg[Moderate NPDR], 794.jpg[Moderate NPDR], 812.jpg[Moderate NPDR], 813.jpg[Moderate NPDR], 825.jpg[Moderate NPDR], 827.jpg[Moderate NPDR], 228.jpg[No DR signs], 236.jpg[No DR signs], 249.jpg[No DR signs], 256.jpg[No DR signs], 261.jpg[No DR signs], 274.jpg[No DR signs], 285.jpg[No DR signs], 290.jpg[No DR signs], 294.jpg[No DR signs], 319.jpg[No DR signs], 339.jpg[No DR signs], 340.jpg[No DR signs], 343.jpg[No DR signs], 360.jpg[No DR signs], 393.jpg[No DR signs], 423.jpg[No DR signs], 432.jpg[No DR signs], 442.jpg[No DR signs], 446.jpg[No DR signs], 541.jpg[No DR signs], 568.jpg[No DR signs], 599.jpg[No DR signs], 601.jpg[No DR signs], 602.jpg[No DR signs], 655.jpg[No DR signs], 680.jpg[No DR signs], 681.jpg[No DR signs], 688.jpg[No DR signs], 1219.jpg[PDR], 1221.jpg[PDR], 1243.jpg[PDR], 1262.jpg[PDR], 1271.jpg[PDR], 1282.jpg[PDR], 1007.jpg[Severe NPDR], 1014.jpg[Severe NPDR], 1035.jpg[Severe NPDR], 1036.jpg[Severe NPDR], 990.jpg[Severe NPDR], 991.jpg[Severe NPDR], 1116.jpg[Very Severe NPDR], 1132.jpg[Very Severe NPDR], 1168.jpg[Very Severe NPDR], 1169.jpg[Very Severe NPDR]
+   cluster (15 files, labels={'No DR signs': 8, 'Moderate NPDR': 2, 'Severe NPDR': 2, 'PDR': 3}): 793.jpg[Moderate NPDR], 800.jpg[Moderate NPDR], 260.jpg[No DR signs], 264.jpg[No DR signs], 509.jpg[No DR signs], 550.jpg[No DR signs], 654.jpg[No DR signs], 689.jpg[No DR signs], 690.jpg[No DR signs], 699.jpg[No DR signs], 1206.jpg[PDR], 1207.jpg[PDR], 1209.jpg[PDR], 1015.jpg[Severe NPDR], 891.jpg[Severe NPDR]
+   cluster (7 files, labels={'No DR signs': 6, 'Moderate NPDR': 1}): 814.jpg[Moderate NPDR], 229.jpg[No DR signs], 258.jpg[No DR signs], 295.jpg[No DR signs], 512.jpg[No DR signs], 623.jpg[No DR signs], 646.jpg[No DR signs]
+   cluster (5 files, labels={'No DR signs': 4, 'Very Severe NPDR': 1}): 325.jpg[No DR signs], 327.jpg[No DR signs], 424.jpg[No DR signs], 498.jpg[No DR signs], 1164.jpg[Very Severe NPDR]
+   cluster (4 files, labels={'No DR signs': 3, 'Advanced PDR': 1}): 1423.jpg[Advanced PDR], 613.jpg[No DR signs], 664.jpg[No DR signs], 707.jpg[No DR signs]
+   cluster (4 files, labels={'Moderate NPDR': 2, 'Severe NPDR': 2}): 807.jpg[Moderate NPDR], 808.jpg[Moderate NPDR], 882.jpg[Severe NPDR], 883.jpg[Severe NPDR]
+   cluster (2 files, labels={'No DR signs': 1, 'Moderate NPDR': 1}): 767.jpg[Moderate NPDR], 280.jpg[No DR signs]
+   cluster (2 files, labels={'No DR signs': 1, 'Moderate NPDR': 1}): 789.jpg[Moderate NPDR], 500.jpg[No DR signs]
+   cluster (2 files, labels={'No DR signs': 1, 'Moderate NPDR': 1}): 822.jpg[Moderate NPDR], 621.jpg[No DR signs]
+   cluster (2 files, labels={'No DR signs': 1, 'PDR': 1}): 702.jpg[No DR signs], 1288.jpg[PDR]
+   cluster (2 files, labels={'Moderate NPDR': 1, 'PDR': 1}): 816.jpg[Moderate NPDR], 1210.jpg[PDR]
+   cluster (2 files, labels={'Moderate NPDR': 1, 'PDR': 1}): 817.jpg[Moderate NPDR], 1211.jpg[PDR]
+   cluster (2 files, labels={'Moderate NPDR': 1, 'PDR': 1}): 818.jpg[Moderate NPDR], 1212.jpg[PDR]
+   cluster (2 files, labels={'Moderate NPDR': 1, 'PDR': 1}): 819.jpg[Moderate NPDR], 1213.jpg[PDR]
+   cluster (2 files, labels={'Moderate NPDR': 1, 'PDR': 1}): 820.jpg[Moderate NPDR], 1214.jpg[PDR]
+   cluster (2 files, labels={'Moderate NPDR': 1, 'PDR': 1}): 821.jpg[Moderate NPDR], 1215.jpg[PDR]
+   cluster (2 files, labels={'Moderate NPDR': 1, 'Very Severe NPDR': 1}): 823.jpg[Moderate NPDR], 1091.jpg[Very Severe NPDR]
+   cluster (2 files, labels={'Moderate NPDR': 1, 'Very Severe NPDR': 1}): 824.jpg[Moderate NPDR], 1092.jpg[Very Severe NPDR]
+   cluster (2 files, labels={'Severe NPDR': 1, 'PDR': 1}): 1226.jpg[PDR], 1033.jpg[Severe NPDR]
+   cluster (2 files, labels={'Very Severe NPDR': 1, 'PDR': 1}): 1251.jpg[PDR], 1093.jpg[Very Severe NPDR]
+   cluster (2 files, labels={'PDR': 1, 'Advanced PDR': 1}): 1420.jpg[Advanced PDR], 1261.jpg[PDR]
+   cluster (2 files, labels={'PDR': 1, 'Advanced PDR': 1}): 1345.jpg[Advanced PDR], 1285.jpg[PDR]
+   cluster (2 files, labels={'PDR': 1, 'Advanced PDR': 1}): 1346.jpg[Advanced PDR], 1286.jpg[PDR]
+   cluster (2 files, labels={'PDR': 1, 'Advanced PDR': 1}): 1347.jpg[Advanced PDR], 1287.jpg[PDR]
+same-label clusters: 93 files: 199
+wrote audit_output/v03_internal_clusters.json

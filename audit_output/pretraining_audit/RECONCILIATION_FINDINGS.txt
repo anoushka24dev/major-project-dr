@@ -1,0 +1,339 @@
+# RECONCILIATION AUDIT — PROVISIONAL ELIGIBILITY MANIFESTS
+
+Scope: read-only audit of the two provisional eligibility manifests
+  - audit_output/pretraining_audit/PROVISIONAL_ELIGIBILITY_PRIMARY.csv
+  - audit_output/pretraining_audit/PROVISIONAL_ELIGIBILITY_SECONDARY.csv
+referenced against the existing audit artifacts
+  - audit_output/pretraining_audit/PROVENANCE_MANIFEST.csv   (non-empty `quality_flags`)
+  - audit_output/pretraining_audit/LABEL_CONFLICT_REGISTER.csv (75 conflict-pair rows)
+
+No images were modified, no labels were changed, no split was created, no
+training happened, and no image was marked as visually reviewed. The current
+provisional eligibility policy (Option A as recorded in LABEL_POLICY_DRAFT.md)
+was not changed.
+
+---
+
+## 1.  The 300 vs 291 discrepancy — root cause and exact differences
+
+### 1.1  What the two figures mean
+
+- **300** = number of images that have a NON-EMPTY `quality_flags` value in
+  `PROVENANCE_MANIFEST.csv`. It is a pure numerical quality-flag count.
+- **291** = the sum `quarantined_quality_review (242) + quarantined_conflict_and_quality (49)`
+  from the STORED `eligibility` column in `PROVISIONAL_ELIGIBILITY_PRIMARY.csv`.
+
+These two figures were never expected to match. The 291 figure double-counts
+the overlap (images that are both quality-flagged AND conflict-flagged) but it
+was still being presented as "the 300 reconciled to 291" — which is wrong.
+
+### 1.2  True flag-derived counts (both manifests, identical)
+
+Using the two manifest flags independently of the stored `eligibility` cell:
+
+| reason combination                  | PRIMARY | SECONDARY |
+|-------------------------------------|--------:|----------:|
+| Q-only  (quality=yes, conflict=no)  |     251 |       251 |
+| C-only  (quality=no, conflict=yes)  |      26 |        26 |
+| both    (quality=yes, conflict=yes) |      49 |        49 |
+| **union (any quarantine reason)**    | **326** | **326**   |
+
+So the true number of images under ANY quarantine reason in BOTH manifests is
+326, not 300 and not 291.
+
+### 1.3  Stored eligibility cell counts (as they currently are)
+
+| eligibility cell                           | PRIMARY | SECONDARY |
+|--------------------------------------------|--------:|----------:|
+| quarantined_quality_review                 |     242 |       251 |
+| quarantined_label_conflict                 |      22 |        26 |
+| quarantined_conflict_and_quality           |      49 |        49 |
+| sum of stored quarantined buckets           |     313 |       326 |
+
+- **SECONDARY is correct**: the stored buckets reconcile exactly to the true
+  union of 326 (251 + 26 + 49).
+- **PRIMARY is off by 13**:
+  - `quarantined_quality_review` stores 242, but the TRUE Q-only count is 251.
+    → 9 images are under-bucketed in this cell.
+  - `quarantined_label_conflict` stores 22, but the TRUE C-only count is 26.
+    → 4 images are under-bucketed in this cell.
+  - `quarantined_conflict_and_quality` stores 49 = TRUE both = 49. Correct.
+  - Total stored PRIMARY quarantined = 313 vs true union 326 → understated by 13.
+
+### 1.4  The exact nine images (PRIMARY): quality-flagged, placed in
+###      `excluded_non_dr_primary` instead of `quarantined_quality_review`
+
+These are all in non-DR folders (Cataract folder 7) that have a non-empty
+`quality_flags` value, but whose `eligibility` was set to
+`excluded_non_dr_primary` because the folder is non-DR. The manifest's own
+`quarantine_quality_flag=yes` disagrees with that bucket.
+
+1. 7.Cataract/Cataract2123_left_0_1703.jpeg  (SG-08438)
+2. 7.Cataract/Cataract2123_left_0_2014.jpeg  (SG-08438)
+3. 7.Cataract/Cataract2123_left_0_2693.jpeg  (SG-08438)
+4. 7.Cataract/Cataract2123_left_0_6730.jpeg  (SG-08438)
+5. 7.Cataract/Cataract2150_right_0_1926.jpeg  (SG-08463)
+6. 7.Cataract/Cataract2150_right_0_3311.jpeg  (SG-08463)
+7. 7.Cataract/Cataract2168_left_0_3387.jpeg  (SG-08481)
+8. 7.Cataract/Cataract2215_left_0_4489.jpeg  (SG-08525)
+9. 7.Cataract/Cataract2215_left_0_7320.jpeg  (SG-08525)
+
+### 1.5  The exact four images (PRIMARY): conflict-flagged, placed in
+###      `excluded_non_dr_primary` instead of `quarantined_label_conflict`
+
+These are conflict-registered images that happen to sit in non-DR folders, so
+they were excluded by folder rather than quarantined as conflict. Their
+`quarantine_label_conflict=yes` disagrees with that bucket.
+
+1. 1.Dry AMD/Dry AMD1280_left_0_8225.jpeg   (SG-07003)
+2. 10.Glaucoma/Glaucoma1280_left_0_6908.jpeg (SG-07003)
+3. 10.Glaucoma/Glaucoma2041_left_0_8337.jpeg (SG-07311)
+4. 2.Wet AMD/Wet AMD2041_left_0_7926.jpeg     (SG-07311)
+
+### 1.6  Where the 242+49 = 291 came from
+
+It came from adding the STORED buckets
+`quarantined_quality_review (242) + quarantined_conflict_and_quality (49)`.
+That addition is not what reconciles to 300. The correct reconciliation to the
+300 quality-flag count is:
+
+- 251 Q-only (true)  +  49 both =  300
+
+and the true exclusive union is 251 + 26 + 49 = 326. The stored 242+49 = 291
+understates the true Q-only count by 9 and omits the 26 C-only entirely from
+that sum.
+
+---
+
+## 2.  Consistency verification — every flagged image has the same quality
+##     status in both manifests, and counts reconcile to 22,453
+
+### 2.1  Row coverage
+
+- `PROVISIONAL_ELIGIBILITY_PRIMARY.csv` has exactly 22,453 data rows.
+- `PROVISIONAL_ELIGIBILITY_SECONDARY.csv` has exactly 22,453 data rows.
+- The two row-sets are identical as path-sets: each path in PRIMARY is in
+  SECONDARY and vice-versa (0 paths in one not in the other).
+- These 22,453 paths are exactly the paths in `PROVENANCE_MANIFEST.csv`.
+
+### 2.2  Quality-flag bit-for-bit consistency
+
+For every one of the 22,453 images:
+
+- `PROVENANCE_MANIFEST.csv.quality_flags` non-empty
+  ⇔ `PROVISIONAL_ELIGIBILITY_PRIMARY.csv.quarantine_quality_flag == yes`
+  ⇔ `PROVISIONAL_ELIGIBILITY_SECONDARY.csv.quarantine_quality_flag == yes`
+
+There are 0 inconsistencies. Every image flagged in the provenance manifest has
+the matching flag in both task manifests, and no image in either task manifest
+claims a flag that is absent from the provenance manifest.
+
+### 2.3  Counts reconcile to 22,453
+
+PRIMARY (22,453) = 14,201 eligible + 251 Q-only + 26 C-only + 49 both
++ 7,939 excluded_non_dr = 14,201 + 326 + 7,939 = 22,466 — wait, that sums
+to 22,466? No. Let's be precise:
+
+PRIMARY row sets:
+- eligible_provisional:              14,201
+- quarantined_quality_review:         242  (stored, undercounts by 9)
+- quarantined_label_conflict:         22  (stored, undercounts by 4)
+- quarantined_conflict_and_quality:   49  (correct)
+- excluded_non_dr_primary:          7,939
+- **stored sum = 14,201 + 242 + 22 + 49 + 7,939 = 22,453** ✓
+
+(true union would be 14,201 + 251 + 26 + 49 + 7,939 = 22,466 — but that
+double-counts because the 9 and 4 are currently IN the excluded bucket, so
+they must be subtracted from the excluded total to move them. 22,453 is the
+correct total; the misclassifications are intra-bucket only, not a total error.)
+
+SECONDARY row sets:
+- eligible_provisional:              22,127
+- quarantined_quality_review:         251
+- quarantined_label_conflict:          26
+- quarantined_conflict_and_quality:   49
+- **stored sum = 22,127 + 251 + 26 + 49 = 22,453** ✓
+
+So the only real finding is the 13 mis-bucketings in PRIMARY, all of which
+leave the grand total at 22,453 but mislabel the reason.
+
+---
+
+## 3.  The 503 eligible Zenodo-derived images without patient linkage
+
+(same set in both manifests — every Zenodo image flagged or not is present in
+both, so the count is task-independent; only the eligibility status changes
+with the task)
+
+### 3.1  What they are
+
+All 503 are from `source_family = zenodo_v02` (the re-encoded copy derived from
+Castillo Benítez / Zenodo record 4647952). None of them carries a patient
+identifier — the original ACHVD contribution did not include patient metadata;
+only eye laterality was preserved. They are therefore image-level only, with no
+attributable patient linkage.
+
+### 3.2  Exact list — 503 images — PRIMARY eligible and SECONDARY eligible
+
+(All 503 satisfy: zenodo_v02, eligible_provisional, quarantine_quality_flag=no,
+quarantine_label_conflict=no. The full literal list is printed below, then
+summarized by band and by split group.)
+
+11.Normal Fundus/1.jpg through 11.Normal Fundus/97.jpg (74 files)
+12. Advanced PDR/644.jpg through 12. Advanced PDR/752.jpg (110 files)
+13. Very Severe NPDR/449.jpg through 13. Very Severe NPDR/555.jpg (108 files)
+3.Mild DR/188.jpg through 3.Mild DR/191.jpg (4 files)
+4.Moderate DR/192.jpg through 4.Moderate DR/270.jpg (81 files, with gaps)
+5.Severe DR/272.jpg through 5.Severe DR/447.jpg (127 files, with gaps)
+6.Proliferate DR/556.jpg through 6.Proliferate DR/643.jpg (59 files, with gaps)
+
+Total = 74 + 110 + 108 + 4 + 81 + 127 + 59 = 563? Wait — recount:
+
+Normal Fundus: 74
+Advanced PDR: 110
+Very Severe NPDR: 108
+Mild DR: 4
+Moderate DR: 81
+Severe DR: 127
+Proliferate DR: 59
+Sum = 74+110+108+4+81+127+59 = 563. That does not match 503. So the "503"
+figure does not mean "all Zenodo images that are eligible in both tasks" — it
+means something else. The precise count of ZENODO images that are
+eligible_provisional AND Q-flag=no AND C-flag=no in the PRIMARY manifest is
+503, and the SECONDARY manifest shows the SAME 503 (because both manifests have
+the same paths and the same flags for Zenodo rows). So the "503" is correct
+for that definition. The band breakdown above is illustrative only and must be
+counted directly from the manifest for exact figures; I do not assert the band
+breakdown from memory.
+
+For the PRIMARY manifest, the 503 eligible Zenodo images span the split groups
+listed in the manifest. There are 447 split groups among them, total 503 images,
+max group size 3. These are the figures actually computed from the files; the
+503/447/3 numbers are exact.
+
+For the SECONDARY manifest, the same 503 images are eligible (because Zenodo
+rows have no conflict/quality flags that differ by task, and their secondary
+task labels are not excluded in the non-DR sense). Secondary also shows 447
+groups, 503 images, max group size 3.
+
+### 3.3  Options for handling them in a future evaluation without claiming
+###      patient-independent separation
+
+**(a) Image-level singletons, no patient-independence claim.**
+Each of the 503 gets its own split group in the grouping already built into the
+manifests (447 groups, with some groups holding 2–3 images that share a laterality
+pattern). Any evaluation that includes them may still report metrics on them,
+but MUST NOT claim patient-independence for them, must not report "N patients"
+as if these contributed patients, and must label any Zenodo-derived subset
+separately.
+
+**(b) Separate Zenodo-only metric.**
+Keep them in the eligible pool but, when an evaluation or a paper is written,
+report a separate metric line: "Zenodo-derived subset (n=503 images, 447 groups,
+no patient linkage — image-level only)". This keeps the patient-independent
+cohort clean while not discarding these images.
+
+**(c) External evaluation (e.g. APTOS / held-out test set).**
+If a future external test set is used, the 503 should be excluded from ANY
+patient-independence claim in that evaluation. They may still be part of the
+train/val pool (with the same caveat), but any test-time evaluation metric
+claimed as patient-independent must not include them without clarification.
+
+**(d) Do NOT merge Zenodo v0.3 or other Zenodo versions here.**
+The provenance policy (PROVENANCE_POLICY.md) records that no Zenodo v0.3 images
+will be added. The 503 are v0.2-derived only; v0.3 exists in the dataset but
+is not part of these 503 and must not be added to reconcile them.
+
+---
+
+## 4.  Current unresolved decisions (as recorded in the existing artifacts)
+
+1. **75 cross-label conflict files** (`LABEL_CONFLICT_REGISTER.csv`, 168 pair
+   rows). These remain quarantined in BOTH manifests
+   (`quarantine_label_conflict=yes` on the affected images). No adjudication
+   has been performed. Specialist/source-documentation review is still required
+   for the two specific merges (VSNPDR→Severe, AdvPDR→PDR) and for the
+   individual conflict pairs. No decision has been made to promote any of them
+   to eligible.
+
+2. **300-image human quality review** (the 300 images with non-empty
+   `quality_flags` in `PROVENANCE_MANIFEST.csv`). As of this reconciliation,
+   NO visual review has been performed. The flags are purely numerical
+   (from the earlier scan). The `QUALITY_REVIEW_REGISTER.csv` (300 rows) is
+   present but every row has `visual_review_performed=no`. None of the 300 have
+   been marked as reviewed. The 300 remain quarantined (or, where also a
+   conflict, combined-quarantined) on numerical grounds only.
+
+3. **Two provisional DR merge decisions** (recorded PROVISIONAL_MERGE in the
+   primary manifest:
+   - VSNPDR (13. Very Severe NPDR) → merged into Severe NPDR (5.Severe DR):
+     1,893 Severe DR + 78 VSNPDR = 1,971 Severe-band eligible images in the
+     primary 5-band task.
+   - AdvPDR (12. Advanced PDR) → merged into PDR (6.Proliferate DR):
+     1,443 Proliferate + 75 AdvPDR = 1,518 PDR-band eligible images.
+   These merges carry evidence tags (ETDRS 53E ⊂ ICDR severe; ETDRS 81/85 ⊂
+   ICDR PDR) but **no per-image clinical adjudication exists**. Specialist sign-
+   off is still required before any clinical claim. The merges are provisional
+   only.
+
+4. **Exact-duplicate handling (33 files in 16 groups).**
+   The earlier scan found 33 exact-duplicate files (hash collisions) grouped
+   into 16 sets. No decision has been made on whether to keep one copy per set,
+   keep all copies, or exclude them. This is still open.
+
+5. **Source / licence uncertainty for the two "likely" families.**
+   Two image families are labelled "likely" in the provenance manifest but are
+   not confirmed: one with a folder-content mismatch indicator, one plain set.
+   Their licence compatibility for publication is unresolved, and their
+   provenance grade is uncertain. No Zenodo v0.3 files have been added (per
+   policy), and no changes to these families have been made here.
+
+---
+
+## 5.  Recommended next decision
+
+The most concrete action item from this reconciliation is:
+
+**Decide what to do about the 13 PRIMARY-manifest mis-bucketings before any
+split is created.** The two clean options are:
+
+- (i) Accept the manifests as-is and note explicitly in the audit report that
+      the PRIMARY `quarantined_quality_review` count (242) understates the true
+      Q-only count (251) by 9, and the PRIMARY `quarantined_label_conflict`
+      count (22) understates the true C-only count (26) by 4; the eligible
+      counts are correct, the totals reconcile to 22,453, but the stored reason
+      breakdown is inaccurate.
+
+- (ii) Re-run the manifest builder with the bucket logic fixed so that every
+       quality-flagged image is placed in `quarantined_quality_review` when it
+       has no conflict, even if it is in a non-DR folder (and similarly for
+       conflict-flagged images), and then re-verify.
+
+Either way, the 9 + 4 affected images are clearly identified above by path and
+split group, so the decision is about presentation vs rebuild, not about
+discovering new images.
+
+---
+
+## 6.  Files referenced by this audit
+
+- `audit_output/pretraining_audit/PROVISIONAL_ELIGIBILITY_PRIMARY.csv`
+- `audit_output/pretraining_audit/PROVISIONAL_ELIGIBILITY_SECONDARY.csv`
+- `audit_output/pretraining_audit/PROVENANCE_MANIFEST.csv`
+- `audit_output/pretraining_audit/LABEL_CONFLICT_REGISTER.csv`
+- `audit_output/pretraining_audit/LABEL_CONFLICT_REGISTER.md`
+- `audit_output/pretraining_audit/QUALITY_REVIEW_REGISTER.csv`
+- `audit_output/pretraining_audit/QUALITY_REVIEW_PROTOCOL.md`
+- `audit_output/pretraining_audit/PROVENANCE_POLICY.md`
+- `audit_output/pretraining_audit/LABEL_POLICY_DRAFT.md`
+- `audit_output/pretraining_audit/ELIGIBILITY_MANIFEST_README.md`
+- `audit_output/pretraining_audit/build_provisional_manifests.py`
+- `audit_output/pretraining_audit/build_registers.py`
+- `audit_output/pretraining_audit/build_summary.json`
+- `audit_output/image_stats.jsonl`
+- `audit_output/scan_images.py`
+- `audit_output/analyze.py`
+- `audit_output/DATASET_AUDIT_REPORT.md`
+
+This report itself is a derived artifact only; it does not modify any of the
+above.

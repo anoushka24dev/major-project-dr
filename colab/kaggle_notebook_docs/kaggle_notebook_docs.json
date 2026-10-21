@@ -1,0 +1,78 @@
+{
+  "generated": "use colab/kaggle_notebook_docs/ as the source for Kaggle cells",
+  "audited_split": "provisional_primary_split/provisional_primary_split.csv",
+  "count": 10,
+  "pairs": [
+    {
+      "in": "colab/cpu_train.py",
+      "out": "01_preflight.py",
+      "size_kb": 26.18,
+      "sha12": "B8906EA4222C",
+      "cell": "01_preflight"
+    },
+    {
+      "in": "colab/colab_helpers.py",
+      "out": "02_helpers.py",
+      "size_kb": 12.6,
+      "sha12": "491F46A9E1CC",
+      "cell": "02_helpers"
+    },
+    {
+      "in": "colab/setup_helpers.py",
+      "out": "03_setup.py",
+      "size_kb": 68.24,
+      "sha12": "4416427D1E8D",
+      "cell": "03_setup"
+    },
+    {
+      "in": "colab/train.py",
+      "out": "04_engine.py",
+      "size_kb": 58.3,
+      "sha12": "DEB45A6446DC",
+      "cell": "04_engine"
+    },
+    {
+      "in": "colab/smoke_test.py",
+      "out": "05_smoke.py",
+      "size_kb": 17.21,
+      "sha12": "B2CE47729225",
+      "cell": "05_smoke"
+    },
+    {
+      "in": "dataset/labels.py",
+      "out": "06_labels.py",
+      "size_kb": 3.38,
+      "sha12": "DBDDC00D94C1",
+      "cell": "06_labels"
+    },
+    {
+      "in": "dataset/decoding.py",
+      "out": "07_decoding.py",
+      "size_kb": 2.14,
+      "sha12": "EAEDDBC3AEEA",
+      "cell": "07_decoding"
+    },
+    {
+      "in": "dataset/__init__.py",
+      "out": "08_dataset_init.py",
+      "size_kb": 0.22,
+      "sha12": "23AD3CB0FF44",
+      "cell": "08_dataset_init"
+    },
+    {
+      "in": "dataset/split_validation.py",
+      "out": "09_split_valid.py",
+      "size_kb": 7.1,
+      "sha12": "674F17F54A4D",
+      "cell": "09_split_valid"
+    },
+    {
+      "in": "provisional_primary_split/provisional_primary_split.csv",
+      "out": "provisional_primary_split.csv",
+      "size_kb": 2155.5,
+      "sha12": "E73F8AEE0482",
+      "audited": true,
+      "cell": "provisional_primary_split.csv"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+0	0	11.Normal Fundus/110.jpg	12. Advanced PDR/743.jpg
+0	0	11.Normal Fundus/117.jpg	4.Moderate DR/266.jpg
+0	0	11.Normal Fundus/178.jpg	6.Proliferate DR/639.jpg
+0	0	12. Advanced PDR/696.jpg	6.Proliferate DR/636.jpg
+0	0	12. Advanced PDR/697.jpg	6.Proliferate DR/637.jpg
+0	0	12. Advanced PDR/740.jpg	6.Proliferate DR/612.jpg
+0	0	13. Very Severe NPDR/511.jpg	4.Moderate DR/267.jpg
+0	0	13. Very Severe NPDR/512.jpg	4.Moderate DR/268.jpg
+0	0	13. Very Severe NPDR/513.jpg	6.Proliferate DR/602.jpg
+0	0	13. Very Severe NPDR/547.jpg	5.Severe DR/443.jpg
+0	0	13. Very Severe NPDR/548.jpg	5.Severe DR/444.jpg
+0	0	4.Moderate DR/243.jpg	6.Proliferate DR/577.jpg
+0	0	4.Moderate DR/243.jpg	6.Proliferate DR/579.jpg
+0	0	4.Moderate DR/243.jpg	6.Proliferate DR/580.jpg
+0	0	4.Moderate DR/244.jpg	6.Proliferate DR/578.jpg
+0	0	4.Moderate DR/245.jpg	6.Proliferate DR/577.jpg
+0	0	4.Moderate DR/245.jpg	6.Proliferate DR/579.jpg
+0	0	4.Moderate DR/245.jpg	6.Proliferate DR/580.jpg
+0	0	4.Moderate DR/246.jpg	6.Proliferate DR/577.jpg
+0	0	4.Moderate DR/246.jpg	6.Proliferate DR/579.jpg
+0	0	4.Moderate DR/246.jpg	6.Proliferate DR/580.jpg
+0	0	4.Moderate DR/252.jpg	5.Severe DR/347.jpg
+0	0	4.Moderate DR/261.jpg	6.Proliferate DR/590.jpg
+0	0	4.Moderate DR/264.jpg	6.Proliferate DR/593.jpg
+0	0	5.Severe DR/355.jpg	6.Proliferate DR/586.jpg
+0	0	5.Severe DR/441.jpg	6.Proliferate DR/596.jpg
+0	1	4.Moderate DR/262.jpg	6.Proliferate DR/591.jpg
+1	0	4.Moderate DR/251.jpg	5.Severe DR/346.jpg
+1	0	4.Moderate DR/260.jpg	6.Proliferate DR/589.jpg
+1	0	4.Moderate DR/263.jpg	6.Proliferate DR/592.jpg
+1	0	4.Moderate DR/265.jpg	6.Proliferate DR/594.jpg
+1	1	12. Advanced PDR/698.jpg	6.Proliferate DR/638.jpg
+2	0	4.Moderate DR/251.jpg	5.Severe DR/347.jpg
+2	2	1.Dry AMD/Dry AMD1280_left_0_8225.jpeg	10.Glaucoma/Glaucoma1280_left_0_6908.jpeg
+2	4	13. Very Severe NPDR/547.jpg	5.Severe DR/444.jpg
+2	4	13. Very Severe NPDR/548.jpg	5.Severe DR/443.jpg
+2	6	11.Normal Fundus/157.jpg	4.Moderate DR/257.jpg
+3	0	4.Moderate DR/252.jpg	5.Severe DR/346.jpg
+3	4	11.Normal Fundus/99.jpg	4.Moderate DR/248.jpg
+3	4	11.Normal Fundus/99.jpg	4.Moderate DR/269.jpg
+3	4	11.Normal Fundus/99.jpg	4.Moderate DR/271.jpg
+3	4	4.Moderate DR/257.jpg	6.Proliferate DR/613.jpg
+3	6	11.Normal Fundus/183.jpg	4.Moderate DR/256.jpg
+4	4	11.Normal Fundus/140.jpg	4.Moderate DR/256.jpg
+4	4	5.Severe DR/355.jpg	6.Proliferate DR/588.jpg
+4	5	11.Normal Fundus/122.jpg	5.Severe DR/435.jpg
+4	5	11.Normal Fundus/131.jpg	4.Moderate DR/248.jpg
+4	5	11.Normal Fundus/131.jpg	4.Moderate DR/269.jpg
+4	5	11.Normal Fundus/131.jpg	4.Moderate DR/271.jpg
+4	6	11.Normal Fundus/130.jpg	6.Proliferate DR/619.jpg
+4	6	11.Normal Fundus/140.jpg	12. Advanced PDR/743.jpg
+4	6	11.Normal Fundus/151.jpg	6.Proliferate DR/613.jpg
+4	6	11.Normal Fundus/156.jpg	6.Proliferate DR/613.jpg
+4	6	11.Normal Fundus/98.jpg	6.Proliferate DR/613.jpg

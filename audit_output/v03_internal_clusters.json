@@ -1,0 +1,2000 @@
+[
+ {
+  "cluster": 11,
+  "members": [
+   {
+    "base": "109.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "110.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 12,
+  "members": [
+   {
+    "base": "11.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "19.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 21,
+  "members": [
+   {
+    "base": "118.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "119.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 29,
+  "members": [
+   {
+    "base": "125.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "222.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 30,
+  "members": [
+   {
+    "base": "126.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "223.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 39,
+  "members": [
+   {
+    "base": "134.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "165.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "79.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 40,
+  "members": [
+   {
+    "base": "135.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "136.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 43,
+  "members": [
+   {
+    "base": "138.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "139.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 106,
+  "members": [
+   {
+    "base": "195.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "196.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 120,
+  "members": [
+   {
+    "base": "207.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "208.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1131,
+  "members": [
+   {
+    "base": "228.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "236.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "249.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "256.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "261.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "274.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "285.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "290.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "294.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "319.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "339.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "340.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "343.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "360.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "393.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "423.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "432.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "442.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "446.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "541.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "568.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "599.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "601.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "602.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "655.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "680.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "681.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "688.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "715.jpg",
+    "label": "Mild (or early) NPDR"
+   },
+   {
+    "base": "766.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "770.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "780.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "786.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "794.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "812.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "813.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "825.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "827.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "1007.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "1014.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "1035.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "1036.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "990.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "991.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "1116.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1132.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1168.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1169.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1219.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1221.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1243.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1262.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1271.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1282.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 144,
+  "members": [
+   {
+    "base": "229.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "258.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "295.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "512.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "623.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "646.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "814.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 147,
+  "members": [
+   {
+    "base": "231.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "560.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 153,
+  "members": [
+   {
+    "base": "237.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "572.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 157,
+  "members": [
+   {
+    "base": "240.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "603.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 158,
+  "members": [
+   {
+    "base": "241.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "604.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 159,
+  "members": [
+   {
+    "base": "242.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "649.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 161,
+  "members": [
+   {
+    "base": "244.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "527.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 162,
+  "members": [
+   {
+    "base": "245.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "672.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 163,
+  "members": [
+   {
+    "base": "246.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "532.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 164,
+  "members": [
+   {
+    "base": "247.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "533.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 165,
+  "members": [
+   {
+    "base": "248.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "563.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 170,
+  "members": [
+   {
+    "base": "252.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "539.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "540.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 171,
+  "members": [
+   {
+    "base": "253.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "684.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 172,
+  "members": [
+   {
+    "base": "254.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "685.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 230,
+  "members": [
+   {
+    "base": "257.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "306.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "307.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 177,
+  "members": [
+   {
+    "base": "259.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "653.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 665,
+  "members": [
+   {
+    "base": "260.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "264.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "509.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "550.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "654.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "689.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "690.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "699.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "793.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "800.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "1015.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "891.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "1206.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1207.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1209.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 181,
+  "members": [
+   {
+    "base": "262.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "534.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 182,
+  "members": [
+   {
+    "base": "263.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "615.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 184,
+  "members": [
+   {
+    "base": "265.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "691.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 185,
+  "members": [
+   {
+    "base": "266.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "697.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 186,
+  "members": [
+   {
+    "base": "267.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "669.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 192,
+  "members": [
+   {
+    "base": "272.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "503.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 193,
+  "members": [
+   {
+    "base": "273.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "504.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 201,
+  "members": [
+   {
+    "base": "280.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "767.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 227,
+  "members": [
+   {
+    "base": "303.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "304.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "305.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 239,
+  "members": [
+   {
+    "base": "314.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "373.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "454.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 253,
+  "members": [
+   {
+    "base": "325.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "327.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "424.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "498.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "1164.jpg",
+    "label": "Very Severe NPDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 258,
+  "members": [
+   {
+    "base": "331.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "517.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "625.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 261,
+  "members": [
+   {
+    "base": "334.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "335.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 264,
+  "members": [
+   {
+    "base": "337.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "338.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 282,
+  "members": [
+   {
+    "base": "353.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "361.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 298,
+  "members": [
+   {
+    "base": "368.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "634.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 346,
+  "members": [
+   {
+    "base": "410.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "524.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "574.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 380,
+  "members": [
+   {
+    "base": "441.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "497.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "592.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "648.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "710.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 383,
+  "members": [
+   {
+    "base": "444.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "591.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 396,
+  "members": [
+   {
+    "base": "456.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "457.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 426,
+  "members": [
+   {
+    "base": "483.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "66.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 446,
+  "members": [
+   {
+    "base": "500.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "789.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 471,
+  "members": [
+   {
+    "base": "523.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "620.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 487,
+  "members": [
+   {
+    "base": "538.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "693.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 504,
+  "members": [
+   {
+    "base": "553.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "554.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 506,
+  "members": [
+   {
+    "base": "555.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "558.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 551,
+  "members": [
+   {
+    "base": "596.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "600.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 571,
+  "members": [
+   {
+    "base": "613.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "664.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "707.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "1423.jpg",
+    "label": "Advanced PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 580,
+  "members": [
+   {
+    "base": "621.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "822.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 670,
+  "members": [
+   {
+    "base": "702.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "1288.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 709,
+  "members": [
+   {
+    "base": "98.jpg",
+    "label": "No DR signs"
+   },
+   {
+    "base": "99.jpg",
+    "label": "No DR signs"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 717,
+  "members": [
+   {
+    "base": "718.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "745.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 718,
+  "members": [
+   {
+    "base": "719.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "736.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 719,
+  "members": [
+   {
+    "base": "720.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "746.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 720,
+  "members": [
+   {
+    "base": "721.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "747.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 721,
+  "members": [
+   {
+    "base": "722.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "748.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 722,
+  "members": [
+   {
+    "base": "723.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "749.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 723,
+  "members": [
+   {
+    "base": "724.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "750.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 724,
+  "members": [
+   {
+    "base": "725.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "751.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 725,
+  "members": [
+   {
+    "base": "726.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "752.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 726,
+  "members": [
+   {
+    "base": "727.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "753.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 727,
+  "members": [
+   {
+    "base": "728.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "737.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 728,
+  "members": [
+   {
+    "base": "729.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "738.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 729,
+  "members": [
+   {
+    "base": "730.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "739.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 730,
+  "members": [
+   {
+    "base": "731.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "740.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 731,
+  "members": [
+   {
+    "base": "732.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "741.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 732,
+  "members": [
+   {
+    "base": "733.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "742.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 733,
+  "members": [
+   {
+    "base": "734.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "743.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 734,
+  "members": [
+   {
+    "base": "735.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "744.jpg",
+    "label": "Moderate NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 806,
+  "members": [
+   {
+    "base": "807.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "808.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "882.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "883.jpg",
+    "label": "Severe NPDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 815,
+  "members": [
+   {
+    "base": "816.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "1210.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 816,
+  "members": [
+   {
+    "base": "817.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "1211.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 817,
+  "members": [
+   {
+    "base": "818.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "1212.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 818,
+  "members": [
+   {
+    "base": "819.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "1213.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 819,
+  "members": [
+   {
+    "base": "820.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "1214.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 820,
+  "members": [
+   {
+    "base": "821.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "1215.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 822,
+  "members": [
+   {
+    "base": "823.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "1091.jpg",
+    "label": "Very Severe NPDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 823,
+  "members": [
+   {
+    "base": "824.jpg",
+    "label": "Moderate NPDR"
+   },
+   {
+    "base": "1092.jpg",
+    "label": "Very Severe NPDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 850,
+  "members": [
+   {
+    "base": "1023.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "1024.jpg",
+    "label": "Severe NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 853,
+  "members": [
+   {
+    "base": "1026.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "884.jpg",
+    "label": "Severe NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 860,
+  "members": [
+   {
+    "base": "1033.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "1226.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 872,
+  "members": [
+   {
+    "base": "835.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "836.jpg",
+    "label": "Severe NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 908,
+  "members": [
+   {
+    "base": "871.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "872.jpg",
+    "label": "Severe NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 924,
+  "members": [
+   {
+    "base": "887.jpg",
+    "label": "Severe NPDR"
+   },
+   {
+    "base": "888.jpg",
+    "label": "Severe NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1037,
+  "members": [
+   {
+    "base": "1038.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1089.jpg",
+    "label": "Very Severe NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1063,
+  "members": [
+   {
+    "base": "1064.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1065.jpg",
+    "label": "Very Severe NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1065,
+  "members": [
+   {
+    "base": "1066.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1067.jpg",
+    "label": "Very Severe NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1077,
+  "members": [
+   {
+    "base": "1078.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1176.jpg",
+    "label": "Very Severe NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1080,
+  "members": [
+   {
+    "base": "1081.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1082.jpg",
+    "label": "Very Severe NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1092,
+  "members": [
+   {
+    "base": "1093.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1251.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 1132,
+  "members": [
+   {
+    "base": "1133.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1134.jpg",
+    "label": "Very Severe NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1136,
+  "members": [
+   {
+    "base": "1137.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1138.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1140.jpg",
+    "label": "Very Severe NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1151,
+  "members": [
+   {
+    "base": "1152.jpg",
+    "label": "Very Severe NPDR"
+   },
+   {
+    "base": "1153.jpg",
+    "label": "Very Severe NPDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1197,
+  "members": [
+   {
+    "base": "1198.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1200.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1201.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1215,
+  "members": [
+   {
+    "base": "1216.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1252.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1232,
+  "members": [
+   {
+    "base": "1233.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1234.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1260,
+  "members": [
+   {
+    "base": "1261.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1420.jpg",
+    "label": "Advanced PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 1273,
+  "members": [
+   {
+    "base": "1274.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1275.jpg",
+    "label": "PDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1284,
+  "members": [
+   {
+    "base": "1285.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1345.jpg",
+    "label": "Advanced PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 1285,
+  "members": [
+   {
+    "base": "1286.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1346.jpg",
+    "label": "Advanced PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 1286,
+  "members": [
+   {
+    "base": "1287.jpg",
+    "label": "PDR"
+   },
+   {
+    "base": "1347.jpg",
+    "label": "Advanced PDR"
+   }
+  ],
+  "cross_label": true
+ },
+ {
+  "cluster": 1302,
+  "members": [
+   {
+    "base": "1303.jpg",
+    "label": "Advanced PDR"
+   },
+   {
+    "base": "1304.jpg",
+    "label": "Advanced PDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1305,
+  "members": [
+   {
+    "base": "1305.jpg",
+    "label": "Advanced PDR"
+   },
+   {
+    "base": "1306.jpg",
+    "label": "Advanced PDR"
+   },
+   {
+    "base": "1307.jpg",
+    "label": "Advanced PDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1314,
+  "members": [
+   {
+    "base": "1315.jpg",
+    "label": "Advanced PDR"
+   },
+   {
+    "base": "1316.jpg",
+    "label": "Advanced PDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1324,
+  "members": [
+   {
+    "base": "1325.jpg",
+    "label": "Advanced PDR"
+   },
+   {
+    "base": "1326.jpg",
+    "label": "Advanced PDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1340,
+  "members": [
+   {
+    "base": "1341.jpg",
+    "label": "Advanced PDR"
+   },
+   {
+    "base": "1437.jpg",
+    "label": "Advanced PDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1370,
+  "members": [
+   {
+    "base": "1371.jpg",
+    "label": "Advanced PDR"
+   },
+   {
+    "base": "1372.jpg",
+    "label": "Advanced PDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1407,
+  "members": [
+   {
+    "base": "1408.jpg",
+    "label": "Advanced PDR"
+   },
+   {
+    "base": "1411.jpg",
+    "label": "Advanced PDR"
+   }
+  ],
+  "cross_label": false
+ },
+ {
+  "cluster": 1428,
+  "members": [
+   {
+    "base": "1429.jpg",
+    "label": "Advanced PDR"
+   },
+   {
+    "base": "1432.jpg",
+    "label": "Advanced PDR"
+   }
+  ],
+  "cross_label": false
+ }
+]

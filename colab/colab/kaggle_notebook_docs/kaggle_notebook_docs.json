@@ -1,0 +1,15 @@
+{
+  "generated": "use this directory as the source for Kaggle cells",
+  "audited_split": "provisional_primary_split/provisional_primary_split.csv",
+  "count": 0,
+  "nested": {
+    "colab/kaggle_notebook_docs": [
+      "kaggle_notebook_docs.json"
+    ],
+    "depths": {
+      ".": 0
+    },
+    "notebooks": []
+  },
+  "pairs": []
+}

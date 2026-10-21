@@ -1,0 +1,16 @@
+bbc82ec5baaf1853dcb40e02786b447caf318754b129331309ffb9ab6493b890	11.Normal Fundus/18.jpg	11.Normal Fundus/19.jpg	11.Normal Fundus/20.jpg
+9c8291bde7a25889e1fafd9dc904e7d460b36c9a4347971df8019c9ceb582ef2	4.Moderate DR/192.jpg	4.Moderate DR/219.jpg
+d7aeb2049d0aad9a607e67241e085f24b8d9c006917ab4398c12db9b8db27313	4.Moderate DR/195.jpg	4.Moderate DR/221.jpg
+c55de8aac4a0740fbf0829b18e7aea3719f27af04538bca5e9eb8f3393eaef01	4.Moderate DR/197.jpg	4.Moderate DR/223.jpg
+430ae37a791d8d642c658a1f6e91d8481b3d3f3a5a5a2471c58ec9555905223d	4.Moderate DR/198.jpg	4.Moderate DR/224.jpg
+e92f2e8351313430aa2caf26bf4f41aa85e8f2ff4f45371cc51fea59f1ce54ae	4.Moderate DR/199.jpg	4.Moderate DR/225.jpg
+718487a5a5ab8dda5f99de5c78ae5c787b3100f290ee7e829001d3d0b4ea55d7	4.Moderate DR/200.jpg	4.Moderate DR/226.jpg
+fb4172f8b3fb5907c9046fd12af8edeb92d39983843d73a004581be505374cf2	4.Moderate DR/203.jpg	4.Moderate DR/212.jpg
+efdf06458c7d7acc9c7fbefba1a08dc8752ced98d75979c3252c8f897d4b5e59	4.Moderate DR/205.jpg	4.Moderate DR/214.jpg
+12c6f28b99bbac190edd3e197c985e2c730a75f70f4c66fe4f462589aa9456e6	4.Moderate DR/208.jpg	4.Moderate DR/217.jpg
+b6cbf8403d84a0ab61f805cc275686533bd6c8d200ae1108b4c163685fe498b1	4.Moderate DR/245.jpg	4.Moderate DR/246.jpg
+c24e5b9c18fe56521d7ed246b4e6f00cb4dafc62cfa0e3248d8371e42c7f8ff8	5.Severe DR/330.jpg	5.Severe DR/394.jpg
+c075e39d5203f007b4da8c355a64de60aeb414b2737758c21869cda787af8690	5.Severe DR/331.jpg	5.Severe DR/395.jpg
+65224193d53715a899fe4eb9b3dea9e45daac8faac4870c173e66068f2e39d51	5.Severe DR/335.jpg	5.Severe DR/399.jpg
+b7ddc900305e8678385c3d9a00246ed0b0c185cfd3985234211aae2d1d80f699	5.Severe DR/340.jpg	5.Severe DR/404.jpg
+bcadeb46925ae96e16e1db927ab9cdee902b0ed973d04d2920c1e2aa186bbae6	5.Severe DR/341.jpg	5.Severe DR/405.jpg

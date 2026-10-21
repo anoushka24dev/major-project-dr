@@ -1,0 +1,116 @@
+  verified 0/1093
+  verified 100/1093
+  verified 200/1093
+  verified 300/1093
+  verified 400/1093
+  verified 500/1093
+  verified 600/1093
+  verified 700/1093
+  verified 800/1093
+  verified 900/1093
+  verified 1000/1093
+pairs=1093 pixel-SAME=996 FALSE-POS=97
+dataset .jpg pixel-covered by V03: 743 of 757 ; uncovered: 14
+uncovered dataset .jpg: 14
+V03 images pixel-matched into dataset: 755 of 1437 ; new/absent from dataset: 682
+V03-absent-from-dataset by class: {'No DR signs': 494, 'Mild (or early) NPDR': 2, 'Moderate NPDR': 32, 'Severe NPDR': 54, 'Very Severe NPDR': 42, 'PDR': 27, 'Advanced PDR': 31}
+
+SAME pairs with label conflict: 100
+distinct dataset files involved: 66 ; distinct V03 images: 66
+conflict pairs (V03 label -> dataset folder):
+   PDR                    -> 4.Moderate DR            : 18
+   No DR signs            -> 4.Moderate DR            : 15
+   Moderate NPDR          -> 11.Normal Fundus         : 10
+   Moderate NPDR          -> 6.Proliferate DR         : 7
+   Moderate NPDR          -> 5.Severe DR              : 4
+   Severe NPDR            -> 6.Proliferate DR         : 4
+   Severe NPDR            -> 13. Very Severe NPDR     : 4
+   Severe NPDR            -> 4.Moderate DR            : 4
+   Very Severe NPDR       -> 5.Severe DR              : 4
+   PDR                    -> 11.Normal Fundus         : 4
+   PDR                    -> 12. Advanced PDR         : 4
+   Advanced PDR           -> 6.Proliferate DR         : 4
+   Severe NPDR            -> 11.Normal Fundus         : 3
+   PDR                    -> 5.Severe DR              : 3
+   No DR signs            -> 6.Proliferate DR         : 2
+   No DR signs            -> 12. Advanced PDR         : 2
+   Moderate NPDR          -> 13. Very Severe NPDR     : 2
+   Very Severe NPDR       -> 4.Moderate DR            : 2
+   Advanced PDR           -> 11.Normal Fundus         : 2
+   Very Severe NPDR       -> 6.Proliferate DR         : 1
+   PDR                    -> 13. Very Severe NPDR     : 1
+
+conflict files that are ALSO cross-label duplicated inside the dataset (from audit pairs):
+   conflict dataset files: 66, already known cross-label in-dataset: 62
+   new conflict files not in audit's cross-class list: 4
+       11.Normal Fundus/165.jpg
+       11.Normal Fundus/43.jpg
+       4.Moderate DR/241.jpg
+       6.Proliferate DR/622.jpg
+
+dataset files matched by >1 distinct V03 label: 62
+    11.Normal Fundus/131.jpg ['Moderate NPDR', 'No DR signs']
+    11.Normal Fundus/130.jpg ['No DR signs', 'Severe NPDR']
+    11.Normal Fundus/43.jpg ['Moderate NPDR', 'No DR signs']
+    4.Moderate DR/248.jpg ['Moderate NPDR', 'No DR signs']
+    4.Moderate DR/269.jpg ['Moderate NPDR', 'No DR signs']
+    4.Moderate DR/271.jpg ['Moderate NPDR', 'No DR signs']
+    11.Normal Fundus/165.jpg ['Moderate NPDR', 'No DR signs']
+    4.Moderate DR/241.jpg ['Moderate NPDR', 'No DR signs']
+    11.Normal Fundus/156.jpg ['No DR signs', 'PDR']
+    11.Normal Fundus/99.jpg ['Moderate NPDR', 'No DR signs', 'PDR', 'Severe NPDR']
+    4.Moderate DR/256.jpg ['Moderate NPDR', 'No DR signs', 'PDR']
+    6.Proliferate DR/622.jpg ['No DR signs', 'PDR']
+    11.Normal Fundus/110.jpg ['Advanced PDR', 'No DR signs']
+    11.Normal Fundus/140.jpg ['Advanced PDR', 'No DR signs']
+    12. Advanced PDR/743.jpg ['Advanced PDR', 'No DR signs']
+
+same-image label conflicts pixel-strength (lowest MAE):
+   MAE=0.130 r=0.9999  V03 1036.jpg [Severe NPDR] == 13. Very Severe NPDR/548.jpg
+   MAE=0.130 r=0.9999  V03 1169.jpg [Very Severe NPDR] == 5.Severe DR/444.jpg
+   MAE=0.132 r=0.9999  V03 1261.jpg [PDR] == 12. Advanced PDR/740.jpg
+   MAE=0.132 r=0.9999  V03 1420.jpg [Advanced PDR] == 6.Proliferate DR/612.jpg
+   MAE=0.133 r=0.9999  V03 1168.jpg [Very Severe NPDR] == 5.Severe DR/443.jpg
+   MAE=0.133 r=0.9999  V03 1035.jpg [Severe NPDR] == 13. Very Severe NPDR/547.jpg
+   MAE=0.135 r=0.9998  V03 702.jpg [No DR signs] == 6.Proliferate DR/639.jpg
+   MAE=0.135 r=0.9998  V03 1288.jpg [PDR] == 11.Normal Fundus/178.jpg
+   MAE=0.135 r=0.9998  V03 1198.jpg [PDR] == 4.Moderate DR/243.jpg
+   MAE=0.136 r=0.9998  V03 1200.jpg [PDR] == 4.Moderate DR/245.jpg
+   MAE=0.136 r=0.9998  V03 1200.jpg [PDR] == 4.Moderate DR/246.jpg
+   MAE=0.136 r=0.9998  V03 1201.jpg [PDR] == 4.Moderate DR/245.jpg
+   MAE=0.136 r=0.9998  V03 1201.jpg [PDR] == 4.Moderate DR/246.jpg
+   MAE=0.136 r=0.9997  V03 613.jpg [No DR signs] == 12. Advanced PDR/743.jpg
+   MAE=0.136 r=0.9997  V03 1423.jpg [Advanced PDR] == 11.Normal Fundus/110.jpg
+   MAE=0.137 r=0.9998  V03 1033.jpg [Severe NPDR] == 6.Proliferate DR/596.jpg
+   MAE=0.137 r=0.9998  V03 1226.jpg [PDR] == 5.Severe DR/441.jpg
+   MAE=0.138 r=0.9998  V03 1199.jpg [PDR] == 4.Moderate DR/244.jpg
+   MAE=0.139 r=0.9998  V03 1207.jpg [PDR] == 5.Severe DR/355.jpg
+   MAE=0.140 r=0.9998  V03 891.jpg [Severe NPDR] == 6.Proliferate DR/586.jpg
+   MAE=0.144 r=0.9997  V03 822.jpg [Moderate NPDR] == 11.Normal Fundus/117.jpg
+   MAE=0.145 r=0.9997  V03 621.jpg [No DR signs] == 4.Moderate DR/266.jpg
+   MAE=0.196 r=0.9998  V03 819.jpg [Moderate NPDR] == 6.Proliferate DR/592.jpg
+   MAE=0.196 r=0.9997  V03 816.jpg [Moderate NPDR] == 6.Proliferate DR/589.jpg
+   MAE=0.197 r=0.9998  V03 1213.jpg [PDR] == 4.Moderate DR/263.jpg
+
+wrote audit_output/v03_pairs_verified.json
+
+--- 14 dataset .jpg not covered: best V03 candidates ---
+  v03 dhash 0/1437
+  v03 dhash 300/1437
+  v03 dhash 600/1437
+  v03 dhash 900/1437
+  v03 dhash 1200/1437
+   11.Normal Fundus/102.jpg: best V03=605.jpg [No DR signs] d=2 MAE=0.13 r=0.9998
+   13. Very Severe NPDR/449.jpg: best V03=413.jpg [No DR signs] d=4 MAE=44.84 r=0.8734
+   13. Very Severe NPDR/450.jpg: best V03=86.jpg [No DR signs] d=9 MAE=23.81 r=0.8433
+   13. Very Severe NPDR/451.jpg: best V03=607.jpg [No DR signs] d=4 MAE=32.50 r=0.9245
+   13. Very Severe NPDR/452.jpg: best V03=1405.jpg [Advanced PDR] d=1 MAE=27.34 r=0.8114
+   13. Very Severe NPDR/453.jpg: best V03=1030.jpg [Severe NPDR] d=3 MAE=21.24 r=0.8408
+   13. Very Severe NPDR/454.jpg: best V03=1384.jpg [Advanced PDR] d=5 MAE=66.97 r=0.8752
+   13. Very Severe NPDR/455.jpg: best V03=292.jpg [No DR signs] d=4 MAE=46.95 r=0.8818
+   13. Very Severe NPDR/456.jpg: best V03=317.jpg [No DR signs] d=2 MAE=61.58 r=0.9170
+   13. Very Severe NPDR/457.jpg: best V03=208.jpg [No DR signs] d=2 MAE=18.19 r=0.9175
+   13. Very Severe NPDR/458.jpg: best V03=108.jpg [No DR signs] d=6 MAE=12.51 r=0.9477
+   13. Very Severe NPDR/537.jpg: best V03=1158.jpg [Very Severe NPDR] d=5 MAE=0.26 r=0.9998
+   5.Severe DR/445.jpg: best V03=1181.jpg [PDR] d=1 MAE=73.16 r=0.8740
+   5.Severe DR/446.jpg: best V03=1181.jpg [PDR] d=4 MAE=74.56 r=0.8759

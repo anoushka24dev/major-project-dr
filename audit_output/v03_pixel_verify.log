@@ -1,0 +1,184 @@
+match buckets (semantically_consistent, strong): {(True, True): 794, (True, False): 166, (False, False): 80, (False, True): 53}
+consistent strong: 794 consistent weak: 166 inconsistent: 133
+consistent-strong: n=60 MAE med=0.16 max=1.36 | r med=0.9999 min=0.9928 | same-image(MAE<8,r>.95)=60
+consistent-weak: n=60 MAE med=3.97 max=56.14 | r med=0.9600 min=0.8758 | same-image(MAE<8,r>.95)=37
+INCONSISTENT: n=133 MAE med=2.94 max=35.82 | r med=0.9825 min=0.7657 | same-image(MAE<8,r>.95)=100
+
+--- inconsistent pairs detail (pixel-checked) ---
+  MAE= 35.82 r=0.8831  V03 533.jpg [No DR signs]  vs  5.Severe DR/423.jpg  (d=4,a=5)
+  MAE= 35.82 r=0.8831  V03 247.jpg [No DR signs]  vs  5.Severe DR/423.jpg  (d=4,a=4)
+  MAE= 14.28 r=0.9319  V03 2.jpg [No DR signs]  vs  5.Severe DR/334.jpg  (d=4,a=6)
+  MAE= 14.28 r=0.9319  V03 2.jpg [No DR signs]  vs  5.Severe DR/398.jpg  (d=4,a=6)
+  MAE= 13.43 r=0.7860  V03 327.jpg [No DR signs]  vs  12. Advanced PDR/743.jpg  (d=2,a=5)
+  MAE= 12.98 r=0.9607  V03 177.jpg [No DR signs]  vs  5.Severe DR/316.jpg  (d=4,a=5)
+  MAE= 11.37 r=0.7657  V03 437.jpg [No DR signs]  vs  13. Very Severe NPDR/502.jpg  (d=3,a=6)
+  MAE=  9.78 r=0.8421  V03 1007.jpg [Severe NPDR]  vs  11.Normal Fundus/36.jpg  (d=4,a=5)
+  MAE=  8.37 r=0.8602  V03 437.jpg [No DR signs]  vs  6.Proliferate DR/613.jpg  (d=4,a=5)
+  MAE=  8.30 r=0.8377  V03 1243.jpg [PDR]  vs  11.Normal Fundus/140.jpg  (d=3,a=4)
+  MAE=  7.61 r=0.8408  V03 434.jpg [No DR signs]  vs  4.Moderate DR/241.jpg  (d=4,a=6)
+  MAE=  7.59 r=0.9552  V03 280.jpg [No DR signs]  vs  4.Moderate DR/241.jpg  (d=1,a=5)
+  MAE=  7.30 r=0.8933  V03 1221.jpg [PDR]  vs  11.Normal Fundus/183.jpg  (d=2,a=6)
+  MAE=  6.44 r=0.9248  V03 310.jpg [No DR signs]  vs  5.Severe DR/435.jpg  (d=2,a=6)
+  MAE=  6.23 r=0.9180  V03 707.jpg [No DR signs]  vs  4.Moderate DR/256.jpg  (d=3,a=6)
+  MAE=  5.91 r=0.9340  V03 800.jpg [Moderate NPDR]  vs  6.Proliferate DR/588.jpg  (d=4,a=4)
+  MAE=  5.89 r=0.9252  V03 1268.jpg [PDR]  vs  11.Normal Fundus/130.jpg  (d=4,a=6)
+  MAE=  5.55 r=0.8990  V03 431.jpg [No DR signs]  vs  4.Moderate DR/256.jpg  (d=4,a=4)
+  MAE=  5.52 r=0.9320  V03 990.jpg [Severe NPDR]  vs  11.Normal Fundus/183.jpg  (d=4,a=4)
+  MAE=  5.41 r=0.9180  V03 541.jpg [No DR signs]  vs  6.Proliferate DR/613.jpg  (d=3,a=5)
+  MAE=  5.34 r=0.9381  V03 786.jpg [Moderate NPDR]  vs  11.Normal Fundus/131.jpg  (d=4,a=4)
+  MAE=  5.29 r=0.9111  V03 431.jpg [No DR signs]  vs  6.Proliferate DR/622.jpg  (d=4,a=5)
+  MAE=  5.04 r=0.9224  V03 568.jpg [No DR signs]  vs  4.Moderate DR/257.jpg  (d=2,a=6)
+  MAE=  4.96 r=0.9472  V03 800.jpg [Moderate NPDR]  vs  6.Proliferate DR/586.jpg  (d=4,a=2)
+  MAE=  4.96 r=0.9472  V03 800.jpg [Moderate NPDR]  vs  5.Severe DR/355.jpg  (d=4,a=2)
+  MAE=  4.77 r=0.9327  V03 454.jpg [No DR signs]  vs  6.Proliferate DR/613.jpg  (d=4,a=6)
+  MAE=  4.56 r=0.9288  V03 664.jpg [No DR signs]  vs  4.Moderate DR/256.jpg  (d=4,a=4)
+  MAE=  4.56 r=0.9291  V03 568.jpg [No DR signs]  vs  4.Moderate DR/256.jpg  (d=4,a=6)
+  MAE=  4.55 r=0.9290  V03 812.jpg [Moderate NPDR]  vs  11.Normal Fundus/140.jpg  (d=3,a=5)
+  MAE=  4.27 r=0.9412  V03 431.jpg [No DR signs]  vs  12. Advanced PDR/743.jpg  (d=4,a=4)
+  MAE=  4.13 r=0.9424  V03 1262.jpg [PDR]  vs  11.Normal Fundus/98.jpg  (d=4,a=6)
+  MAE=  4.09 r=0.9616  V03 990.jpg [Severe NPDR]  vs  11.Normal Fundus/99.jpg  (d=4,a=4)
+  MAE=  4.08 r=0.9681  V03 1221.jpg [PDR]  vs  11.Normal Fundus/99.jpg  (d=4,a=6)
+  MAE=  4.05 r=0.9380  V03 314.jpg [No DR signs]  vs  6.Proliferate DR/613.jpg  (d=4,a=6)
+  MAE=  4.01 r=0.9618  V03 568.jpg [No DR signs]  vs  4.Moderate DR/271.jpg  (d=2,a=4)
+  MAE=  4.01 r=0.9618  V03 568.jpg [No DR signs]  vs  4.Moderate DR/248.jpg  (d=2,a=4)
+  MAE=  4.01 r=0.9618  V03 568.jpg [No DR signs]  vs  4.Moderate DR/269.jpg  (d=2,a=4)
+  MAE=  3.99 r=0.9762  V03 1027.jpg [Severe NPDR]  vs  11.Normal Fundus/122.jpg  (d=4,a=5)
+  MAE=  3.96 r=0.9491  V03 343.jpg [No DR signs]  vs  12. Advanced PDR/743.jpg  (d=4,a=6)
+  MAE=  3.92 r=0.9502  V03 1015.jpg [Severe NPDR]  vs  6.Proliferate DR/586.jpg  (d=3,a=6)
+  MAE=  3.90 r=0.9623  V03 827.jpg [Moderate NPDR]  vs  11.Normal Fundus/131.jpg  (d=4,a=6)
+  MAE=  3.90 r=0.9623  V03 770.jpg [Moderate NPDR]  vs  11.Normal Fundus/131.jpg  (d=4,a=6)
+  MAE=  3.90 r=0.9623  V03 825.jpg [Moderate NPDR]  vs  11.Normal Fundus/131.jpg  (d=4,a=6)
+  MAE=  3.73 r=0.9762  V03 655.jpg [No DR signs]  vs  4.Moderate DR/271.jpg  (d=4,a=5)
+  MAE=  3.73 r=0.9762  V03 655.jpg [No DR signs]  vs  4.Moderate DR/248.jpg  (d=4,a=5)
+  MAE=  3.73 r=0.9762  V03 655.jpg [No DR signs]  vs  4.Moderate DR/269.jpg  (d=4,a=5)
+  MAE=  3.73 r=0.9761  V03 261.jpg [No DR signs]  vs  4.Moderate DR/271.jpg  (d=4,a=5)
+  MAE=  3.73 r=0.9761  V03 261.jpg [No DR signs]  vs  4.Moderate DR/248.jpg  (d=4,a=5)
+  MAE=  3.73 r=0.9761  V03 261.jpg [No DR signs]  vs  4.Moderate DR/269.jpg  (d=4,a=5)
+  MAE=  3.60 r=0.9548  V03 343.jpg [No DR signs]  vs  6.Proliferate DR/622.jpg  (d=4,a=5)
+  MAE=  3.52 r=0.9494  V03 1221.jpg [PDR]  vs  11.Normal Fundus/156.jpg  (d=4,a=6)
+  MAE=  3.49 r=0.9534  V03 813.jpg [Moderate NPDR]  vs  11.Normal Fundus/157.jpg  (d=2,a=6)
+  MAE=  3.31 r=0.9597  V03 1423.jpg [Advanced PDR]  vs  11.Normal Fundus/140.jpg  (d=4,a=6)
+  MAE=  3.30 r=0.9596  V03 664.jpg [No DR signs]  vs  12. Advanced PDR/743.jpg  (d=4,a=6)
+  MAE=  3.28 r=0.9645  V03 1262.jpg [PDR]  vs  11.Normal Fundus/157.jpg  (d=3,a=6)
+  MAE=  3.23 r=0.9644  V03 1015.jpg [Severe NPDR]  vs  11.Normal Fundus/130.jpg  (d=3,a=4)
+  MAE=  3.21 r=0.9825  V03 602.jpg [No DR signs]  vs  4.Moderate DR/271.jpg  (d=4,a=5)
+  MAE=  3.21 r=0.9825  V03 602.jpg [No DR signs]  vs  4.Moderate DR/248.jpg  (d=4,a=5)
+  MAE=  3.21 r=0.9825  V03 602.jpg [No DR signs]  vs  4.Moderate DR/269.jpg  (d=4,a=5)
+  MAE=  3.21 r=0.9825  V03 827.jpg [Moderate NPDR]  vs  11.Normal Fundus/99.jpg  (d=3,a=3)
+  MAE=  3.21 r=0.9825  V03 770.jpg [Moderate NPDR]  vs  11.Normal Fundus/99.jpg  (d=3,a=3)
+  MAE=  3.21 r=0.9825  V03 825.jpg [Moderate NPDR]  vs  11.Normal Fundus/99.jpg  (d=3,a=3)
+  MAE=  3.20 r=0.9531  V03 343.jpg [No DR signs]  vs  4.Moderate DR/256.jpg  (d=4,a=6)
+  MAE=  3.11 r=0.9558  V03 1262.jpg [PDR]  vs  11.Normal Fundus/156.jpg  (d=4,a=6)
+  MAE=  3.09 r=0.9541  V03 800.jpg [Moderate NPDR]  vs  11.Normal Fundus/43.jpg  (d=4,a=5)
+  MAE=  2.98 r=0.9583  V03 1221.jpg [PDR]  vs  4.Moderate DR/256.jpg  (d=3,a=4)
+  MAE=  2.94 r=0.9555  V03 813.jpg [Moderate NPDR]  vs  6.Proliferate DR/613.jpg  (d=3,a=4)
+  MAE=  2.94 r=0.9555  V03 1262.jpg [PDR]  vs  4.Moderate DR/257.jpg  (d=3,a=4)
+  MAE=  2.87 r=0.9700  V03 800.jpg [Moderate NPDR]  vs  11.Normal Fundus/165.jpg  (d=4,a=4)
+  MAE=  2.32 r=0.9874  V03 1209.jpg [PDR]  vs  5.Severe DR/355.jpg  (d=4,a=4)
+  MAE=  2.32 r=0.9873  V03 891.jpg [Severe NPDR]  vs  6.Proliferate DR/588.jpg  (d=4,a=4)
+  MAE=  1.36 r=0.9928  V03 883.jpg [Severe NPDR]  vs  4.Moderate DR/251.jpg  (d=1,a=0)
+  MAE=  1.36 r=0.9928  V03 808.jpg [Moderate NPDR]  vs  5.Severe DR/346.jpg  (d=3,a=0)
+  MAE=  1.36 r=0.9928  V03 807.jpg [Moderate NPDR]  vs  5.Severe DR/347.jpg  (d=2,a=1)
+  MAE=  1.36 r=0.9928  V03 882.jpg [Severe NPDR]  vs  4.Moderate DR/252.jpg  (d=3,a=0)
+  MAE=  0.95 r=0.9985  V03 1035.jpg [Severe NPDR]  vs  13. Very Severe NPDR/548.jpg  (d=2,a=4)
+  MAE=  0.95 r=0.9985  V03 1168.jpg [Very Severe NPDR]  vs  5.Severe DR/444.jpg  (d=2,a=4)
+  MAE=  0.94 r=0.9985  V03 1036.jpg [Severe NPDR]  vs  13. Very Severe NPDR/547.jpg  (d=2,a=4)
+  MAE=  0.94 r=0.9985  V03 1169.jpg [Very Severe NPDR]  vs  5.Severe DR/443.jpg  (d=2,a=4)
+  MAE=  0.22 r=0.9996  V03 823.jpg [Moderate NPDR]  vs  13. Very Severe NPDR/511.jpg  (d=0,a=1)
+  MAE=  0.22 r=0.9996  V03 1091.jpg [Very Severe NPDR]  vs  4.Moderate DR/267.jpg  (d=0,a=1)
+  MAE=  0.22 r=0.9996  V03 1345.jpg [Advanced PDR]  vs  6.Proliferate DR/636.jpg  (d=0,a=0)
+  MAE=  0.22 r=0.9996  V03 1285.jpg [PDR]  vs  12. Advanced PDR/696.jpg  (d=0,a=1)
+  MAE=  0.22 r=0.9996  V03 824.jpg [Moderate NPDR]  vs  13. Very Severe NPDR/512.jpg  (d=0,a=0)
+  MAE=  0.22 r=0.9996  V03 1092.jpg [Very Severe NPDR]  vs  4.Moderate DR/268.jpg  (d=0,a=0)
+  MAE=  0.21 r=0.9996  V03 1346.jpg [Advanced PDR]  vs  6.Proliferate DR/637.jpg  (d=0,a=0)
+  MAE=  0.21 r=0.9996  V03 1286.jpg [PDR]  vs  12. Advanced PDR/697.jpg  (d=0,a=0)
+  MAE=  0.21 r=0.9997  V03 1347.jpg [Advanced PDR]  vs  6.Proliferate DR/638.jpg  (d=0,a=1)
+  MAE=  0.21 r=0.9997  V03 1287.jpg [PDR]  vs  12. Advanced PDR/698.jpg  (d=1,a=2)
+  MAE=  0.21 r=0.9997  V03 883.jpg [Severe NPDR]  vs  4.Moderate DR/252.jpg  (d=1,a=0)
+  MAE=  0.21 r=0.9997  V03 882.jpg [Severe NPDR]  vs  4.Moderate DR/251.jpg  (d=1,a=0)
+  MAE=  0.21 r=0.9997  V03 808.jpg [Moderate NPDR]  vs  5.Severe DR/347.jpg  (d=0,a=0)
+  MAE=  0.21 r=0.9997  V03 807.jpg [Moderate NPDR]  vs  5.Severe DR/346.jpg  (d=1,a=1)
+  MAE=  0.21 r=0.9997  V03 1198.jpg [PDR]  vs  4.Moderate DR/245.jpg  (d=0,a=0)
+  MAE=  0.21 r=0.9997  V03 1198.jpg [PDR]  vs  4.Moderate DR/246.jpg  (d=0,a=0)
+  MAE=  0.21 r=0.9998  V03 1093.jpg [Very Severe NPDR]  vs  6.Proliferate DR/602.jpg  (d=0,a=0)
+  MAE=  0.20 r=0.9997  V03 1200.jpg [PDR]  vs  4.Moderate DR/243.jpg  (d=0,a=0)
+  MAE=  0.20 r=0.9997  V03 1201.jpg [PDR]  vs  4.Moderate DR/243.jpg  (d=0,a=0)
+  MAE=  0.20 r=0.9997  V03 1212.jpg [PDR]  vs  4.Moderate DR/262.jpg  (d=1,a=3)
+  MAE=  0.20 r=0.9997  V03 1214.jpg [PDR]  vs  4.Moderate DR/264.jpg  (d=0,a=1)
+  MAE=  0.20 r=0.9998  V03 1251.jpg [PDR]  vs  13. Very Severe NPDR/513.jpg  (d=0,a=0)
+  MAE=  0.20 r=0.9997  V03 818.jpg [Moderate NPDR]  vs  6.Proliferate DR/591.jpg  (d=1,a=2)
+  MAE=  0.20 r=0.9997  V03 1211.jpg [PDR]  vs  4.Moderate DR/261.jpg  (d=0,a=0)
+  MAE=  0.20 r=0.9997  V03 1215.jpg [PDR]  vs  4.Moderate DR/265.jpg  (d=3,a=0)
+  MAE=  0.20 r=0.9997  V03 817.jpg [Moderate NPDR]  vs  6.Proliferate DR/590.jpg  (d=0,a=0)
+  MAE=  0.20 r=0.9997  V03 821.jpg [Moderate NPDR]  vs  6.Proliferate DR/594.jpg  (d=1,a=1)
+  MAE=  0.20 r=0.9997  V03 820.jpg [Moderate NPDR]  vs  6.Proliferate DR/593.jpg  (d=0,a=1)
+  MAE=  0.20 r=0.9997  V03 1210.jpg [PDR]  vs  4.Moderate DR/260.jpg  (d=1,a=0)
+  MAE=  0.20 r=0.9998  V03 1213.jpg [PDR]  vs  4.Moderate DR/263.jpg  (d=0,a=0)
+  MAE=  0.20 r=0.9997  V03 816.jpg [Moderate NPDR]  vs  6.Proliferate DR/589.jpg  (d=0,a=0)
+  MAE=  0.20 r=0.9998  V03 819.jpg [Moderate NPDR]  vs  6.Proliferate DR/592.jpg  (d=1,a=0)
+  MAE=  0.15 r=0.9997  V03 621.jpg [No DR signs]  vs  4.Moderate DR/266.jpg  (d=0,a=2)
+  MAE=  0.14 r=0.9997  V03 822.jpg [Moderate NPDR]  vs  11.Normal Fundus/117.jpg  (d=0,a=2)
+  MAE=  0.14 r=0.9998  V03 891.jpg [Severe NPDR]  vs  6.Proliferate DR/586.jpg  (d=0,a=0)
+  MAE=  0.14 r=0.9998  V03 1207.jpg [PDR]  vs  5.Severe DR/355.jpg  (d=0,a=0)
+  MAE=  0.14 r=0.9998  V03 1199.jpg [PDR]  vs  4.Moderate DR/244.jpg  (d=3,a=1)
+  MAE=  0.14 r=0.9998  V03 1033.jpg [Severe NPDR]  vs  6.Proliferate DR/596.jpg  (d=0,a=0)
+  MAE=  0.14 r=0.9998  V03 1226.jpg [PDR]  vs  5.Severe DR/441.jpg  (d=0,a=0)
+  MAE=  0.14 r=0.9997  V03 613.jpg [No DR signs]  vs  12. Advanced PDR/743.jpg  (d=0,a=0)
+  MAE=  0.14 r=0.9997  V03 1423.jpg [Advanced PDR]  vs  11.Normal Fundus/110.jpg  (d=0,a=0)
+  MAE=  0.14 r=0.9998  V03 1200.jpg [PDR]  vs  4.Moderate DR/245.jpg  (d=0,a=0)
+  MAE=  0.14 r=0.9998  V03 1200.jpg [PDR]  vs  4.Moderate DR/246.jpg  (d=0,a=0)
+  MAE=  0.14 r=0.9998  V03 1201.jpg [PDR]  vs  4.Moderate DR/245.jpg  (d=0,a=0)
+  MAE=  0.14 r=0.9998  V03 1201.jpg [PDR]  vs  4.Moderate DR/246.jpg  (d=0,a=0)
+  MAE=  0.14 r=0.9998  V03 1198.jpg [PDR]  vs  4.Moderate DR/243.jpg  (d=0,a=0)
+  MAE=  0.13 r=0.9998  V03 702.jpg [No DR signs]  vs  6.Proliferate DR/639.jpg  (d=2,a=1)
+  MAE=  0.13 r=0.9998  V03 1288.jpg [PDR]  vs  11.Normal Fundus/178.jpg  (d=2,a=1)
+  MAE=  0.13 r=0.9999  V03 1035.jpg [Severe NPDR]  vs  13. Very Severe NPDR/547.jpg  (d=0,a=0)
+  MAE=  0.13 r=0.9999  V03 1168.jpg [Very Severe NPDR]  vs  5.Severe DR/443.jpg  (d=0,a=0)
+  MAE=  0.13 r=0.9999  V03 1420.jpg [Advanced PDR]  vs  6.Proliferate DR/612.jpg  (d=0,a=1)
+  MAE=  0.13 r=0.9999  V03 1261.jpg [PDR]  vs  12. Advanced PDR/740.jpg  (d=0,a=1)
+  MAE=  0.13 r=0.9999  V03 1036.jpg [Severe NPDR]  vs  13. Very Severe NPDR/548.jpg  (d=0,a=0)
+  MAE=  0.13 r=0.9999  V03 1169.jpg [Very Severe NPDR]  vs  5.Severe DR/444.jpg  (d=0,a=0)
+
+dataset .jpg with NO V03 perceptual match: 14
+   11.Normal Fundus/102.jpg  2124x2056 sha=0fa952b70317
+   13. Very Severe NPDR/449.jpg  2124x2056 sha=8f8d5039141c
+   13. Very Severe NPDR/450.jpg  2124x2056 sha=e2a162fa6ac0
+   13. Very Severe NPDR/451.jpg  2124x2056 sha=1223ea30101b
+   13. Very Severe NPDR/452.jpg  2124x2056 sha=369e1adb0181
+   13. Very Severe NPDR/453.jpg  2124x2056 sha=e0be38239df6
+   13. Very Severe NPDR/454.jpg  2124x2056 sha=cc2c6bdd1e84
+   13. Very Severe NPDR/455.jpg  2124x2056 sha=ce0cb273842b
+   13. Very Severe NPDR/456.jpg  2124x2056 sha=4e62ee20ca6a
+   13. Very Severe NPDR/457.jpg  2124x2056 sha=98c3de79cf6a
+   13. Very Severe NPDR/458.jpg  2124x2056 sha=f7cac17bf5df
+   13. Very Severe NPDR/537.jpg  2124x2056 sha=7b598c1b2f13
+   5.Severe DR/445.jpg  2124x2056 sha=f4655f2b9c38
+   5.Severe DR/446.jpg  2124x2056 sha=fd0a6adf7a0b
+
+V03 unmatched: 647
+unmatched-V03 best-dhash histogram: {0: 12, 1: 51, 2: 101, 3: 120, 4: 121, 5: 111, 6: 56, 7: 42, 8: 19, 9: 10, 10: 4}
+
+verifying 12 closest unmatched V03 pairs pixel-wise:
+  d=0 V03 24.jpg [No DR signs] vs 13. Very Severe NPDR/546.jpg: MAE=13.80 r=0.9418 -> diff
+  d=0 V03 243.jpg [No DR signs] vs 11.Normal Fundus/140.jpg: MAE=4.79 r=0.9034 -> diff
+  d=0 V03 279.jpg [No DR signs] vs 11.Normal Fundus/143.jpg: MAE=9.35 r=0.8444 -> diff
+  d=0 V03 289.jpg [No DR signs] vs 11.Normal Fundus/101.jpg: MAE=4.38 r=0.9119 -> diff
+  d=0 V03 377.jpg [No DR signs] vs 11.Normal Fundus/93.jpg: MAE=4.67 r=0.9601 -> SAME
+  d=0 V03 39.jpg [No DR signs] vs 11.Normal Fundus/162.jpg: MAE=29.14 r=0.8650 -> diff
+  d=0 V03 402.jpg [No DR signs] vs 4.Moderate DR/255.jpg: MAE=11.38 r=0.7908 -> diff
+  d=0 V03 413.jpg [No DR signs] vs 4.Moderate DR/238.jpg: MAE=3.75 r=0.9556 -> SAME
+  d=0 V03 414.jpg [No DR signs] vs 11.Normal Fundus/124.jpg: MAE=5.43 r=0.9055 -> diff
+  d=0 V03 430.jpg [No DR signs] vs 11.Normal Fundus/124.jpg: MAE=6.19 r=0.9086 -> diff
+  d=0 V03 571.jpg [No DR signs] vs 11.Normal Fundus/140.jpg: MAE=3.40 r=0.9542 -> SAME
+  d=0 V03 6.jpg [No DR signs] vs 11.Normal Fundus/5.jpg: MAE=22.92 r=0.8609 -> diff
+closest-12 that are actually same image: 3
+
+farthest unmatched V03 (truly new content) examples:
+  d=9 V03 805.jpg [Moderate NPDR] best-neighbor 5.Severe DR/368.jpg
+  d=9 V03 806.jpg [Moderate NPDR] best-neighbor 11.Normal Fundus/302_left.jpeg
+  d=9 V03 987.jpg [Severe NPDR] best-neighbor 4.Moderate DR/209.jpg
+  d=9 V03 993.jpg [Severe NPDR] best-neighbor 10.Glaucoma/Glaucoma1307_left_0_4787.jpeg
+  d=10 V03 1231.jpg [PDR] best-neighbor 12. Advanced PDR/749.jpg
+  d=10 V03 1363.jpg [Advanced PDR] best-neighbor 5.Severe DR/333.jpg
+  d=10 V03 9.jpg [No DR signs] best-neighbor 11.Normal Fundus/22.jpg
+  d=10 V03 988.jpg [Severe NPDR] best-neighbor 5.Severe DR/368.jpg

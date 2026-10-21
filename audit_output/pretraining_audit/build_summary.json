@@ -1,0 +1,154 @@
+{
+ "register_pair_rows": 168,
+ "register_unique_files": 238,
+ "components": 103,
+ "conflict_pair_rows": 55,
+ "conflict_unique_files": 75,
+ "cross_label_components": 26,
+ "exact_groups": 16,
+ "exact_files": 33,
+ "strong_pairs": 149,
+ "strong_files": 205,
+ "cross_class_strong_pairs": 54,
+ "strong_same_patient": 13,
+ "strong_cross_patient": 3,
+ "strong_unknown_patient": 133,
+ "strong_within_class": 95,
+ "quality_flagged": 300,
+ "zenodo_confirmed": 757,
+ "flag_tallies": {
+  "very_dark": 231,
+  "low_texture": 21,
+  "black_border": 3,
+  "near_grayscale": 64,
+  "near_uniform_low_std": 10
+ },
+ "families": {
+  "prefixed": 11097,
+  "plain": 10599,
+  "zenodo_v02": 757
+ },
+ "primary_stats": {
+  "11.Normal Fundus": {
+   "primary_label": "No apparent DR",
+   "total": 3061,
+   "quality_flagged": 80,
+   "conflict_involved": 13,
+   "provisional_eligible": 2973,
+   "unique_groups": 1951,
+   "multi_image_groups": 1022,
+   "both_eye_groups": 1022,
+   "zenodo_ungrouped": 99
+  },
+  "3.Mild DR": {
+   "primary_label": "Mild NPDR",
+   "total": 2441,
+   "quality_flagged": 5,
+   "conflict_involved": 0,
+   "provisional_eligible": 2436,
+   "unique_groups": 1842,
+   "multi_image_groups": 594,
+   "both_eye_groups": 594,
+   "zenodo_ungrouped": 4
+  },
+  "4.Moderate DR": {
+   "primary_label": "Moderate NPDR",
+   "total": 5368,
+   "quality_flagged": 60,
+   "conflict_involved": 20,
+   "provisional_eligible": 5303,
+   "unique_groups": 3338,
+   "multi_image_groups": 1965,
+   "both_eye_groups": 1965,
+   "zenodo_ungrouped": 53
+  },
+  "5.Severe DR": {
+   "primary_label": "Severe NPDR",
+   "total": 1918,
+   "quality_flagged": 24,
+   "conflict_involved": 7,
+   "provisional_eligible": 1893,
+   "unique_groups": 722,
+   "multi_image_groups": 561,
+   "both_eye_groups": 305,
+   "zenodo_ungrouped": 157
+  },
+  "13. Very Severe NPDR": {
+   "primary_label": "Severe NPDR (merged candidate)",
+   "total": 108,
+   "quality_flagged": 27,
+   "conflict_involved": 5,
+   "provisional_eligible": 78,
+   "unique_groups": 78,
+   "multi_image_groups": 0,
+   "both_eye_groups": 0,
+   "zenodo_ungrouped": 78
+  },
+  "6.Proliferate DR": {
+   "primary_label": "PDR",
+   "total": 1504,
+   "quality_flagged": 57,
+   "conflict_involved": 21,
+   "provisional_eligible": 1443,
+   "unique_groups": 481,
+   "multi_image_groups": 444,
+   "both_eye_groups": 262,
+   "zenodo_ungrouped": 37
+  },
+  "12. Advanced PDR": {
+   "primary_label": "PDR (merged candidate)",
+   "total": 114,
+   "quality_flagged": 38,
+   "conflict_involved": 5,
+   "provisional_eligible": 75,
+   "unique_groups": 75,
+   "multi_image_groups": 0,
+   "both_eye_groups": 0,
+   "zenodo_ungrouped": 75
+  }
+ },
+ "nondr_stats": {
+  "1.Dry AMD": {
+   "total": 1360,
+   "quality_flagged": 0,
+   "conflict_involved": 1,
+   "provisional_eligible": 1359,
+   "unique_groups": 135
+  },
+  "2.Wet AMD": {
+   "total": 587,
+   "quality_flagged": 0,
+   "conflict_involved": 1,
+   "provisional_eligible": 586,
+   "unique_groups": 46
+  },
+  "7.Cataract": {
+   "total": 1505,
+   "quality_flagged": 9,
+   "conflict_involved": 0,
+   "provisional_eligible": 1496,
+   "unique_groups": 208
+  },
+  "8.Hypertensive Retinopathy": {
+   "total": 1344,
+   "quality_flagged": 0,
+   "conflict_involved": 0,
+   "provisional_eligible": 1344,
+   "unique_groups": 103
+  },
+  "9.Pathological Myopia": {
+   "total": 1265,
+   "quality_flagged": 0,
+   "conflict_involved": 0,
+   "provisional_eligible": 1265,
+   "unique_groups": 166
+  },
+  "10.Glaucoma": {
+   "total": 1878,
+   "quality_flagged": 0,
+   "conflict_involved": 2,
+   "provisional_eligible": 1876,
+   "unique_groups": 204
+  }
+ }
+}

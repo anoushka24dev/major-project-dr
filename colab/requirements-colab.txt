@@ -1,0 +1,22 @@
+# Colab runtime dependencies for the frozen ResNet-50 primary-baseline.
+# Install with: pip install -r requirements-colab.txt
+#
+# Notes:
+# - Colab often already has a torch/torchvision stack installed. This file is meant
+#   to be used only if the runtime needs a compatible, explicitly pinned stack.
+# - Do not uninstall Colab's preinstalled packages by default; install only if needed.
+# - The "+cu124" local version tags are published on PyTorch's own wheel index, not on
+#   PyPI, so the index URL below is part of the pin. Without it, pip fails with
+#   "No matching distribution found for torch==2.6.0+cu124".
+# - torch 2.6.0 was never built for CUDA 12.1, so do not "fix" this back to +cu121:
+#   the CUDA 12.1 wheel index ends at torch 2.5.1+cu121.
+# - Installed on a Colab runtime that already has torch/torchvision, this would also
+#   move numpy/Pillow, so only install it when the stack is genuinely missing.
+# - Verified resolvable (pip --dry-run) for CPython 3.12 and 3.13 on linux_x86_64.
+
+--extra-index-url https://download.pytorch.org/whl/cu124
+
+torch==2.6.0+cu124
+torchvision==0.21.0+cu124
+numpy==2.2.1
+Pillow==12.2.0
