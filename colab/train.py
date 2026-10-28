@@ -1465,7 +1465,12 @@ def run_final_evaluation(
     # actionable errors (no checkpoint yet, wrong split) are reported first.
     require_torchvision()
     model = build_frozen_resnet50(num_classes=len(BAND_ORDER), pretrained=False)
-    payload = torch.load(best_dir / "model.pt", map_location=device, weights_only=True)
+    # Reuse the resume path's loader: weights_only=True rejects the
+    # torch.torch_version.TorchVersion object that training embeds in
+    # config['runtime']['torch_version'], which fails only at evaluation time.
+    # _torch_load tries the safe path first and falls back for this pipeline's own
+    # checkpoints, exactly as resume already does.
+    payload, _ = _torch_load(best_dir / "model.pt", device)
     if "model_state_dict" not in payload:
         raise ValueError(
             f"Checkpoint at {best_dir / 'model.pt'} has no 'model_state_dict' entry."
