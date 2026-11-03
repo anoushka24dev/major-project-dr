@@ -2,8 +2,9 @@
 
 Status of this document: written from the code on disk, verified by the commands in
 §6. It supersedes the cell-by-cell instructions in `colab/TASK_REPORT.md`,
-`colab/FIXED_NOTEBOOK_REPORT.md` and the notes in `PIPELINE_STATUS_HANDOFF.md`,
-which describe the previous multi-cell notebook. Those files remain as history.
+`colab/FIXED_NOTEBOOK_REPORT.md` and the notes formerly in
+`PIPELINE_STATUS_HANDOFF.md` (since removed; still readable in git history),
+which describe the previous multi-cell notebook. The two `colab/` reports remain as history.
 
 ---
 
