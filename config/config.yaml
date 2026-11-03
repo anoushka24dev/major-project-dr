@@ -1,0 +1,306 @@
+# ---------------------------------------------------------------------------
+# Central configuration for the unified diabetic-retinopathy pipeline.
+#
+# Every value used by the pipeline is read from here (or from an environment
+# variable override) so that behaviour is reproducible and auditable.
+# Validate with:  python -m src.pipeline validate-config
+# ---------------------------------------------------------------------------
+
+project:
+  name: "A Multimodal Explainable Agentic AI Framework for Trustworthy Diabetic Retinopathy Diagnosis from Fundus Images"
+  short_name: "dr-trustworthy-pipeline"
+  # Fixed seed for every stochastic step (splits, augmentation, init, sampling).
+  seed: 12345
+  # Bumped whenever manifest semantics change; stored in checkpoints so an
+  # incompatible checkpoint can never be reused silently.
+  manifest_version: "unified-v1-2026-11-03"
+  # The five-band mapping is provisional in the pre-existing project audit.
+  provisional_label_policy: true
+
+paths:
+  datasets_dir: "datasets"
+  mendeley_dir: "datasets/mendeley"
+  mmrdr_dir: "datasets/mmrdr"
+  idrid_dir: "datasets/idrid"
+  # Download staging area (archives, partial files, extraction).
+  cache_dir: "work/cache"
+  outputs_dir: "outputs"
+  logs_dir: "logs"
+  runs_dir: "runs"
+  # An already-downloaded copy of the Mendeley corpus, if the user has one.
+  # Left empty by default; also settable via the DR_FUNDUS_ROOT env var, or
+  # --fundus-root on the command line. Never hard-coded to a personal path.
+  legacy_fundus_root: ""
+  # Where the user drops manually-downloaded IDRiD files. Empty = datasets/idrid.
+  idrid_manual_root: ""
+
+datasets:
+  mendeley:
+    dataset_id: "6ry9n79gb4"
+    version: 1
+    doi: "10.17632/6ry9n79gb4.1"
+    page_url: "https://data.mendeley.com/datasets/6ry9n79gb4/1"
+    api_base: "https://data.mendeley.com/public-api/datasets"
+    licence: "CC BY 4.0"
+    auto_download: true
+    # The 13 verbatim class folders the corpus is expected to contain.
+    expected_class_folders:
+      - "1.Dry AMD"
+      - "2.Wet AMD"
+      - "3.Mild DR"
+      - "4.Moderate DR"
+      - "5.Severe DR"
+      - "6.Proliferate DR"
+      - "7.Cataract"
+      - "8.Hypertensive Retinopathy"
+      - "9.Pathological Myopia"
+      - "10.Glaucoma"
+      - "11.Normal Fundus"
+      - "12. Advanced PDR"
+      - "13. Very Severe NPDR"
+
+  mmrdr:
+    article_id: 29423747
+    doi: "10.6084/m9.figshare.29423747"
+    page_url: "https://figshare.com/articles/dataset/MMRDR/29423747"
+    api_base: "https://api.figshare.com/v2/articles"
+    licence: "see Figshare article"
+    auto_download: true
+    # Number of split-zip parts published for this article.
+    expected_parts: 9
+    # Only the CFP subset feeds the five-class fundus classifier. OCT and UWF
+    # are different modalities with different grade definitions and are excluded.
+    allowed_modality: "CFP"
+    excluded_modalities:
+      CFP: ""
+      OCT: "different imaging modality (OCT); its grade column encodes DME grades 0-2, not DR severity"
+      UWF: "different imaging modality (ultra-widefield); not an ordinary colour fundus photograph"
+
+  idrid:
+    page_url: "https://ieee-dataport.org/open-access/indian-diabetic-retinopathy-image-dataset-idrid"
+    mirror_url: "https://idrid.grand-challenge.org/"
+    licence: "registration + terms acceptance required"
+    auto_download: false
+    requires_registration: true
+    # Sub-paths the manual download must provide, relative to the IDRiD root.
+    required_relative_paths:
+      - "1. Original Images/a. Training Set"
+      - "2. All Segmentation Groundtruths/a. Training Set/1. Microaneurysms"
+      - "2. All Segmentation Groundtruths/a. Training Set/2. Haemorrhages"
+      - "2. All Segmentation Groundtruths/a. Training Set/3. Hard Exudates"
+      - "2. All Segmentation Groundtruths/a. Training Set/4. Soft Exudates"
+
+taxonomy:
+  # Numeric label -> class name. Order is fixed and is the model output order.
+  # These strings are the repository's canonical band names: they match
+  # dataset/labels.py and the existing provisional_primary_split.csv exactly, so
+  # the legacy baseline and the unified pipeline stay interchangeable.
+  classes:
+    - "No apparent DR"
+    - "Mild NPDR"
+    - "Moderate NPDR"
+    - "Severe NPDR"
+    - "PDR"
+  # Presentation-only wording used in reports (never in code paths or CSVs).
+  display_names:
+    - "No Apparent DR"
+    - "Mild NPDR"
+    - "Moderate NPDR"
+    - "Severe NPDR"
+    - "Proliferative DR (PDR)"
+  # Segmentation channel order is fixed: MA, HE, EX, SE.
+  lesion_channels:
+    - "MA"
+    - "HE"
+    - "EX"
+    - "SE"
+
+# Mapping rules. Each entry documents *why* a source label maps where it does.
+label_mapping:
+  mendeley:
+    # Reuses the project's existing provisional policy in dataset/labels.py.
+    source_field: "class_folder"
+    rules:
+      "11.Normal Fundus": {mapped_label: 0, rule: "source folder is the normal-fundus class; documented as 'no DR visible according to the source label', never 'healthy'"}
+      "3.Mild DR": {mapped_label: 1, rule: "verbatim mild non-proliferative DR folder"}
+      "4.Moderate DR": {mapped_label: 2, rule: "verbatim moderate non-proliferative DR folder"}
+      "5.Severe DR": {mapped_label: 3, rule: "verbatim severe non-proliferative DR folder"}
+      "13. Very Severe NPDR": {mapped_label: 3, rule: "PROVISIONAL merge of Very Severe NPDR into Severe NPDR (project policy Option A); recorded as a merge, not as a verbatim grade"}
+      "6.Proliferate DR": {mapped_label: 4, rule: "verbatim proliferative DR folder"}
+      "12. Advanced PDR": {mapped_label: 4, rule: "PROVISIONAL merge of Advanced PDR into PDR (project policy Option A); recorded as a merge, not as a verbatim grade"}
+    # Folders that are not DR severity grades at all.
+    exclude_non_dr:
+      "1.Dry AMD": "non-DR retinal disease (dry age-related macular degeneration); not a DR severity grade"
+      "2.Wet AMD": "non-DR retinal disease (wet age-related macular degeneration); not a DR severity grade"
+      "7.Cataract": "non-DR ocular condition (cataract); not a DR severity grade"
+      "8.Hypertensive Retinopathy": "different disease entity (hypertensive retinopathy); not DR severity"
+      "9.Pathological Myopia": "non-DR retinal disease (pathological myopia); not a DR severity grade"
+      "10.Glaucoma": "non-DR ocular condition (glaucoma); not a DR severity grade"
+
+  mmrdr:
+    source_field: "FP.csv:grade"
+    rules:
+      "0": {mapped_label: 0, rule: "verbatim: MMRDR README defines grade 0 as No DR"}
+      "1": {mapped_label: 1, rule: "verbatim: MMRDR README defines grade 1 as Mild NPDR"}
+      "2": {mapped_label: 2, rule: "verbatim: MMRDR README defines grade 2 as Moderate NPDR"}
+      "3": {mapped_label: 3, rule: "verbatim: MMRDR README defines grade 3 as Severe NPDR"}
+      "4": {mapped_label: 4, rule: "verbatim: MMRDR README defines grade 4 as PDR"}
+
+preprocessing:
+  classification:
+    image_size: 224
+    # Aspect-ratio-preserving resize then symmetric pad. Never crops, so lesions
+    # near the retinal border cannot be cut away.
+    resize_mode: "resize_and_pad"
+    imagenet_normalize: true
+    augmentation:
+      horizontal_flip: true
+      # Rotation is limited: larger angles force black wedges into the frame and
+      # change apparent lesion geometry.
+      rotation_degrees: 10
+      brightness: 0.08
+      contrast: 0.08
+      # Explicitly disabled: these would remove or distort lesions.
+      random_crop: false
+      vertical_flip: false
+  segmentation:
+    image_size: 512
+    mask_interpolation: "nearest"
+    image_interpolation: "bilinear"
+
+quality:
+  enabled: true
+  # Laplacian variance below this is flagged as blurred. Evaluated on the
+  # fundus-interior region only.
+  blur_threshold: 12.0
+  # Mean intensity (0-255) outside these bounds is flagged.
+  dark_threshold: 25.0
+  bright_threshold: 230.0
+  # Fraction of near-black pixels above which the image is flagged as
+  # largely uninformative.
+  dark_fraction_threshold: 0.75
+  # Never delete flagged images; only record the decision.
+  exclude_flagged: false
+
+split:
+  # Ratios apply within each source dataset and class.
+  ratios:
+    train: 0.70
+    validation: 0.15
+    test: 0.15
+  # When true, MMRDR's official `ts` images become an `external_test`
+  # partition that is never trained on.
+  use_official_test_partitions: true
+  # Perceptual-hash near-duplicate detection.
+  duplicate:
+    enable_perceptual: true
+    dhash_max_distance: 4
+    ahash_max_distance: 6
+
+classification:
+  architecture: "resnet50"
+  num_classes: 5
+  pretrained: true
+  allow_weight_download: true
+  # 0 = train the whole network. >0 = train the head only for that many epochs,
+  # then unfreeze. Recorded in run metadata either way.
+  freeze_backbone_epochs: 1
+  epochs: 15
+  # `auto` resolves from detected hardware at runtime and is recorded.
+  batch_size: "auto"
+  num_workers: "auto"
+  optimizer: "adamw"
+  learning_rate: 3.0e-4
+  weight_decay: 1.0e-4
+  scheduler: "cosine"
+  warmup_epochs: 1
+  early_stopping_patience: 5
+  # Which validation quantity drives checkpoint selection and early stopping.
+  # val_macro_f1 is preferred over raw accuracy because the classes are imbalanced.
+  monitor: "val_macro_f1"
+  monitor_mode: "max"
+  # `auto` enables AMP only when a CUDA device is actually usable.
+  mixed_precision: "auto"
+  class_weighting: true
+  gradient_clip_norm: 1.0
+  label_smoothing: 0.0
+
+segmentation:
+  architecture: "unet4"
+  in_channels: 3
+  out_channels: 4
+  base_filters: 32
+  epochs: 25
+  batch_size: "auto"
+  num_workers: "auto"
+  learning_rate: 1.0e-4
+  weight_decay: 1.0e-5
+  optimizer: "adamw"
+  scheduler: "cosine"
+  early_stopping_patience: 6
+  mixed_precision: "auto"
+  # BCE + Dice. Dice handles the extreme foreground/background imbalance of
+  # small lesions; BCE keeps gradients stable early in training.
+  loss:
+    bce_weight: 0.5
+    dice_weight: 0.5
+  # Per-lesion thresholds are tuned on the VALIDATION partition only.
+  threshold_search:
+    enabled: true
+    start: 0.10
+    stop: 0.90
+    step: 0.05
+
+evaluation:
+  batch_size: "auto"
+  num_workers: "auto"
+  # Expected Calibration Error.
+  calibration:
+    bins: 15
+    strategy: "equal_width"
+  uncertainty:
+    # Predictive entropy in nats. ln(5) = 1.609 is maximal for five classes.
+    entropy_threshold: 1.10
+    confidence_threshold: 0.60
+  gradcam:
+    enabled: true
+    num_examples: 3
+    # Percentile of the CAM used to binarise it for lesion-overlap scoring.
+    # Chosen on validation data; recorded in the output JSON.
+    binarise_percentile: 90
+  roc_auc:
+    enabled: true
+
+cross_dataset:
+  enabled: true
+
+download:
+  chunk_size: 1048576
+  timeout_seconds: 120
+  max_retries: 5
+  retry_backoff_seconds: 3
+  # HTTP Range resume for interrupted transfers.
+  resume: true
+  verify_sha256_when_available: true
+  # Perceptual/structural validation of extracted trees.
+  validate_after_extract: true
+
+run:
+  # Reuse a checkpoint only when its fingerprint matches the current config,
+  # manifest version and class mapping.
+  reuse_valid_checkpoints: true
+  force_retrain: false
+  # Stop the run on the first failed stage instead of continuing.
+  stop_on_failure: true
+  stages:
+    - download
+    - prepare
+    - quality
+    - train_classification
+    - train_segmentation
+    - explainability
+    - evaluate_classification
+    - evaluate_segmentation
+    - calibration
+    - cross_dataset
+    - report

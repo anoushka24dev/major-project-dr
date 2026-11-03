@@ -1386,6 +1386,57 @@ def test_mini_final_evaluation_scores_only_the_test_partition(tmp_path, monkeypa
     assert len(payload["confusion_matrix"]) == len(BAND_ORDER)
 
 
+@needs_images
+def test_final_evaluation_loads_checkpoint_with_torchversion_metadata(tmp_path, monkeypatch):
+    """Regression: training stores torch.__version__ (a TorchVersion instance, not a
+    plain str) in config['runtime'], so weights_only=True rejects the checkpoint.
+    Evaluation must still load it -- without retraining the run."""
+    import pickle
+    from torch.torch_version import TorchVersion
+
+    train_rows, val_rows, test_rows = _mini_subsets()
+
+    out = tmp_path / "torchversion_run"
+    out.mkdir(parents=True)
+    model = _TinyResNetLike(len(BAND_ORDER))
+    optimizer = torch.optim.SGD(model.parameters(), lr=1e-3)
+    config = {
+        "task": "primary_five_band_provisional",
+        "model": "resnet50_frozen",
+        "num_classes": len(BAND_ORDER),
+        "image_size": MODEL_IMAGE_SIZE,
+        "seed": 12345,
+        "class_weights": compute_class_weights_from_rows(train_rows),
+        "runtime": {"torch_version": TorchVersion("2.14.0+cpu")},
+    }
+    save_checkpoint(
+        out, initial_training_state(epoch=0, best_val_loss=0.25), model, optimizer, config, epoch=0, is_best=True
+    )
+
+    # Pin the production failure: the strict loader refuses this payload.
+    with pytest.raises(pickle.UnpicklingError):
+        torch.load(out / "best_checkpoint" / "model.pt", map_location="cpu", weights_only=True)
+
+    decoded, built, loss_devices = [], [], []
+    train_mod = _install_mini_run_stubs(
+        monkeypatch, train_rows, val_rows, test_rows, decoded, built, loss_devices
+    )
+    monkeypatch.setattr(train_mod, "require_torchvision", lambda: None)
+
+    result = train_mod.run_final_evaluation(
+        split_dir=SPLIT_DIR,
+        dataset_root=IMAGE_ROOT,
+        output_dir=out,
+        batch_size=2,
+        image_size=MODEL_IMAGE_SIZE,
+        device=torch.device("cpu"),
+        confirm_final_evaluation=True,
+    )
+
+    assert result["metrics"]["num_samples"] == len(test_rows)
+    assert (out / "final_test_evaluation" / "final_test_metrics.json").is_file()
+
+
 # ---------------------------------------------------------------------------
 # Notebook <-> module consistency (imports, call signatures, cell order)
 # ---------------------------------------------------------------------------

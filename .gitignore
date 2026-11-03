@@ -2,12 +2,37 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+env/
 
-cpu_runs/
+# --- generated project artefacts (never committed) -------------------------
+# Datasets are downloaded by RUN.bat and are far too large for a repository.
+datasets/
+work/
+runs/
+outputs/
+logs/
+*.log
+
+# Model checkpoints and weights
 checkpoints/
-
 *.pt
 *.pth
+*.onnx
 
+# Existing training-output folders
+cpu_runs/
+
+# OS / editor noise
 .DS_Store
 Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+
+# Test / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage

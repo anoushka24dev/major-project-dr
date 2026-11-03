@@ -1,54 +1,0 @@
-  [PASS] python: 3.11.15 at C:\Users\anous\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe
-  [PASS] torch: torch 2.14.0+cpu (CUDA build: no)
-  [PASS] torchvision: torchvision 0.29.1+cpu
-  [PASS] device_cpu: device forced to cpu; no CUDA device visible
-  [PASS] pretrained_weights: NOT cached at C:\Users\anous\.cache\torch\hub\checkpoints\resnet50-0676ba61.pth; download of one ImageNet resnet50 .pth is permitted by --allow-weight-download (one-time)
-  [PASS] split_dir: C:\Users\anous\OneDrive\Desktop\major_project\provisional_primary_split\provisional_primary_split.csv
-  [PASS] dataset_root: C:\Users\anous\Downloads\Diabetic Retinopathy and Retinal Diseases Fundus I
-  [PASS] split_csv_exists: C:\Users\anous\OneDrive\Desktop\major_project\provisional_primary_split\provisional_primary_split.csv
-  [PASS] split_csv_readable: 14201 data rows, columns ['image_path', 'task', 'partition', 'primary_class', 'group_id', 'source_family', 'patient_key_available', 'zenodo_unlinked', 'eligibility_snapshot', 'manifest_version', 'split_seed']
-  [PASS] row_count: 14201 rows (matches the audited artifact)
-  [PASS] all_primary_task: every row has task='primary'
-  [PASS] partitions_exact: partitions are exactly train/validation/test
-  [PASS] partition_counts_match_audited_split: train 9,924 / validation 2,133 / test 2,144
-  [PASS] classes_are_the_five_provisional_bands: exactly the five expected bands
-  [PASS] labels_module_agreement: dataset.labels.PRIMARY_MAPPING values match EXPECTED_CLASSES
-  [PASS] provisional_merges_intact: 13. Very Severe NPDR->Severe NPDR and 12. Advanced PDR->PDR (PROVISIONAL)
-  [PASS] band_order_matches_colab_helpers: colab_helpers.BAND_ORDER agrees
-  [PASS] image_paths_unique: no duplicated image_path
-  [PASS] every_band_in_every_partition: all five bands present in all three partitions
-  [PASS] path_prefix_matches_label: every path's source folder maps through PRIMARY_MAPPING to its primary_class
-  [PASS] no_group_leakage_across_partitions: 14143 groups, each confined to one partition
-  [PASS] split_protocol_validation: SplitValidator OK: 14201 assigned, warnings=0
-  [PASS] image_files_exist: 60/14201 stratified sample paths exist under C:\Users\anous\Downloads\Diabetic Retinopathy and Retinal Diseases Fundus I
-  [PASS] sample_images_decode: 15 stratified images decoded via dataset.decoding.load_rgb (size range (512, 512)..(2124, 2056))
-preflight PASSED: 24 checks, 0 failed, 0 skipped
-  [PASS] canary/canary_csv_at_expected_path: C:\Users\anous\OneDrive\Desktop\major_project\cpu_runs\canary\canary_split\provisional_primary_split.csv
-  [PASS] canary/canary_csv_readable: 75 data rows, columns ['image_path', 'task', 'partition', 'primary_class', 'group_id', 'source_family', 'patient_key_available', 'zenodo_unlinked', 'eligibility_snapshot', 'manifest_version', 'split_seed']
-  [PASS] canary/canary_partitions_known: only train/validation/test rows
-  [PASS] canary/canary_total_rows: 75 rows (expected 75)
-  [PASS] canary/canary_train_rows: train: 50 rows (expected 50)
-  [PASS] canary/canary_validation_rows: validation: 25 rows (expected 25)
-  [PASS] canary/canary_test_rows: test: 0 rows (expected 0)
-  [PASS] canary/canary_classes_are_the_five_bands: exactly the five provisional bands
-  [PASS] canary/canary_all_bands_in_train: train covers all five bands
-  [PASS] canary/canary_all_bands_in_validation: validation covers all five bands
-  [PASS] canary/canary_train_per_class: every band has exactly 10 train rows
-  [PASS] canary/canary_validation_per_class: every band has exactly 5 validation rows
-  [PASS] canary/canary_image_paths_unique: no duplicated image_path
-  [PASS] canary/canary_path_prefix_matches_label: every canary path's source folder maps to its primary_class
-  [PASS] canary/canary_no_group_leakage: 73 groups, each confined to one partition
-  [PASS] canary/canary_image_paths_exist: all 75 canary image paths exist under C:\Users\anous\Downloads\Diabetic Retinopathy and Retinal Diseases Fundus I
-  [PASS] canary/canary_images_decode: decoded 5 canary image(s) across the five bands via dataset.decoding.load_rgb
-smoke gate passed (colab/smoke_test.py exited 0).
-Downloading: "https://download.pytorch.org/models/resnet50-0676ba61.pth" to C:\Users\anous/.cache\torch\hub\checkpoints\resnet50-0676ba61.pth
-  0%|          | 0.00/97.8M [00:00<?, ?B/s]  1%|1         | 1.25M/97.8M [00:00<00:08, 11.9MB/s]  3%|2         | 2.50M/97.8M [00:00<00:09, 10.4MB/s]  4%|3         | 3.62M/97.8M [00:00<00:09, 10.7MB/s]  5%|4         | 4.88M/97.8M [00:00<00:08, 11.5MB/s]  6%|6         | 6.12M/97.8M [00:00<00:08, 11.5MB/s]  8%|7         | 7.38M/97.8M [00:00<00:08, 11.8MB/s]  9%|8         | 8.62M/97.8M [00:00<00:07, 11.8MB/s] 10%|#         | 9.88M/97.8M [00:00<00:08, 11.1MB/s] 11%|#1        | 11.0M/97.8M [00:01<00:08, 10.3MB/s] 12%|#2        | 12.1M/97.8M [00:01<00:08, 10.1MB/s] 13%|#3        | 13.1M/97.8M [00:01<00:20, 4.43MB/s] 15%|#4        | 14.2M/97.8M [00:01<00:16, 5.38MB/s] 16%|#5        | 15.4M/97.8M [00:02<00:13, 6.21MB/s] 17%|#7        | 16.6M/97.8M [00:02<00:11, 7.41MB/s] 18%|#8        | 17.9M/97.8M [00:02<00:09, 8.49MB/s] 19%|#9        | 19.0M/97.8M [00:02<00:08, 9.18MB/s] 21%|##        | 20.2M/97.8M [00:02<00:08, 9.84MB/s] 22%|##1       | 21.5M/97.8M [00:02<00:07, 10.4MB/s] 23%|##3       | 22.6M/97.8M [00:02<00:07, 10.0MB/s] 24%|##4       | 23.8M/97.8M [00:02<00:07, 9.78MB/s] 25%|##5       | 24.8M/97.8M [00:02<00:07, 9.60MB/s] 26%|##6       | 25.8M/97.8M [00:03<00:07, 9.52MB/s] 27%|##7       | 26.8M/97.8M [00:03<00:07, 9.45MB/s] 28%|##8       | 27.8M/97.8M [00:03<00:07, 9.38MB/s] 29%|##9       | 28.8M/97.8M [00:03<00:07, 9.35MB/s] 30%|###       | 29.8M/97.8M [00:03<00:07, 9.27MB/s] 31%|###1      | 30.8M/97.8M [00:03<00:07, 9.11MB/s] 32%|###2      | 31.8M/97.8M [00:03<00:07, 9.35MB/s] 33%|###3      | 32.8M/97.8M [00:03<00:07, 9.28MB/s] 35%|###4      | 33.8M/97.8M [00:03<00:07, 8.62MB/s] 35%|###5      | 34.6M/97.8M [00:04<00:16, 3.98MB/s] 37%|###6      | 35.9M/97.8M [00:04<00:12, 5.22MB/s] 38%|###7      | 37.0M/97.8M [00:04<00:10, 6.27MB/s] 39%|###8      | 37.9M/97.8M [00:04<00:10, 6.13MB/s] 40%|###9      | 39.0M/97.8M [00:05<00:08, 7.19MB/s] 41%|####1     | 40.2M/97.8M [00:05<00:07, 8.10MB/s] 42%|####2     | 41.4M/97.8M [00:05<00:06, 8.84MB/s] 43%|####3     | 42.4M/97.8M [00:05<00:08, 6.82MB/s] 44%|####4     | 43.5M/97.8M [00:05<00:07, 7.71MB/s] 46%|####5     | 44.8M/97.8M [00:05<00:06, 8.86MB/s] 47%|####7     | 46.0M/97.8M [00:05<00:05, 9.65MB/s] 48%|####8     | 47.2M/97.8M [00:05<00:05, 10.2MB/s] 49%|####9     | 48.4M/97.8M [00:06<00:04, 10.4MB/s] 51%|#####     | 49.6M/97.8M [00:06<00:04, 11.1MB/s] 52%|#####1    | 50.8M/97.8M [00:06<00:04, 10.6MB/s] 53%|#####3    | 51.9M/97.8M [00:06<00:04, 10.3MB/s] 54%|#####4    | 53.0M/97.8M [00:07<00:15, 3.05MB/s] 55%|#####5    | 54.1M/97.8M [00:07<00:11, 3.90MB/s] 57%|#####6    | 55.2M/97.8M [00:07<00:09, 4.83MB/s] 58%|#####7    | 56.5M/97.8M [00:07<00:07, 5.98MB/s] 59%|#####8    | 57.5M/97.8M [00:07<00:06, 6.66MB/s] 60%|######    | 58.8M/97.8M [00:07<00:05, 7.92MB/s] 61%|######1   | 59.9M/97.8M [00:08<00:04, 8.57MB/s] 62%|######2   | 61.0M/97.8M [00:08<00:04, 9.30MB/s] 64%|######3   | 62.1M/97.8M [00:08<00:03, 9.62MB/s] 65%|######4   | 63.2M/97.8M [00:08<00:03, 9.42MB/s] 66%|######5   | 64.2M/97.8M [00:08<00:03, 9.32MB/s] 67%|######6   | 65.2M/97.8M [00:08<00:03, 8.90MB/s] 68%|######7   | 66.2M/97.8M [00:08<00:03, 8.94MB/s] 69%|######8   | 67.4M/97.8M [00:08<00:03, 9.54MB/s] 70%|######9   | 68.4M/97.8M [00:08<00:03, 9.46MB/s] 71%|#######   | 69.4M/97.8M [00:09<00:03, 9.44MB/s] 72%|#######1  | 70.4M/97.8M [00:09<00:03, 9.38MB/s] 73%|#######2  | 71.4M/97.8M [00:09<00:02, 9.26MB/s] 74%|#######4  | 72.4M/97.8M [00:09<00:02, 9.27MB/s] 75%|#######5  | 73.4M/97.8M [00:09<00:02, 9.29MB/s] 76%|#######6  | 74.4M/97.8M [00:09<00:02, 9.32MB/s] 77%|#######7  | 75.4M/97.8M [00:09<00:02, 9.24MB/s] 78%|#######8  | 76.4M/97.8M [00:09<00:02, 9.02MB/s] 79%|#######9  | 77.4M/97.8M [00:09<00:02, 9.24MB/s] 80%|########  | 78.4M/97.8M [00:10<00:02, 9.50MB/s] 81%|########1 | 79.4M/97.8M [00:10<00:02, 9.15MB/s] 82%|########2 | 80.4M/97.8M [00:10<00:01, 9.33MB/s] 83%|########3 | 81.4M/97.8M [00:10<00:01, 9.29MB/s] 84%|########4 | 82.4M/97.8M [00:10<00:01, 9.23MB/s] 85%|########5 | 83.4M/97.8M [00:10<00:01, 9.26MB/s] 86%|########6 | 84.4M/97.8M [00:10<00:01, 9.33MB/s] 87%|########7 | 85.4M/97.8M [00:10<00:01, 9.22MB/s] 88%|########8 | 86.4M/97.8M [00:11<00:01, 9.13MB/s] 89%|########9 | 87.4M/97.8M [00:11<00:01, 9.25MB/s] 90%|######### | 88.4M/97.8M [00:11<00:01, 9.12MB/s] 91%|#########1| 89.4M/97.8M [00:11<00:00, 9.35MB/s] 92%|#########2| 90.4M/97.8M [00:11<00:00, 9.04MB/s] 93%|#########3| 91.4M/97.8M [00:11<00:00, 9.41MB/s] 94%|#########4| 92.4M/97.8M [00:11<00:00, 9.28MB/s] 95%|#########5| 93.4M/97.8M [00:11<00:00, 9.39MB/s] 97%|#########6| 94.4M/97.8M [00:11<00:00, 9.23MB/s] 98%|#########7| 95.4M/97.8M [00:12<00:00, 9.29MB/s] 99%|#########8| 96.4M/97.8M [00:12<00:00, 8.98MB/s]100%|#########9| 97.4M/97.8M [00:12<00:00, 8.87MB/s]100%|##########| 97.8M/97.8M [00:12<00:00, 8.33MB/s]
-{"event": "training_start", "device": "cpu", "cuda_available": false, "cuda_device_name": null, "train_size": 50, "val_size": 25, "epochs": 2, "class_weights": {"No apparent DR": 1.0, "Mild NPDR": 1.0, "Moderate NPDR": 1.0, "Severe NPDR": 1.0, "PDR": 1.0}}
-{"event": "epoch_end", "epoch": 0, "train_loss": 1.6473022747039794, "val_loss": 1.3205307722091675, "val_accuracy": 0.44, "val_macro_f1": 0.39722222222222225, "best_epoch": 0, "best_val_loss": 1.3205307722091675, "patience_counter": 0, "epoch_seconds": 19.726, "device": "cpu"}
-{"event": "epoch_end", "epoch": 1, "train_loss": 1.4769718170166015, "val_loss": 1.0218268489837647, "val_accuracy": 0.48, "val_macro_f1": 0.45103785103785105, "best_epoch": 1, "best_val_loss": 1.0218268489837647, "patience_counter": 0, "epoch_seconds": 18.626, "device": "cpu"}
-{"event": "training_complete", "best_epoch": 1, "best_val_loss": 1.0218268489837647, "epochs_run": 2, "epochs_requested": 2, "started_at_epoch": 0, "resumed": false, "manifest": "C:\\Users\\anous\\OneDrive\\Desktop\\major_project\\cpu_runs\\canary\\run_manifest.json"}
-training complete on cpu: best epoch 1 (val loss 1.0218)
-output dir: C:\Users\anous\OneDrive\Desktop\major_project\cpu_runs\canary
-run summary: C:\Users\anous\OneDrive\Desktop\major_project\cpu_runs\canary\run_summary.json
-note: test partition not evaluated (that is a separate, explicit step).
-exit=0
