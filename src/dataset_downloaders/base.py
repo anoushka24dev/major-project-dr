@@ -126,6 +126,17 @@ def _sha256_of(path: Path, chunk_size: int = 1024 * 1024) -> str:
     return digest.hexdigest()
 
 
+def _safe_replace(source: Path, destination: Path, max_attempts: int = 10, delay: float = 1.0) -> None:
+    for attempt in range(max_attempts):
+        try:
+            os.replace(source, destination)
+            return
+        except OSError:
+            if attempt == max_attempts - 1:
+                raise
+            time.sleep(delay)
+
+
 def download_file(
     url: str,
     destination: Path,
@@ -227,7 +238,7 @@ def download_file(
         if logger:
             logger.info("sha256 verified for %s", destination.name)
 
-    os.replace(part, destination)
+    _safe_replace(part, destination)
     return destination
 
 
@@ -354,7 +365,7 @@ def join_split_zip(
                 shutil.copyfileobj(handle, out, chunk_size)
             if logger:
                 logger.info("joined %s", part.name)
-    os.replace(partial, target)
+    _safe_replace(partial, target)
     if logger:
         logger.info("reconstructed %s (%.1f GB)", target.name, target.stat().st_size / 1024**3)
     return target

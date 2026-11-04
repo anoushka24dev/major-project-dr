@@ -344,9 +344,9 @@ def _run_stage(stage_name: str, cfg: Config, logger, events, args) -> Dict[str, 
         if not usable:
             return {"status": "blocked", "sources": results,
                     "detail": f"no dataset is usable: {statuses}"}
-        if "mendeley" not in usable:
+        if "mendeley" not in usable and "mmrdr" not in usable:
             return {"status": "blocked", "sources": results,
-                    "detail": "the classification source (Mendeley) is unavailable"}
+                    "detail": "no classification source (Mendeley or MMRDR) is available"}
         return {"status": "completed", "sources": results, "usable": usable}
 
     if stage_name == "prepare":

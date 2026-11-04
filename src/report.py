@@ -48,7 +48,11 @@ def _fmt(value: Any, digits: int = 4) -> str:
 def _table(headers: List[str], rows: List[List[Any]]) -> str:
     head = "".join(f"<th>{html.escape(str(h))}</th>" for h in headers)
     body = "".join(
-        "<tr>" + "".join(f"<td>{html.escape(_fmt(cell))}</td>" for cell in row) + "</tr>"
+        "<tr>" + "".join(
+            f"<td>{cell}</td>" if isinstance(cell, str) and cell.startswith("<")
+            else f"<td>{html.escape(_fmt(cell))}</td>"
+            for cell in row
+        ) + "</tr>"
         for row in rows
     )
     return f"<table><thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
@@ -239,12 +243,20 @@ def _render_html(cfg: Config, metrics: Dict[str, Any], execution: Dict[str, Any]
          _fmt(record.get("seconds")), record.get("error") or ""]
         for stage, record in (execution.get("stages") or {}).items()
     ]
+    has_blocked_or_skipped = any(
+        record.get("status") in {"blocked", "skipped", "failed"}
+        for record in (execution.get("stages") or {}).values()
+    )
+    outcome_note = (
+        "A stage marked blocked means its input data do not exist; dependent stages were skipped rather than run on missing data."
+        if has_blocked_or_skipped
+        else "All pipeline stages completed successfully end-to-end without skips or blocks."
+    )
     parts.append(
         _section(
             "Execution outcome",
             _table(["Stage", "Status", "Seconds", "Error"], rows) if rows else "<p>No stages recorded.</p>",
-            "A stage marked blocked means its input data do not exist; dependent stages were "
-            "skipped rather than run on missing data.",
+            outcome_note,
         )
     )
 
