@@ -21,6 +21,8 @@ checkpoints/
 
 # Existing training-output folders
 cpu_runs/
+deliverables_for_submission/
+*.zip
 
 # OS / editor noise
 .DS_Store
