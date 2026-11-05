@@ -10,14 +10,24 @@ One entry point for every stage, with explicit dependency gating:
 * the final report is always written, including when earlier stages failed, so the
   reason is visible to the person who double-clicked the launcher.
 
-Modes
------
+Stage modes
+-----------
 ``full``      download → prepare → quality → train → evaluate → report
 ``download``  dataset acquisition only
 ``prepare``   manifests and quality assessment only
 ``train``     the two training stages only
 ``evaluate``  evaluation, explainability, calibration, cross-dataset, report
 ``report``    rebuild the report from existing artefacts
+
+Dataset-composition modes
+-------------------------
+``combined``  run the whole pipeline with one classifier trained on every validated
+              classification source (Mendeley + MMRDR + APTOS + DDR).
+``external``  run the whole pipeline training only on ``run.development_sources``
+              (initially Mendeley + MMRDR) and evaluating on the held-out sources.
+
+Both are recorded in the execution summary, and neither is inferred from whatever
+happens to be on disk.
 """
 
 from __future__ import annotations
@@ -34,20 +44,26 @@ from .clinical_status import status_record
 from .config import Config, ConfigError, load_config
 from .logutil import EventLog, get_logger, stage as stage_context
 
+FULL_STAGES: List[str] = [
+    "download",
+    "prepare",
+    "quality",
+    "train_classification",
+    "train_segmentation",
+    "explainability",
+    "evaluate_classification",
+    "evaluate_segmentation",
+    "calibration",
+    "cross_dataset",
+    "report",
+]
+
 MODES: Dict[str, List[str]] = {
-    "full": [
-        "download",
-        "prepare",
-        "quality",
-        "train_classification",
-        "train_segmentation",
-        "explainability",
-        "evaluate_classification",
-        "evaluate_segmentation",
-        "calibration",
-        "cross_dataset",
-        "report",
-    ],
+    "full": FULL_STAGES,
+    # Dataset-composition modes run the full stage list; they differ in which
+    # sources are allowed to train the classifier (see src.prepare).
+    "combined": FULL_STAGES,
+    "external": FULL_STAGES,
     "download": ["download"],
     "prepare": ["prepare", "quality"],
     "train": ["train_classification", "train_segmentation"],
@@ -100,7 +116,7 @@ def build_parser() -> argparse.ArgumentParser:
     # Mode aliases, so the launcher can forward human-friendly flags unchanged.
     aliases = parser.add_argument_group("mode shortcuts")
     aliases.add_argument("--download-only", dest="mode_alias", action="store_const",
-                         const="download", help="datasets only")
+                         const="download", help="download and verify datasets only")
     aliases.add_argument("--prepare-only", dest="mode_alias", action="store_const",
                          const="prepare", help="manifests and quality only")
     aliases.add_argument("--train-only", dest="mode_alias", action="store_const",
@@ -116,12 +132,28 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--fundus-root", default=None,
                         help="root of a pre-existing Mendeley corpus (13 class folders)")
     parser.add_argument("--idrid-root", default=None, help="root of a pre-existing IDRiD copy")
+    parser.add_argument("--aptos-root", default=None,
+                        help="root of a pre-existing APTOS 2019 copy")
+    parser.add_argument("--ddr-root", default=None,
+                        help="root of a pre-existing DDR copy")
+    parser.add_argument("--dataset-mode", dest="dataset_mode", default=None,
+                        choices=["combined", "external"],
+                        help="which sources may train the classifier; combinable with any "
+                             "stage mode, e.g. --prepare-only --dataset-mode external")
+    parser.add_argument("--experiments", nargs="+", default=None, metavar="EXP",
+                        help="run the ResNet-50 experiment series instead of one baseline "
+                             "run: 'all', or a subset such as 'E0 E4 final_candidate'")
+    parser.add_argument("--cv-folds", dest="cv_folds", type=int, default=None, metavar="N",
+                        help="run grouped stratified N-fold cross-validation (default 5, from "
+                             "run.cv.n_splits), then retrain on the full development pool")
     parser.add_argument("--resume", action="store_true",
                         help="continue interrupted training from the last checkpoint")
     parser.add_argument("--force-retrain", action="store_true",
                         help="ignore existing checkpoints and train from scratch")
     parser.add_argument("--skip-download", action="store_true",
                         help="inspect datasets without transferring bytes")
+    parser.add_argument("--datasets", nargs="+", default=None, metavar="NAME",
+                        help="acquire only these sources, e.g. --datasets mmrdr ddr")
     parser.add_argument("--json", action="store_true", help="print the summary as JSON")
     parser.add_argument("--validate-config", action="store_true",
                         help="validate config/config.yaml and exit")
@@ -133,6 +165,14 @@ def build_parser() -> argparse.ArgumentParser:
 def _limitations(cfg: Config, summary: Dict[str, Any], stage_records: Dict[str, Dict[str, Any]]) -> List[str]:
     """Collect honest limitations from what actually happened."""
     items: List[str] = []
+
+    if summary.get("dataset_mode") == "external":
+        items.append(
+            "External-validation mode: the classifier trains only on "
+            + ", ".join(cfg.development_sources)
+            + ". Every other source is evaluated as a held-out external test set and "
+            "does not influence training, thresholds, calibration or model selection."
+        )
 
     dataset = summary.get("dataset_summary") or {}
     if dataset.get("mode") == "partial":
@@ -196,9 +236,27 @@ def run_pipeline(args: argparse.Namespace) -> Dict[str, Any]:
         import os
 
         os.environ["DR_IDRID_ROOT"] = str(Path(args.idrid_root).resolve())
+    if args.aptos_root:
+        import os
+
+        os.environ["DR_APTOS_ROOT"] = str(Path(args.aptos_root).resolve())
+    if args.ddr_root:
+        import os
+
+        os.environ["DR_DDR_ROOT"] = str(Path(args.ddr_root).resolve())
 
     # Re-load so environment overrides take effect.
     cfg = load_config(args.config, root=args.project_root)
+
+    # A dataset-composition mode on the command line overrides the configured one,
+    # and is recorded in the run so downstream stages cannot disagree about it.
+    if getattr(args, "dataset_mode", None):
+        dataset_mode = args.dataset_mode
+    elif args.mode in {"combined", "external"}:
+        dataset_mode = args.mode
+    else:
+        dataset_mode = cfg.dataset_mode
+    cfg._data.setdefault("run", {})["dataset_mode"] = dataset_mode
 
     logs_dir = cfg.path("paths.logs_dir", create=True)
     stamp = __import__("time").strftime("%Y%m%d_%H%M%S")
@@ -208,10 +266,14 @@ def run_pipeline(args: argparse.Namespace) -> Dict[str, Any]:
 
     logger.info("=" * 70)
     logger.info("Diabetic-retinopathy pipeline v%s | mode=%s", __version__, args.mode)
+    logger.info("dataset composition mode: %s", dataset_mode)
     logger.info("config: %s", cfg.source)
     logger.info("log:    %s", log_path)
     logger.info("=" * 70)
-    events.write("run_start", mode=args.mode, version=__version__, config=str(cfg.source))
+    events.write(
+        "run_start", mode=args.mode, dataset_mode=dataset_mode,
+        version=__version__, config=str(cfg.source),
+    )
 
     stages = list(MODES[args.mode])
     stage_records: Dict[str, Dict[str, Any]] = {}
@@ -246,7 +308,9 @@ def run_pipeline(args: argparse.Namespace) -> Dict[str, Any]:
         logger.info("--- %s ---", label)
         try:
             with stage_context(stage_name, logger, events) as timer:
-                outputs[stage_name] = _run_stage(stage_name, cfg, logger, events, args)
+                outputs[stage_name] = _run_stage(
+                    stage_name, cfg, logger, events, args, dataset_mode
+                )
                 if isinstance(outputs[stage_name], dict):
                     stage_records[stage_name] = {
                         "status": outputs[stage_name].get("status", "completed"),
@@ -280,6 +344,8 @@ def run_pipeline(args: argparse.Namespace) -> Dict[str, Any]:
     summary: Dict[str, Any] = {
         "pipeline_version": __version__,
         "mode": args.mode,
+        "dataset_mode": dataset_mode,
+        "experiments_requested": list(args.experiments or []),
         "config_file": str(cfg.source),
         "log_file": str(log_path),
         "stages": stage_records,
@@ -319,40 +385,32 @@ def run_pipeline(args: argparse.Namespace) -> Dict[str, Any]:
     return summary
 
 
-def _run_stage(stage_name: str, cfg: Config, logger, events, args) -> Dict[str, Any]:
+def _run_stage(
+    stage_name: str,
+    cfg: Config,
+    logger,
+    events,
+    args,
+    dataset_mode: str = "combined",
+) -> Dict[str, Any]:
     """Dispatch one stage to its implementation module."""
     if stage_name == "download":
-        from .dataset_downloaders.base import DownloadManifest
+        from .dataset_downloaders.manager import run_download_stage
 
-        # Reuse the downloader modules directly so results stay structured.
-        from .dataset_downloaders import idrid as idrid_mod
-        from .dataset_downloaders import mendeley as mendeley_mod
-        from .dataset_downloaders import mmrdr as mmrdr_mod
-
-        manifest = DownloadManifest(cfg.outputs_dir("manifests") / "download_manifest.json")
-        results: Dict[str, Any] = {}
-        results["mendeley"] = mendeley_mod.run(
-            cfg, logger, manifest, fundus_root=cfg.fundus_root()
-        ).as_dict()
-        results["mmrdr"] = mmrdr_mod.run(
-            cfg, logger, manifest, skip_download=bool(args.skip_download)
-        ).as_dict()
-        results["idrid"] = idrid_mod.run(cfg, logger, manifest).as_dict()
-
-        usable = [name for name, payload in results.items() if payload.get("usable")]
-        statuses = {name: payload["status"] for name, payload in results.items()}
-        if not usable:
-            return {"status": "blocked", "sources": results,
-                    "detail": f"no dataset is usable: {statuses}"}
-        if "mendeley" not in usable and "mmrdr" not in usable:
-            return {"status": "blocked", "sources": results,
-                    "detail": "no classification source (Mendeley or MMRDR) is available"}
-        return {"status": "completed", "sources": results, "usable": usable}
+        result = run_download_stage(
+            cfg,
+            logger,
+            events,
+            skip_download=bool(args.skip_download),
+            only=getattr(args, "datasets", None),
+        )
+        result["dataset_mode"] = dataset_mode
+        return result
 
     if stage_name == "prepare":
         from .prepare import run_prepare
 
-        return run_prepare(cfg, logger, events)
+        return run_prepare(cfg, logger, events, dataset_mode=dataset_mode)
 
     if stage_name == "quality":
         from .quality import run_quality_assessment
@@ -360,6 +418,74 @@ def _run_stage(stage_name: str, cfg: Config, logger, events, args) -> Dict[str, 
         return run_quality_assessment(cfg, logger, events, limit=args.limit_quality)
 
     if stage_name == "train_classification":
+        if getattr(args, "cv_folds", None):
+            from .kfold import run_cv_protocol
+
+            result = run_cv_protocol(
+                cfg,
+                logger,
+                events,
+                n_splits=int(args.cv_folds),
+                resume=bool(args.resume),
+                force_retrain=bool(args.force_retrain),
+            )
+            summary = {
+                key: value
+                for key, value in result.items()
+                if key not in {"folds", "plan"}
+            }
+            return {
+                "status": str(result.get("status", "failed")),
+                "cross_validation": summary,
+                "folds_completed": len(result.get("folds") or []),
+                "published_checkpoint": result.get("published_checkpoint"),
+                "detail": result.get("reason"),
+            }
+
+        requested = list(getattr(args, "experiments", None) or [])
+        if requested:
+            from .experiments import (
+                promote_final_candidate,
+                run_selected_experiments,
+                write_experiment_comparison,
+                write_experiment_csvs,
+            )
+
+            result = run_selected_experiments(
+                cfg,
+                logger,
+                events,
+                experiments=requested,
+                resume=bool(args.resume),
+                force_retrain=bool(args.force_retrain),
+            )
+            comparison_path = write_experiment_comparison(
+                cfg, result["comparison"], result["individual"], result["selected"]
+            )
+            csv_paths = write_experiment_csvs(cfg, result["individual"])
+            promoted = promote_final_candidate(
+                cfg, result["individual"], result["selected"], logger=logger
+            )
+            failed = [
+                eid for eid, summary in result["individual"].items()
+                if summary.get("status") not in {"completed", "reused"}
+            ]
+            status = "failed" if promoted is None else "completed"
+            return {
+                "status": status,
+                "experiments": result["selected"],
+                "best_by_validation_macro_f1": result["best_by_validation_macro_f1"],
+                "failed_experiments": failed,
+                "comparison_json": str(comparison_path),
+                "comparison_csv": str(csv_paths.get("experiment_comparison.csv", "")),
+                "promoted_checkpoint": str(promoted) if promoted else None,
+                "detail": (
+                    None if promoted
+                    else "no experiment produced a checkpoint, so no test-time evaluation "
+                         "can run"
+                ),
+            }
+
         from .train_classifier import run_training
 
         return run_training(

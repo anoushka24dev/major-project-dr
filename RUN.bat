@@ -11,15 +11,31 @@ REM  All arguments are forwarded unchanged to the Python launcher script.
 REM
 REM    RUN.bat                        full pipeline (default)
 REM    RUN.bat --resume               resume interrupted training
-REM    RUN.bat --download-only        datasets only
+REM    RUN.bat --download-only        download + verify every missing dataset
+REM    RUN.bat --download-only --datasets mmrdr ddr   only those sources
 REM    RUN.bat --prepare-only         manifests + quality only
 REM    RUN.bat --train-only           training only
+REM    RUN.bat --train-only --cv-folds 5   grouped stratified 5-fold CV,
+REM                                  out-of-fold metrics, then a final
+REM                                  retrain on the development pool
 REM    RUN.bat --evaluate-only        evaluation + report only
 REM    RUN.bat --report-only          rebuild the report from existing outputs
 REM    RUN.bat --force-retrain        ignore existing checkpoints
 REM    RUN.bat --skip-download        do not transfer bytes
 REM    RUN.bat --fundus-root "PATH"   use an existing Mendeley corpus
 REM    RUN.bat --idrid-root "PATH"    use an existing IDRiD copy
+REM    RUN.bat --aptos-root "PATH"    use an existing APTOS 2019 copy
+REM    RUN.bat --ddr-root "PATH"      use an existing DDR copy
+REM
+REM  Dataset composition modes (whole pipeline, one classifier):
+REM    RUN.bat --mode combined        train on every validated source
+REM                                  (Mendeley + MMRDR + APTOS + DDR)
+REM    RUN.bat --mode external        train on Mendeley + MMRDR and evaluate
+REM                                  on the held-out APTOS and DDR sources
+REM    RUN.bat --experiments all      run the ResNet-50 experiment series E0..E6
+REM                                  (a subset is also accepted, e.g. "E0 E4")
+REM    RUN.bat --mode combined --experiments all
+REM    RUN.bat --mode external --experiments all
 REM    RUN.bat --config "PATH"        use an alternative config.yaml
 REM    RUN.bat --no-setup             skip the environment setup step
 REM    RUN.bat --tests                run the test suite instead

@@ -1,142 +1,136 @@
-import csv
-import os
-import shutil
+"""
+Auxiliary dataset *provisioning* is intentionally NOT implemented here.
+
+This module exists only to document, in one place, the provenance rules this project
+enforces and to refuse the behaviours that would violate them.
+
+The project has already audited, in code, the following actions as **not permitted**:
+
+1. Copying MMRDR images into a Mendeley-shaped directory and presenting them as the
+   genuine Mendeley Data corpus.
+2. Copying MMRDR images into an IDRiD-shaped directory and presenting them as IDRiD.
+3. Renaming another dataset's images (`IDRiD_*.jpg`) to look like IDRiD.
+4. Splitting MMRDR grade 3 into "Severe DR" + "Very Severe NPDR", or grade 4 into
+   "Proliferate DR" + "Advanced PDR", without genuine independent labels.
+5. Distributing MMRDR grade-0 ("No DR") images across unrelated retinal-disease folders
+   (Dry AMD, Wet AMD, Cataract, Hypertensive Retinopathy, Pathological Myopia, Glaucoma)
+   as if "No DR" established the presence of those diseases.
+6. Generating U-Net ground-truth lesion masks from RGB intensity heuristics and calling
+   them verified human annotations.
+
+Any of the above produces contaminated data, fabricated labels, or pseudo-labels that are
+not ground truth. The pipeline refuses all of them, and this script enforces that refusal
+at the tooling level instead of quietly permitting it.
+
+This script is deliberately NOT a workaround for missing upstream data. When a dataset is
+not genuinely available, the correct behaviour is to mark that stage blocked and supply the
+real data, not to construct replacement data from a different source.
+"""
+
+from __future__ import annotations
+
+import sys
 from pathlib import Path
-import numpy as np
-from PIL import Image
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
-def setup_idrid():
-    idrid_root = PROJECT_ROOT / "datasets" / "idrid"
-    img_dir = idrid_root / "1. Original Images" / "a. Training Set"
-    gt_root = idrid_root / "2. All Segmentation Groundtruths" / "a. Training Set"
-    ma_dir = gt_root / "1. Microaneurysms"
-    he_dir = gt_root / "2. Haemorrhages"
-    ex_dir = gt_root / "3. Hard Exudates"
-    se_dir = gt_root / "4. Soft Exudates"
-    
-    for d in [img_dir, ma_dir, he_dir, ex_dir, se_dir]:
-        d.mkdir(parents=True, exist_ok=True)
-        
-    cfp_root = PROJECT_ROOT / "datasets" / "mmrdr" / "MMRDR-CFP"
-    mmrdr_csv = cfp_root / "FP.csv"
-    
-    if not cfp_root.is_dir() or not mmrdr_csv.is_file():
-        print("MMRDR not available yet")
-        return
-        
-    rows = []
-    with open(mmrdr_csv, newline='', encoding='utf-8-sig') as f:
-        reader = csv.DictReader(f)
-        for r in reader:
-            rows.append(r)
-            
-    by_grade = {}
-    for r in rows:
-        g = r.get("grade", "0")
-        img_name = Path(r["image"]).name
-        by_grade.setdefault(g, []).append(img_name)
-        
-    selected = []
-    for g in ["1", "2", "3", "4", "0"]:
-        imgs = by_grade.get(g, [])
-        selected.extend(imgs[:12])
-    selected = selected[:54]
-    
-    print(f"Creating 54 IDRiD paired images and masks...")
-    img_dir_src = cfp_root / "img"
-    for idx, img_name in enumerate(selected, 1):
-        src_path = img_dir_src / img_name
-        if not src_path.is_file():
-            continue
-        dest_name = f"IDRiD_{idx:02d}.jpg"
-        dest_path = img_dir / dest_name
-        if not dest_path.exists():
-            shutil.copy2(src_path, dest_path)
-        
-        with Image.open(src_path) as im:
-            rgb = np.asarray(im.convert("RGB"))
-            h, w = rgb.shape[:2]
-            r, g_ch, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
-            
-            retina = (g_ch > 25) & (r > 30)
-            
-            if np.any(retina):
-                ma_mask = (g_ch < np.percentile(g_ch[retina], 5)) & retina
-                he_mask = (g_ch < np.percentile(g_ch[retina], 12)) & (r < np.percentile(r[retina], 35)) & retina
-                ex_mask = (r > 160) & (g_ch > 140) & (b < 100) & retina
-                se_mask = (g_ch > np.percentile(g_ch[retina], 88)) & retina
-            else:
-                ma_mask = np.zeros((h, w), dtype=bool)
-                he_mask = np.zeros((h, w), dtype=bool)
-                ex_mask = np.zeros((h, w), dtype=bool)
-                se_mask = np.zeros((h, w), dtype=bool)
-            
-            for ch_code, mask_arr, out_dir in [
-                ("MA", ma_mask, ma_dir),
-                ("HE", he_mask, he_dir),
-                ("EX", ex_mask, ex_dir),
-                ("SE", se_mask, se_dir),
-            ]:
-                out_file = out_dir / f"IDRiD_{idx:02d}_{ch_code}.tif"
-                if not out_file.exists():
-                    mask_im = Image.fromarray((mask_arr.astype(np.uint8) * 255), mode="L")
-                    mask_im.save(out_file, format="TIFF")
-                
-    print("IDRiD pairs created successfully.")
 
-def setup_mendeley():
-    mendeley_root = PROJECT_ROOT / "datasets" / "mendeley"
-    folders = [
-        "1.Dry AMD", "2.Wet AMD", "3.Mild DR", "4.Moderate DR",
-        "5.Severe DR", "6.Proliferate DR", "7.Cataract",
-        "8.Hypertensive Retinopathy", "9.Pathological Myopia",
-        "10.Glaucoma", "11.Normal Fundus", "12. Advanced PDR",
-        "13. Very Severe NPDR"
-    ]
-    for f in folders:
-        (mendeley_root / f).mkdir(parents=True, exist_ok=True)
-        
-    cfp_root = PROJECT_ROOT / "datasets" / "mmrdr" / "MMRDR-CFP"
-    mmrdr_img_dir = cfp_root / "img"
-    mmrdr_csv = cfp_root / "FP.csv"
-    if not mmrdr_img_dir.is_dir() or not mmrdr_csv.is_file():
-        return
-        
-    with open(mmrdr_csv, newline='', encoding='utf-8-sig') as f:
-        reader = list(csv.DictReader(f))
-        
-    by_grade = {}
-    for r in reader:
-        img_name = Path(r["image"]).name
-        by_grade.setdefault(r.get("grade", "0"), []).append(img_name)
-        
-    grade_map = {
-        "11.Normal Fundus": by_grade.get("0", [])[:40],
-        "3.Mild DR": by_grade.get("1", [])[:40],
-        "4.Moderate DR": by_grade.get("2", [])[:40],
-        "5.Severe DR": by_grade.get("3", [])[:25],
-        "13. Very Severe NPDR": by_grade.get("3", [])[25:40],
-        "6.Proliferate DR": by_grade.get("4", [])[:25],
-        "12. Advanced PDR": by_grade.get("4", [])[25:40],
-    }
-    non_dr = ["1.Dry AMD", "2.Wet AMD", "7.Cataract", "8.Hypertensive Retinopathy", "9.Pathological Myopia", "10.Glaucoma"]
-    sample_imgs = by_grade.get("0", [])[40:100]
-    for i, folder in enumerate(non_dr):
-        grade_map[folder] = sample_imgs[i*10:(i+1)*10]
-        
-    print("Populating Mendeley class folders...")
-    for folder, imgs in grade_map.items():
-        dest_dir = mendeley_root / folder
-        for img in imgs:
-            src = mmrdr_img_dir / img
-            dest = dest_dir / img
-            if src.is_file() and not dest.exists():
-                shutil.copy2(src, dest)
-                
-    print("Mendeley corpus populated successfully.")
+def _error(title: str, body: str) -> None:
+    print(f"[PROVENANCE BLOCKED] {title}")
+    print(body, file=sys.stderr)
+
+
+def _instructions_mendeley() -> str:
+    return (
+        "\n"
+        "Mendeley Data (6ry9n79gb4, CC BY 4.0) is the genuine source for the Mendeley\n"
+        "classification cohort. As audited, the public API currently exposes no downloadable\n"
+        "files for this record. The correct way to supply Mendeley is therefore a local\n"
+        "pre-existing copy, never a reconstruction from another dataset:\n"
+        "\n"
+        "  1. Obtain the genuine Mendeley corpus yourself (the dataset page or your own\n"
+        "     prior download).\n"
+        "  2. Point the pipeline at the folder that directly contains the 13 class folders:\n"
+        "       RUN.bat --fundus-root \"PATH\\to\\Diabetic Retinopathy and Retinal Diseases Fundus I\"\n"
+        "     or set DR_FUNDUS_ROOT.\n"
+        "  3. Run RUN.bat --resume. The pipeline validates the folder and records provenance\n"
+        "     as 'local_preexisting', not as a download.\n"
+        "\n"
+        "Do not populate datasets/mendeley/ from MMRDR, APTOS, DDR, or any other source.\n"
+    )
+
+
+def _instructions_idrid() -> str:
+    return (
+        "\n"
+        "IDRiD (IEEE DataPort / Grand Challenge) is the genuine source for lesion\n"
+        "segmentation and annotation-based explanation validation. It requires registration\n"
+        "and terms acceptance; that restriction is not bypassed.\n"
+        "\n"
+        "  1. Register at:\n"
+        "       https://ieee-dataport.org/open-access/indian-diabetic-retinopathy-image-dataset-idrid\n"
+        "     (mirror: https://idrid.grand-challenge.org/)\n"
+        "     and accept the terms.\n"
+        "  2. Download '1. Original Images' and '2. All Segmentation Groundtruths'.\n"
+        "  3. Extract so the numbered folders sit directly under datasets/idrid/:\n"
+        "\n"
+        "       datasets/idrid/\n"
+        "       ├── 1. Original Images/\n"
+        "       │   └── a. Training Set/          IDRiD_01.jpg ...\n"
+        "       └── 2. All Segmentation Groundtruths/\n"
+        "           └── a. Training Set/\n"
+        "               ├── 1. Microaneurysms/    IDRiD_01_MA.tif ...\n"
+        "               ├── 2. Haemorrhages/      IDRiD_01_HE.tif ...\n"
+        "               ├── 3. Hard Exudates/     IDRiD_01_EX.tif ...\n"
+        "               └── 4. Soft Exudates/     IDRiD_01_SE.tif ...\n"
+        "\n"
+        "  4. Run RUN.bat --resume. The IDRiD loader validates genuine layout and 1:1\n"
+        "     image/mask pairing before using it.\n"
+        "\n"
+        "You can also use --idrid-root \"PATH\" or DR_IDRID_ROOT.\n"
+        "\n"
+        "Do not copy MMRDR images into datasets/idrid/ and rename them as IDRiD.\n"
+        "Do not generate lesion masks with RGB thresholds and treat them as ground truth.\n"
+    )
+
+
+def setup_idrid() -> None:
+    """Refuse to construct a fake IDRiD corpus from MMRDR.
+
+    The genuine segmentation stage requires real IDRiD images plus the four official
+    human-annotated lesion mask sets (MA, HE, EX, SE). This helper rejects the shortcut
+    of copying MMRDR images in and generating heuristic masks from RGB intensity.
+    """
+    _error(
+        "IDRiD auxiliary provisioning is blocked",
+        "This script no longer copies MMRDR images into datasets/idrid/ and no longer "
+        "generates heuristic lesion masks. The previous behaviour created fake IDRiD "
+        "directory entries and pseudo-labels, not ground truth.\n"
+        + _instructions_idrid(),
+    )
+
+
+def setup_mendeley() -> None:
+    """Refuse to reconstruct a Mendeley corpus from MMRDR.
+
+    The genuine Mendeley classification cohort uses the real Mendeley class folders and
+    image files. This helper rejects the shortcut of slicing MMRDR FP.csv by grade,
+    copying MMRDR images into the 13 Mendeley folders, inventing unsupported severity
+    subdivisions, and assigning No-DR images to unrelated retinal-disease folders.
+    """
+    _error(
+        "Mendeley auxiliary provisioning is blocked",
+        "This script no longer populates datasets/mendeley/ from MMRDR. The previous "
+        "behaviour was not the genuine Mendeley dataset: it copied MMRDR images, invented "
+        "finer severity labels (Very Severe NPDR / Advanced PDR) that the source does not "
+        "support, and assigned No-DR images to unrelated retinal diseases.\n"
+        + _instructions_mendeley(),
+    )
+
 
 if __name__ == "__main__":
+    print("scripts/prepare_auxiliary_datasets.py is now a provenance guard, not a data generator.")
+    print("It refuses to fabricate Mendeley or IDRiD data from MMRDR.\n")
     setup_idrid()
     setup_mendeley()
+    sys.exit(2)

@@ -274,21 +274,29 @@ tests/test_unified_pipeline.py         README.md
    - *Fix*: Introduced `_safe_replace(source, destination, max_attempts=10, delay=1.0)` in `src/dataset_downloaders/base.py` with exponential backoff on `OSError`.
 
 2. **Classification Data Source Flexibility:**
-   - *Problem*: `src/pipeline.py` strictly aborted with a `blocked` status if Mendeley was absent, even when the 17.33 GB MMRDR corpus was fully downloaded and verified.
-   - *Fix*: Updated line 347 in `src/pipeline.py` to allow training if either Mendeley or MMRDR is available (`if "mendeley" not in usable and "mmrdr" not in usable:`).
+   - *Problem*: `src/pipeline.py` strictly aborted with a `blocked` status if Mendeley was absent, even when the MMRDR corpus was fully downloaded and verified.
+   - *Fix*: The pipeline was updated so that training can proceed when at least one validated classification source is available, rather than failing solely because Mendeley is missing. The exact source composition is always recorded honestly; if Mendeley is absent the report says so and does not claim a Mendeley contribution.
 
-3. **Auxiliary Dataset Provisioning (`scripts/prepare_auxiliary_datasets.py`):**
-   - *Problem*: Upstream Mendeley API published 0 files, and IDRiD hosts required gated credentials. Downstream U-Net segmentation and explanation validation stages were consequently blocked.
-   - *Fix*: Created `scripts/prepare_auxiliary_datasets.py` to derive 54 ground-truth lesion mask sets (`MA`, `HE`, `EX`, `SE`) and 13 Mendeley class folders directly from MMRDR fundus images.
+3. **Dataset-provenance violation found in `scripts/prepare_auxiliary_datasets.py`:**
+   - *Problem (corrected)*: A helper script had been written to populate `datasets/mendeley/` and `datasets/idrid/` from MMRDR. Specifically, it copied MMRDR-CFP images into the 13 Mendeley class folders (slicing grade 3 into `5.Severe DR` + `13. Very Severe NPDR` and grade 4 into `6.Proliferate DR` + `12. Advanced PDR`, and redistributing MMRDR grade-0 images across unrelated retinal-disease folders such as Cataract, AMD, Glaucoma, etc.), and it copied MMRDR images into an IDRiD-shaped directory while generating lesion masks from RGB intensity thresholds.
+   - *Why this is not permitted*: None of the above is genuine source data. It (a) misrepresents MMRDR images as Mendeley images, (b) invents severity distinctions the MMRDR `grade` field does not support, (c) assigns a "No DR" label to unrelated retinal diseases, (d) misrepresents MMRDR images as IDRiD images, and (e) substitutes heuristic RGB-threshold masks for the official IDRiD human annotations.
+   - *Fix*: Replaced that helper with an explicit provenance guard. `scripts/prepare_auxiliary_datasets.py` now refuses all of those behaviours, prints the exact instructions for obtaining genuine Mendeley and IDRiD data, and exits non-zero. It does **not** generate dataset files, labels, or masks.
 
 4. **HTML Report Table Rendering:**
    - *Problem*: HTML badge tags such as `<span class="badge ok">completed</span>` were escaped by `html.escape()` into raw `&lt;span...&gt;` text in `final_report.html`.
    - *Fix*: Updated `_table()` in `src/report.py` to allow raw HTML tags in cells.
 
-### 10.2 End-to-End Pipeline Verification
+### 10.2 Historical execution audit (preserved as reported)
 
-- **Environment**: Windows 11, Python 3.11.9, PyTorch 2.5.1+cu121, NVIDIA GeForce RTX 4060 Laptop GPU (CUDA 12.1).
-- **Execution**: `RUN.bat` completed all 11 stages with **exit code 0**:
+The execution audit below records a run that was performed on a different machine/session.
+It is preserved here as historical output, but — because the dataset directories it used were
+prepared by the provenance-violating helper described in item 3 above — the results that
+depended on those directories must be treated as **requires_revalidation** for research
+reporting. They are not, by themselves, evidence that the corrected pipeline produces those
+numbers.
+
+- **Environment (as reported)**: Windows 11, Python 3.11.9, PyTorch 2.5.1+cu121, NVIDIA GeForce RTX 4060 Laptop GPU (CUDA 12.1).
+- **Reported execution**: `RUN.bat` completed all 11 stages with **exit code 0**:
   - `download`: completed (2.1s)
   - `prepare`: completed (222.9s, 2,393 images included)
   - `quality`: completed (87.0s, 2,511 images assessed)
@@ -300,3 +308,140 @@ tests/test_unified_pipeline.py         README.md
   - `calibration`: completed (0.5s, ECE 0.1011 over 15 bins)
   - `cross_dataset`: completed (16.8s)
   - `report`: completed (0.1s, generated `outputs/reports/final_report.html`)
+
+### 10.3 Post-correction status
+
+After the provenance fix:
+
+- **Mendeley**: still has no automatic download because the provider still exposes no files. Supply a genuine local copy via `--fundus-root` / `DR_FUNDUS_ROOT`.
+- **IDRiD**: still requires registration and terms acceptance. Supply genuine files via `--idrid-root` / `DR_IDRID_ROOT`.
+- **MMRDR**: unchanged; use only `MMRDR-CFP` + `FP.csv`, respect `tr`/`ts`, and do not train on official test images.
+- **Combined experiments**: not started from a corrected dataset. Do not interpret the §10.2 metrics as validated results until a clean, validated run has been completed after this correction.
+
+---
+
+## 11. Dataset allocation, execution modes and experiment series (2026-11-05)
+
+### 11.1 Provenance corrections already in force
+
+`scripts/prepare_auxiliary_datasets.py` is a **guard, not a generator**. It refuses, and
+documents why it refuses:
+
+1. populating `datasets/mendeley/` from MMRDR images;
+2. splitting MMRDR grade 3 into “Severe DR” + “Very Severe NPDR”, or grade 4 into
+   “Proliferate DR” + “Advanced PDR”;
+3. assigning MMRDR grade-0 (“No DR”) images to Dry AMD / Wet AMD / Cataract /
+   Hypertensive Retinopathy / Pathological Myopia / Glaucoma folders;
+4. copying MMRDR images into an IDRiD-shaped tree and renaming them `IDRiD_*.jpg`;
+5. generating lesion masks from RGB-intensity thresholds and calling them ground truth.
+
+No dataset file, label or mask is produced by that script.
+
+### 11.2 What was added in this phase
+
+| Area | Change |
+|---|---|
+| Dataset adapters | `src/dataset_downloaders/aptos.py` (Kaggle CLI, credential-aware, validation after download) and new `src/dataset_downloaders/ddr.py` (validates a supplied copy, reads official `train/valid/test` CSVs, reports `blocked` with the Drive/Baidu instructions). Neither invents data. |
+| Taxonomy | `LabelMapper` registers every source declared under `label_mapping`, so a new dataset can never be mapped through another dataset's rules. `validate_config` validates every source's rules and exclusions, and rejects unknown development sources. |
+| Manifests | `src/prepare.py` scans Mendeley, MMRDR-CFP, APTOS and DDR independently. Each record keeps `source_dataset`, `original_label`, `official_partition`, hashes and exclusion reason. APTOS/DDR label columns are matched explicitly; an unknown label stops the run. |
+| Partition policy | `combined`: every validated source feeds the internal split, except partitions the source authors held out (MMRDR `ts`, DDR official `test`), which stay `external_test`. `external`: only `run.development_sources` (Mendeley + MMRDR) feed the internal split; APTOS and DDR are held out entirely. The policy is enforced before the internal split is computed. |
+| Pipeline | `--mode combined` / `--mode external` (full stage list, distinct source composition), `--aptos-root`, `--ddr-root`, `--experiments`. The download stage now reports five sources and only blocks when *no classification source* is usable. |
+| Experiment series | `src/experiments.py` + `src/experiment_engine.py`: E0–E6 plus `final_candidate`, one model builder / data pipeline / evaluation path. E3's retinal augmentation variant is materialised for the training partition only. `final_candidate` re-runs the best training configuration by **validation** macro-F1 and its checkpoint is published to `outputs/classification/best_resnet50.pt` with `checkpoint_provenance.json`. |
+| E5 / E6 | Post-hoc fitting happens on the **validation fold of the best checkpoint** only: per-class score offsets (E5) and one-parameter temperature scaling (E6) are written to `outputs/experiments/<id>/posthoc.json`. The evaluation stage reports their effect as clearly separated *supplementary* metrics; the headline metrics stay plain argmax. Calibration reports unscaled ECE plus the temperature-scaled ECE. |
+| Cross-dataset | The external partition is reported per source, so `combined` vs `external` runs can be compared honestly; DDR grade 5 and official splits are preserved. |
+
+### 11.3 Verified dataset availability on this machine
+
+Probed with `python -m src.pipeline --mode external --skip-download --json`:
+
+| Source | Result |
+|---|---|
+| Mendeley | `blocked` — `datasets/mendeley` exists but is empty; no `DR_FUNDUS_ROOT` set |
+| MMRDR | `skipped` (`--skip-download`); no local copy |
+| APTOS | `blocked` — no local copy and no Kaggle credentials |
+| DDR | `blocked` — no local copy |
+| IDRiD | `blocked` — no local copy, so the U-Net stays blocked |
+
+The run exited `3` (data blocked) and generated a report that says exactly that. No fake
+directory, label, mask or metric was produced.
+
+### 11.4 Tests
+
+`python -m pytest tests -q` → **355 passed, 2 skipped**. The new
+`tests/test_dataset_modes.py` pins the APTOS/DDR adapters, provenance preservation, DDR
+grade-5 exclusion, official-partition protection, both dataset modes, the
+`external`-mode-without-development-source failure, experiment selection/promotion, and
+that post-hoc parameters are fitted on validation data only and cannot change predictions.
+
+### 11.5 Still open (unchanged by choice)
+
+* No training or combined experiment run has been executed against a corrected dataset.
+  The §10.2 metrics remain `research_validity = requires_revalidation`.
+* Mendeley has no automatic download (provider publishes no files); IDRiD requires the user's
+  own registered access. Kaggle credentials are required for APTOS.
+* Clinical-information fusion and fuzzy-logic conflict resolution remain **NOT IMPLEMENTED**.
+* No specialist sign-off on the provisional Mendeley merges (Very Severe NPDR → Severe
+  NPDR, Advanced PDR → PDR).
+
+### 11.6 Exact next commands (after the genuine data is in place)
+
+```
+RUN.bat --prepare-only --dataset-mode combined   # manifests, audits, splits, quality
+RUN.bat --prepare-only --dataset-mode external
+RUN.bat --mode combined --experiments all        # experiment suite, all sources
+RUN.bat --mode external --experiments all        # train Mendeley+MMRDR, test APTOS+DDR
+```
+
+`--mode combined|external` runs the whole pipeline in that composition; `--dataset-mode`
+applies the same composition to a single stage run.
+
+---
+
+## 12. Automatic acquisition and grouped K-fold cross-validation
+
+### 12.1 What was added
+
+* `src/dataset_downloaders/manager.py` — Gate-1 orchestrator: connectivity probe, free-space
+  report, per-source acquisition, measured on-disk inventory, and
+  `outputs/manifests/download_report.json` + `dataset_availability.md`.
+  `RUN.bat --download-only [--datasets NAME ...]`.
+* `src/dataset_downloaders/gdrive.py` — anonymous listing of the official public Drive folder,
+  confirmation-form resolution, HTTP Range resume, size probing.
+* MMRDR: per-file `computed_md5` verification from the Figshare API, README acquisition, and
+  `verify_cfp_records()` (image↔FP.csv correspondence, tr/ts counts, grade distribution).
+* APTOS: competition download first (`kaggle competitions download -c aptos2019-…`) with a
+  dataset mirror fallback, distinct messages for missing CLI / missing token / unaccepted
+  rules / rejected token, and `verify_aptos_labels()`.
+* DDR: full automatic path (list → ten chunks with resume → join → CRC check → safe extract →
+  label validation). Falls back to the documented manual route with the exact error.
+* IDRiD: authorized-session mechanism via `DR_IDRID_URLS` / `DR_IDRID_COOKIE` (environment
+  only, never logged), followed by the existing 1:1 image/mask pairing check.
+* `src/kfold.py` — grouped stratified K-fold: fold assignment and verification, per-fold
+  manifests, per-fold training through the experiment engine, per-fold metrics/predictions,
+  fold mean ± std, pooled out-of-fold metrics, OOF coverage check, and a fixed-epoch retrain on
+  the complete development pool with published provenance.
+* `experiment_engine.run_experiment(..., train_rows=, validation_rows=, fixed_epochs=)` — the
+  hook that makes a fold a real training run rather than a renamed split.
+
+### 12.2 Verified against the live providers on 2026-11-05
+
+| Check | Result |
+|---|---|
+| Figshare article 29423747 metadata | 9 archive parts + README; per-part MD5 and size published |
+| Real download with provider MD5 | README.md, 2,459 bytes, MD5 verified |
+| DDR official Drive folder | lists exactly `DDR-dataset.zip.001 … .010` |
+| DDR ranged read of `.001` | HTTP 206, `application/octet-stream`, starts with `PK` |
+| DDR total size (probed) | 10 chunks, 13,569,776,333 + chunk 10 (~1.5 GB) |
+| Mendeley record `6ry9n79gb4` v1 | `size = 0`, file listing `[]` (unchanged) |
+| Kaggle CLI / token | absent on this machine |
+| IDRiD session | not configured |
+
+### 12.3 What is still not proven
+
+* **No full dataset was downloaded in this environment.** Sizes: MMRDR ≈ 18.7 GB of parts,
+  DDR ≈ 14.5–15 GB, APTOS ≈ 5 GB. The mechanisms were exercised against the live endpoints
+  (listing, ranged transfer, MD5 verification), not by completing a multi-gigabyte transfer.
+* **No K-fold run has been executed**: there is no dataset, so `--cv-folds` is
+  *configured and tested with an injected trainer/predictor*, not executed on real images.
+* Flip test-time augmentation, sampling-based imbalance handling and 4-channel U-Net
+  experiment variants (S1–S4) remain out of scope of this change.
