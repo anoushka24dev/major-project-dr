@@ -415,7 +415,8 @@ def run_training(
             val_metrics = _evaluate(model, val_loader, loss_fn, device, class_names, amp_enabled)
             scheduler.step()
 
-            current = float(val_metrics.get(monitor, val_metrics["loss"]))
+            monitor_key = monitor[4:] if monitor.startswith("val_") else monitor
+            current = float(val_metrics.get(monitor_key, val_metrics.get(monitor, val_metrics["loss"])))
             improved = current > best_value if monitor_mode == "max" else current < best_value
             if improved:
                 best_value = current
