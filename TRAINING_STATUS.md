@@ -21,7 +21,17 @@ All requested dataset sources have been downloaded, verified, and combined into 
 
 ---
 
-## 2. Autonomously Resolved Pipeline Issues
+## 2. ResNet-50 Training Progression (15 Epochs Target)
+
+| Epoch | Train Loss | Train Acc | Val Loss | Val Acc | Val Macro F1 | Epoch Duration | Best Checkpoint |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **1 / 15** (Frozen backbone) | 1.1295 | 55.61% | 0.9339 | 62.07% | 0.5436 | 233.72s | Saved (`best_resnet50.pt`) |
+| **2 / 15** (Backbone unfrozen) | **0.7132** | **69.27%** | **0.6838** | **69.60%** | **0.6493** | 202.31s | **Saved (New Best: Macro F1 0.6493)** |
+| **3 / 15** | *Running...* | | | | | | |
+
+---
+
+## 3. Autonomously Resolved Pipeline Issues
 
 1. **Classification Metric Monitoring & Early Stopping Bug**:
    - *Issue*: `src/train_classifier.py` was querying `monitor = "val_macro_f1"` from `val_metrics`, but `_evaluate()` outputs unprefixed keys (`"macro_f1"`, `"loss"`). The fallback evaluated `loss` with `monitor_mode="max"`, mistaking decreasing loss for deterioration and triggering premature early stoppage.
@@ -41,17 +51,17 @@ All requested dataset sources have been downloaded, verified, and combined into 
 
 ---
 
-## 3. Real-Time Pipeline Progress & Stage Timing
+## 4. Pipeline Execution Schedule
 
 ```
 [DOWNLOAD]  ✓ Complete (Mendeley, MMRDR, APTOS 2019, IDRiD present)
 [PREPARE]   ✓ Complete in 345.3s (Unified manifest: 16,864 included images)
-[QUALITY]   ▶ IN PROGRESS (Assessing sharpness, illumination, exposure)
-[TRAIN-CLS] ⏳ Scheduled next: ResNet-50 (15 epochs, ~175s / epoch ≈ 40 mins)
+[QUALITY]   ✓ Complete in 256.1s (16,981 assessed, 0 unreadable)
+[TRAIN-CLS] ▶ ACTIVE: ResNet-50 (Epoch 3/15, Val Acc: 69.60%, Macro F1: 0.6493)
 [TRAIN-SEG] ⏳ Scheduled: Lesion U-Net (25 epochs, ~8s / epoch ≈ 3.5 mins)
 [EVALUATE]  ⏳ Scheduled: Test sets, external validation, Grad-CAM, calibration (~3 mins)
 [PACKAGING] ⏳ Scheduled: Deliverables bundle update & auto git push to origin/main
 ```
 
-**Estimated Total Runtime**: ~40-45 minutes.  
-**Execution Safety**: Process is running in isolated background task; it will run continuously through all epochs until completion.
+**Estimated Completion**: ~07:55 - 08:00 AM IST.  
+**Execution Safety**: Supervised background execution running until full end-to-end completion.
