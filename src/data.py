@@ -109,6 +109,8 @@ def source_roots(cfg: Config) -> Dict[str, Path]:
     mendeley = fundus if (fundus and fundus.is_dir()) else cfg.path("paths.mendeley_dir")
     roots["mendeley"] = mendeley
     roots["mmrdr"] = cfg.path("paths.mmrdr_dir")
+    roots["aptos"] = cfg.aptos_root()
+    roots["ddr"] = cfg.ddr_root()
     return roots
 
 
@@ -141,6 +143,7 @@ class ClassifierDataset(Dataset):
         self.rotation = float(aug.get("rotation_degrees", 0) or 0) if self.train else 0.0
         self.brightness = float(aug.get("brightness", 0) or 0) if self.train else 0.0
         self.contrast = float(aug.get("contrast", 0) or 0) if self.train else 0.0
+        self.colour_jitter = float(aug.get("colour_jitter", 0) or 0) if self.train else 0.0
         if bool(aug.get("random_crop", False)):
             raise ValueError(
                 "preprocessing.classification.augmentation.random_crop is enabled but random "
@@ -172,6 +175,9 @@ class ClassifierDataset(Dataset):
         if self.contrast > 0:
             factor = float(1.0 + self._rng.uniform(-self.contrast, self.contrast))
             image = TF.adjust_contrast(image, factor)
+        if self.colour_jitter > 0:
+            factor = float(1.0 + self._rng.uniform(-self.colour_jitter, self.colour_jitter))
+            image = TF.adjust_saturation(image, factor)
         return image
 
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, int, Dict[str, Any]]:
