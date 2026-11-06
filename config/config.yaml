@@ -274,7 +274,7 @@ classification:
   weight_decay: 1.0e-4
   scheduler: "cosine"
   warmup_epochs: 1
-  early_stopping_patience: 5
+  early_stopping_patience: 15
   # Which validation quantity drives checkpoint selection and early stopping.
   # val_macro_f1 is preferred over raw accuracy because the classes are imbalanced.
   monitor: "val_macro_f1"
@@ -297,7 +297,7 @@ segmentation:
   weight_decay: 1.0e-5
   optimizer: "adamw"
   scheduler: "cosine"
-  early_stopping_patience: 6
+  early_stopping_patience: 25
   mixed_precision: "auto"
   # BCE + Dice. Dice handles the extreme foreground/background imbalance of
   # small lesions; BCE keeps gradients stable early in training.

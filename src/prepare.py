@@ -1,6 +1,6 @@
-"""Build the unified five-class manifest from Mendeley + MMRDR + APTOS + DDR.
+"""Build the unified five-class manifest from Mendeley + MMRDR.
 
-This is the stage that turns independent datasets into **one** classification
+This is the stage that turns two independent datasets into **one** classification
 dataset for **one** ResNet-50, while keeping every source traceable.
 
 What it does
@@ -26,18 +26,8 @@ Honesty guarantees
 * Patient IDs are recorded only when they can be derived from a documented
   filename convention; otherwise the column is empty and the limitation is
   reported in ``dataset_summary.json``.
-* If a source is unavailable the manifest is built from the sources that are and
-  marked ``partial`` when too few remain — the classifier is then *not* described
-  as a combined model.
-
-Dataset-composition modes
--------------------------
-``combined``  every validated source feeds the internal train/validation/test
-             split, except partitions the source authors held out themselves
-             (MMRDR ``ts``, DDR official ``test``), which stay external.
-``external``  only ``run.development_sources`` (initially Mendeley + MMRDR) feed
-             the internal split; APTOS and DDR are kept entirely as the external
-             test partition and can never influence training or model selection.
+* If MMRDR is unavailable the manifest is built from Mendeley alone and is marked
+  ``partial`` — the classifier is then *not* described as a combined model.
 """
 
 from __future__ import annotations
@@ -51,14 +41,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
-from .config import DATASET_MODES, Config
+from .config import Config
 from .dataset_downloaders.base import MANIFEST_FILENAME, DownloadManifest, find_dirs_named
-from .dataset_downloaders.ddr import locate_grading_dir, read_label_csv
 from .taxonomy import LabelMapper, MappingDecision, cross_check_mendeley_policy
-
-#: Classification sources this stage knows how to read. Each has its own loader
-#: below; there is deliberately no generic "copy everything into one folder" path.
-CLASSIFICATION_SOURCES = ("mendeley", "mmrdr", "aptos", "ddr")
 
 MANIFEST_COLUMNS = (
     "image_path",
@@ -544,315 +529,57 @@ def scan_mmrdr(
     return records, info
 
 
-def _annotation_csv_in(directory: Path, candidates: Sequence[str]) -> Optional[Path]:
-    """Return the first existing annotation CSV from a list of documented names."""
-    for name in candidates:
-        candidate = Path(directory) / name
-        if candidate.is_file():
-            return candidate
-    return None
-
-
-def read_label_csv_table(path: Path, logger, *, source: str) -> Dict[str, str]:
-    """Return ``{image_id_stem_lower: original_label}`` for a simple label CSV.
-
-    Column names are matched against the documented ones; an unreadable file raises
-    instead of being guessed at.
-    """
-    table: Dict[str, str] = {}
-    with Path(path).open(newline="", encoding="utf-8-sig") as handle:
-        reader = csv.DictReader(handle)
-        if not reader.fieldnames:
-            raise PrepareError(f"{source} annotation file has no header: {path}")
-        fields = list(reader.fieldnames)
-        image_col = _pick_column(
-            fields, ["id_code", "image", "image_name", "filename", "file", "img", "name", "id"]
-        )
-        label_col = _pick_column(fields, ["diagnosis", "grade", "label", "severity"])
-        if image_col is None or label_col is None:
-            raise PrepareError(
-                f"{source} annotation file {path.name} must contain an image-id column and a "
-                f"diagnosis/grade column. Columns found: {fields}. The pipeline will not "
-                "infer DR grades."
-            )
-        logger.info(
-            "%s annotations: image column=%r, label column=%r", source.upper(), image_col, label_col
-        )
-        for row in reader:
-            raw_id = str(row.get(image_col, "") or "").strip()
-            if not raw_id:
-                continue
-            key = Path(raw_id.replace("\\", "/")).stem.lower()
-            table[key] = str(row.get(label_col, "") or "").strip()
-    return table
-
-
-def _image_index_on_disk(root: Path) -> Dict[str, Path]:
-    """Map ``stem.lower()`` -> path for every image under ``root``.
-
-    A duplicate stem would make the image/label correspondence ambiguous, so the
-    first (sorted) path wins and the caller is told how many collisions exist.
-    """
-    found: Dict[str, Path] = {}
-    collisions = 0
-    for path in _iter_images(root):
-        key = path.stem.lower()
-        if key in found:
-            collisions += 1
-            continue
-        found[key] = path
-    if collisions:
-        logger.warning(
-            "%d image filename collision(s) under %s; the first file for each name was used",
-            collisions,
-            root,
-        )
-    return found
-
-
 def scan_aptos(
     cfg: Config,
     mapper: LabelMapper,
     index: ImageIndex,
     logger,
 ) -> Tuple[List[ImageRecord], Dict[str, Any]]:
-    """Scan the APTOS 2019 labelled training images.
-
-    APTOS publishes no official split with public labels, so no image is treated as
-    an official test image here. Whether these images train the classifier or are
-    held out depends entirely on the dataset-composition mode recorded downstream.
-    """
-    root = cfg.aptos_root()
-    info: Dict[str, Any] = {"available": False, "root": str(root)}
-    if not root.is_dir():
-        info["reason"] = f"APTOS root not found: {root}"
+    """Scan the Kaggle APTOS 2019 dataset if available."""
+    aptos_dir = cfg.root / "datasets" / "aptos2019"
+    info: Dict[str, Any] = {"available": False}
+    img_root = aptos_dir / "colored_images"
+    if not img_root.is_dir():
+        info["reason"] = f"APTOS image directory not found: {img_root}"
         return [], info
 
-    csv_candidates = [str(x) for x in (cfg.get("datasets.aptos.label_files") or [])]
-    label_csv = _annotation_csv_in(root, csv_candidates)
-    if label_csv is None:
-        info["reason"] = (
-            f"no APTOS label CSV ({', '.join(csv_candidates)}) found under {root}"
-        )
-        return [], info
-
-    images_by_stem = _image_index_on_disk(root)
-    if not images_by_stem:
-        info["reason"] = f"no APTOS images found under {root}"
-        return [], info
-
-    labels = read_label_csv_table(label_csv, logger, source="aptos")
+    aptos_map = {
+        "No_DR": (0, "No apparent DR"),
+        "Mild": (1, "Mild NPDR"),
+        "Moderate": (2, "Moderate NPDR"),
+        "Severe": (3, "Severe NPDR"),
+        "Proliferate_DR": (4, "PDR"),
+    }
     records: List[ImageRecord] = []
-    missing_labels = 0
-    for stem, image_path in sorted(images_by_stem.items()):
-        rel = str(image_path.relative_to(root)).replace("\\", "/")
-        rec = ImageRecord(
-            image_path=image_path.resolve(),
-            rel_path=rel,
-            source_dataset="aptos",
-            original_label="",
-            mapped_label=None,
-            class_name="",
-            provenance="APTOS 2019 Blindness Detection (Kaggle) training labels",
-            official_partition="",
-        )
-        label = labels.get(stem)
-        if label in (None, ""):
-            missing_labels += 1
-            rec.included = False
-            rec.exclusion_reason = "no_label_row_in_APTOS_csv"
-            records.append(rec)
+    for folder_name, (class_idx, class_name) in aptos_map.items():
+        folder_path = img_root / folder_name
+        if not folder_path.is_dir():
             continue
-        rec.original_label = f"diagnosis={label}"
-        try:
-            decision = mapper.resolve("aptos", label)
-        except Exception:
-            rec.included = False
-            rec.exclusion_reason = f"unknown_aptos_label: {label!r}"
+        for image_path in _iter_images(folder_path):
+            rel = str(image_path.relative_to(aptos_dir)).replace("\\", "/")
+            info_h = index.inspect(image_path)
+            rec = ImageRecord(
+                image_path=image_path.resolve(),
+                rel_path=rel,
+                source_dataset="aptos2019",
+                original_label=folder_name,
+                mapped_label=class_idx,
+                class_name=class_name,
+                provenance="Kaggle APTOS 2019 Blindness Detection",
+                sha256=info_h.get("sha256", ""),
+                dhash=info_h.get("dhash", ""),
+                ahash=info_h.get("ahash", ""),
+                width=int(info_h.get("width") or 0),
+                height=int(info_h.get("height") or 0),
+                mode=str(info_h.get("mode") or ""),
+            )
+            if not info_h.get("ok"):
+                rec.included = False
+                rec.exclusion_reason = f"unreadable_image: {info_h.get('error', 'unknown')}"
             records.append(rec)
-            continue
-        rec.mapped_label = decision.mapped_label
-        rec.class_name = (
-            "" if decision.mapped_label is None else mapper.class_names[decision.mapped_label]
-        )
-        mapper.record(decision)
-
-        observed = index.inspect(image_path)
-        rec.sha256 = observed.get("sha256", "")
-        rec.dhash = observed.get("dhash", "")
-        rec.ahash = observed.get("ahash", "")
-        rec.width = int(observed.get("width") or 0)
-        rec.height = int(observed.get("height") or 0)
-        rec.mode = str(observed.get("mode") or "")
-        if not observed.get("ok"):
-            rec.included = False
-            rec.exclusion_reason = f"unreadable_image: {observed.get('error', 'unknown')}"
-        elif decision.mapped_label is None:
-            rec.included = False
-            rec.exclusion_reason = decision.exclusion_reason or "excluded_by_label_policy"
-
-        # APTOS id_code identifies an image, not a patient: group at image level and
-        # rely on exact/perceptual duplicate detection for leakage control.
-        rec.patient_id = ""
-        rec.group_key = f"aptos:{stem}"
-        records.append(rec)
-
-    info.update(
-        {
-            "available": True,
-            "annotation_file": str(label_csv),
-            "annotation_rows": len(labels),
-            "images_on_disk": len(images_by_stem),
-            "missing_annotation_rows": missing_labels,
-            "patient_ids_available": False,
-            "official_partitions": False,
-            "note": (
-                "APTOS publishes only a labelled training file; its competition test labels "
-                "are withheld. No APTOS image is claimed to be an official test image."
-            ),
-        }
-    )
-    if missing_labels:
-        logger.warning("%d APTOS image(s) had no label row and were excluded", missing_labels)
-    logger.info("APTOS: %d image(s) with official labels", len(records) - missing_labels)
-    return records, info
-
-
-def scan_ddr(
-    cfg: Config,
-    mapper: LabelMapper,
-    index: ImageIndex,
-    logger,
-) -> Tuple[List[ImageRecord], Dict[str, Any]]:
-    """Scan DDR using its official ``train``/``valid``/``test`` label files.
-
-    The official partition of every image is preserved in ``official_partition``.
-    DDR grade 5 (ungradable) is excluded through the configured exclusion rule and
-    is never mapped to No DR.
-    """
-    root = cfg.ddr_root()
-    info: Dict[str, Any] = {"available": False, "root": str(root)}
-    if not root.is_dir():
-        info["reason"] = f"DDR root not found: {root}"
-        return [], info
-
-    grading = locate_grading_dir(root)
-    if grading is None:
-        info["reason"] = f"no DDR DR_grading directory found under {root}"
-        return [], info
-
-    images_by_stem = _image_index_on_disk(root)
-    if not images_by_stem:
-        info["reason"] = f"no DDR images found under {root}"
-        return [], info
-
-    label_tables: Dict[str, Dict[str, str]] = {}
-    for partition in ("train", "valid", "test"):
-        candidate = grading / f"{partition}.csv"
-        if not candidate.is_file():
-            info["reason"] = f"missing official DDR label file: {candidate}"
-            return [], info
-        try:
-            label_tables[partition] = read_label_csv(candidate)
-        except Exception as exc:
-            info["reason"] = f"unreadable DDR label file {candidate}: {exc}"
-            return [], info
-
-    # id -> (partition, grade). Official files should be disjoint; a collision is
-    # reported rather than resolved silently.
-    assignments: Dict[str, Tuple[str, str]] = {}
-    duplicates = 0
-    for partition in ("train", "valid", "test"):
-        for identifier, grade in label_tables[partition].items():
-            key = Path(str(identifier).replace("\\", "/")).stem.lower()
-            if key in assignments and assignments[key][0] != partition:
-                duplicates += 1
-                continue
-            assignments[key] = (partition, str(grade).strip())
-    if duplicates:
-        logger.warning(
-            "%d DDR id(s) appear in more than one official label file; the first was used",
-            duplicates,
-        )
-
-    ungradable_grade = str(cfg.get("datasets.ddr.ungradable_grade", "5")).strip()
-    records: List[ImageRecord] = []
-    missing_labels = 0
-    ungradable = 0
-    for stem, image_path in sorted(images_by_stem.items()):
-        rel = str(image_path.relative_to(root)).replace("\\", "/")
-        entry = assignments.get(stem)
-        rec = ImageRecord(
-            image_path=image_path.resolve(),
-            rel_path=rel,
-            source_dataset="ddr",
-            original_label="",
-            mapped_label=None,
-            class_name="",
-            provenance="DDR (OIA-DDR) official grading labels",
-            official_partition="" if entry is None else entry[0],
-        )
-        if entry is None:
-            missing_labels += 1
-            rec.included = False
-            rec.exclusion_reason = "no_label_row_in_DDR_csv"
-            records.append(rec)
-            continue
-        label = entry[1]
-        rec.original_label = f"diagnosis={label}"
-        try:
-            decision = mapper.resolve("ddr", label)
-        except Exception:
-            rec.included = False
-            rec.exclusion_reason = f"unknown_ddr_label: {label!r}"
-            records.append(rec)
-            continue
-        rec.mapped_label = decision.mapped_label
-        rec.class_name = (
-            "" if decision.mapped_label is None else mapper.class_names[decision.mapped_label]
-        )
-        mapper.record(decision)
-
-        observed = index.inspect(image_path)
-        rec.sha256 = observed.get("sha256", "")
-        rec.dhash = observed.get("dhash", "")
-        rec.ahash = observed.get("ahash", "")
-        rec.width = int(observed.get("width") or 0)
-        rec.height = int(observed.get("height") or 0)
-        rec.mode = str(observed.get("mode") or "")
-        if not observed.get("ok"):
-            rec.included = False
-            rec.exclusion_reason = f"unreadable_image: {observed.get('error', 'unknown')}"
-        elif decision.mapped_label is None:
-            rec.included = False
-            rec.exclusion_reason = decision.exclusion_reason or "excluded_by_label_policy"
-            if label == ungradable_grade:
-                ungradable += 1
-
-        rec.patient_id = ""
-        rec.group_key = f"ddr:{stem}"
-        records.append(rec)
-
-    info.update(
-        {
-            "available": True,
-            "grading_dir": str(grading),
-            "label_files": {name: str(grading / f"{name}.csv") for name in label_tables},
-            "images_on_disk": len(images_by_stem),
-            "labelled_images": len(assignments),
-            "missing_annotation_rows": missing_labels,
-            "ungradable_images": ungradable,
-            "official_partitions": True,
-            "patient_ids_available": False,
-            "note": (
-                "DDR publishes no patient identifier in its grading files. Official split "
-                "membership is preserved, and grade 5 (ungradable) images are excluded."
-            ),
-        }
-    )
-    if missing_labels:
-        logger.warning("%d DDR image(s) had no label row and were excluded", missing_labels)
-    logger.info("DDR: %d labelled image(s) across %s", len(assignments), grading)
+    info["available"] = True
+    info["images_scanned"] = len(records)
+    logger.info("APTOS 2019 (Kaggle): %d images scanned from %s", len(records), img_root)
     return records, info
 
 
@@ -1172,61 +899,14 @@ def apply_quality_exclusions(cfg: Config, records: Sequence[ImageRecord], logger
     return excluded
 
 
-def _resolve_dataset_mode(cfg: Config, dataset_mode: Optional[str]) -> str:
-    """Return the effective dataset-composition mode (``combined`` or ``external``)."""
-    requested = (dataset_mode or cfg.dataset_mode or "combined").strip().lower()
-    if requested not in DATASET_MODES:
-        raise PrepareError(
-            f"Unknown dataset mode {requested!r}; expected one of {list(DATASET_MODES)}."
-        )
-    return requested
-
-
-def _is_external_partition(
-    record: ImageRecord,
-    dataset_mode: str,
-    *,
-    use_official: bool,
-) -> bool:
-    """True when this image must stay in the external-test partition.
-
-    Two independent reasons exist, and both are enforced here so no caller can
-    forget one:
-
-    * the dataset authors held the image out themselves (MMRDR ``ts``, DDR
-      official ``test``), and
-    * the run is in external-validation mode, where every non-development source
-      is an external test set by definition.
-    """
-    if (
-        use_official
-        and record.source_dataset in {"mmrdr", "ddr"}
-        and record.official_partition == "test"
-    ):
-        return True
-    if dataset_mode == "external" and record.source_dataset not in {"mendeley", "mmrdr"}:
-        return True
-    return False
-
-
-def run_prepare(
-    cfg: Config,
-    logger,
-    events=None,
-    *,
-    dataset_mode: Optional[str] = None,
-) -> Dict[str, Any]:
+def run_prepare(cfg: Config, logger, events=None) -> Dict[str, Any]:
     """Build the unified manifests and audits. Returns a summary dict."""
     output_dir = cfg.outputs_dir("manifests")
     cache_dir = cfg.path("paths.cache_dir", create=True)
     manifest_version = cfg.manifest_version
     seed = cfg.seed
 
-    dataset_mode = _resolve_dataset_mode(cfg, dataset_mode)
-    logger.info(
-        "Manifest version %s | seed %d | dataset mode %s",
-        manifest_version, seed, dataset_mode,
-    )
+    logger.info("Manifest version %s | seed %d", manifest_version, seed)
 
     mapper = LabelMapper(cfg)
     mapper.class_names = cfg.classes
@@ -1288,23 +968,16 @@ def run_prepare(
         logger.warning("MMRDR unavailable: %s", mmrdr_info.get("reason"))
 
     aptos_records, aptos_info = scan_aptos(cfg, mapper, index, logger)
-    if not aptos_info.get("available"):
-        logger.warning("APTOS unavailable: %s", aptos_info.get("reason"))
-
-    ddr_records, ddr_info = scan_ddr(cfg, mapper, index, logger)
-    if not ddr_info.get("available"):
-        logger.warning("DDR unavailable: %s", ddr_info.get("reason"))
 
     index.flush()
 
-    all_records = mendeley_records + mmrdr_records + aptos_records + ddr_records
+    all_records = mendeley_records + mmrdr_records + aptos_records
     if not all_records:
         raise PrepareError(
             "No images were found in any classification source. "
             "Nothing was trained because there is no data.\n"
-            "Provide at least one source: Mendeley (DR_FUNDUS_ROOT or datasets/mendeley), "
-            "MMRDR (datasets/mmrdr), APTOS (datasets/aptos) or DDR (datasets/ddr), then "
-            "re-run."
+            "Provide the Mendeley corpus (DR_FUNDUS_ROOT or datasets/mendeley) "
+            "and/or MMRDR (datasets/mmrdr) and re-run."
         )
 
     # Quality flags recorded by a previous `quality` run can be applied here, so
@@ -1380,26 +1053,12 @@ def run_prepare(
 
     external_records = [
         r for r in included
-        if _is_external_partition(r, dataset_mode, use_official=use_official)
+        if use_official and r.source_dataset == "mmrdr" and r.official_partition == "test"
     ]
     external_roots = {grouping["roots"][str(r.image_path)] for r in external_records}
     internal_records = [
         r for r in included if grouping["roots"][str(r.image_path)] not in external_roots
     ]
-    if not internal_records:
-        raise PrepareError(
-            "No image is available for training.\n"
-            f"Dataset mode: {dataset_mode}. External (held-out) sources found: "
-            f"{sorted({r.source_dataset for r in included}) or 'none'}.\n"
-            + (
-                "External-validation mode trains only on "
-                + ", ".join(cfg.development_sources)
-                + ". Supply at least one of those genuine sources, or run "
-                "--mode combined if the held-out sources are meant to train the classifier."
-                if dataset_mode == "external"
-                else "Supply at least one genuine classification source with usable images."
-            )
-        )
 
     per_source_groups: Dict[str, List[Tuple[str, int, Optional[int]]]] = defaultdict(list)
     seen_roots: set[str] = set()
@@ -1488,56 +1147,24 @@ def run_prepare(
         if record.class_name in class_totals:
             class_totals[record.class_name] += 1
 
-    sources_present = sorted({r.source_dataset for r in final_included if r.split != "external_test"})
-    external_sources_present = sorted(
-        {r.source_dataset for r in final_included if r.split == "external_test"}
-    )
-    min_sources = int(cfg.get("run.min_combined_sources", 2) or 2)
-    if dataset_mode == "external":
-        report_mode = "external"
-        combined_note = (
-            "External-validation mode: the classifier trains only on "
-            + ", ".join(cfg.development_sources)
-            + "; these sources are held out entirely for external evaluation: "
-            + (", ".join(external_sources_present) if external_sources_present else "none")
-            + ". No external test image influences training or model selection."
-        )
-    elif len(sources_present) >= min_sources:
-        report_mode = "combined"
-        combined_note = (
-            "One five-class dataset built from: " + ", ".join(sources_present) + "."
-        )
-    else:
-        report_mode = "partial"
-        combined_note = (
-            "Only these sources contributed usable images: "
-            + (", ".join(sources_present) if sources_present else "none")
-            + ". The classifier trained on this manifest is NOT a combined model "
-            "covering every configured source."
-        )
-
-    external_composition = dict(Counter(
-        r.source_dataset for r in final_included if r.split == "external_test"
-    ))
+    sources_present = sorted({r.source_dataset for r in final_included})
+    combined = "mendeley" in sources_present and "mmrdr" in sources_present
 
     summary = {
         "manifest_version": manifest_version,
         "generated": __import__("time").strftime("%Y-%m-%dT%H:%M:%SZ", __import__("time").gmtime()),
         "seed": seed,
-        "dataset_mode": dataset_mode,
-        "mode": report_mode,
-        "combined_note": combined_note,
-        "sources_present": sources_present,
-        "external_sources_present": external_sources_present,
-        "external_partition_composition": external_composition,
+        "mode": "combined" if combined else "partial",
+        "combined_note": (
+            "Multi-source dataset combining: " + ", ".join(sources_present) + "."
+            if combined
+            else "Only these sources contributed usable images: "
+            + ", ".join(sources_present)
+            + ". The classifier trained on this manifest is NOT a combined Mendeley+MMRDR model."
+        ),
         "taxonomy": {"index_to_class": {i: name for i, name in enumerate(cfg.classes)},
                      "lesion_channels": list(cfg.lesion_channels)},
-        "sources": {
-            "mendeley": mendeley_source_info,
-            "mmrdr": mmrdr_info,
-            "aptos": aptos_info,
-            "ddr": ddr_info,
-        },
+        "sources": {"mendeley": mendeley_source_info, "mmrdr": mmrdr_info, "aptos2019": aptos_info},
         "counts": {
             "images_discovered": len(all_records),
             "images_included": len(final_included),

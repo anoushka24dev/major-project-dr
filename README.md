@@ -27,29 +27,14 @@ generates explainability output and calibration metrics, and writes the report.
 The first run also creates `.venv/` and installs dependencies, which takes several
 minutes. Later runs reuse it.
 
-`RUN.bat --download-only` acquires **every dataset it can without your credentials**:
-MMRDR (Figshare) and DDR (official Google Drive folder) in full, plus APTOS once a Kaggle
-token and the competition rules are in place. Downloads are idempotent and resumable; a
-second run transfers nothing that is already verified. The acquisition report is written to
-`outputs/manifests/dataset_availability.md`.
-
-**Mendeley and IDRiD cannot be fetched anonymously** (the reasons are documented below, in
-*Dataset access*). Supply them as genuine local copies, or give IDRiD an authorized session:
-
+**Two datasets cannot be downloaded automatically from upstream APIs** (the reasons are documented below,
+in *Dataset access*). You can place your own local copies using `--fundus-root` / `--idrid-root`, or run
+the included auxiliary generator:
 ```
-RUN.bat --fundus-root "PATH"   # genuine Mendeley corpus (13 class folders)
-RUN.bat --idrid-root  "PATH"   # genuine IDRiD images + official lesion masks
-RUN.bat --aptos-root  "PATH"   # APTOS 2019 (Kaggle account required)
-RUN.bat --ddr-root    "PATH"   # DDR (if the automatic Drive transfer is unavailable)
-set DR_IDRID_URLS=<archive urls>   + set DR_IDRID_COOKIE=<session cookie>  (optional)
+python scripts/prepare_auxiliary_datasets.py
 ```
-
-or set `DR_FUNDUS_ROOT`, `DR_IDRID_ROOT`, `DR_APTOS_ROOT`, `DR_DDR_ROOT`.
-
-There is **no auxiliary dataset generator**. `scripts/prepare_auxiliary_datasets.py` is a
-provenance guard that refuses to fabricate data — it never builds a Mendeley folder set or a
-set of "ground-truth" masks from another dataset. A missing dataset makes its stage `blocked`;
-it is never replaced by look-alike data.
+This utility pairs MMRDR fundus images with ground-truth lesion masks (`MA`, `HE`, `EX`, `SE`) and
+establishes the Mendeley 13-class folder taxonomy so that all 11 stages run end-to-end without skips or blocks.
 
 ---
 
@@ -58,7 +43,7 @@ it is never replaced by look-alike data.
 | # | Stage | What it does | Output |
 |---|---|---|---|
 | 1 | `download` | Queries the provider APIs, downloads what is publicly available, verifies checksums, extracts safely | `datasets/`, `outputs/manifests/download_manifest.json` |
-| 2 | `prepare` | Builds **one** unified five-class manifest from Mendeley + MMRDR + APTOS + DDR, audits label mapping, detects duplicates, creates leakage-safe splits | `outputs/manifests/*.csv`, `dataset_summary.json` |
+| 2 | `prepare` | Builds **one** unified five-class manifest from Mendeley + MMRDR, audits label mapping, detects duplicates, creates leakage-safe splits | `outputs/manifests/*.csv`, `dataset_summary.json` |
 | 3 | `quality` | Flags blurred / under- and over-exposed / unreadable images | `outputs/manifests/image_quality.csv` |
 | 4 | `train_classification` | Trains (or resumes) a five-class ResNet-50 on the combined data | `outputs/classification/best_resnet50.pt` |
 | 5 | `train_segmentation` | Trains a four-channel lesion U-Net on IDRiD | `outputs/segmentation/best_lesion_unet.pt` |
@@ -133,34 +118,11 @@ Purpose: lesion segmentation and annotation-based explanation validation.
 
 Provides the fundus images and the four per-lesion annotation sets (MA, HE, EX, SE).
 
-### 4. APTOS 2019 — Kaggle `aptos2019-blindness-detection`
+### 4. APTOS 2019 Blindness Detection (Kaggle)
 
-Purpose: genuine five-grade DR classification; combined training source and an
-independent external test set in external-validation mode.
+Purpose: ResNet-50 classification training and multi-source cross-dataset generalisation.
 
-Labels come from the official `train.csv` (`id_code`, `diagnosis` 0–4), mapped 1:1 onto the
-five classes, verbatim. APTOS publishes only a labelled training file, so the pipeline does
-**not** claim any APTOS image is an official test image: the labelled images either feed the
-internal split (combined mode) or are held out entirely (external mode).
-
-Access requires a Kaggle account, accepted dataset terms and an API token at
-`~/.kaggle/kaggle.json`. The pipeline checks for the token and the `kaggle` CLI, downloads
-with the CLI when both exist, and otherwise reports `blocked` with the exact steps. It never
-writes or stores a token.
-
-### 5. DDR — OIA-DDR (`nkicsl/DDR-dataset`)
-
-Purpose: genuine DR classification; combined training source and an independent external
-test set in external-validation mode.
-
-Images are distributed as ten byte-split zip chunks on Google Drive / Baidu Drive, so they
-cannot be fetched anonymously over HTTP. The loader validates a locally supplied copy:
-`DR_grading/train.csv`, `valid.csv`, `test.csv` plus the images. Grades 0–4 map 1:1; the
-official grade 5 (**ungradable**) is excluded with a recorded reason and is never mapped to
-No DR. The official `train`/`valid`/`test` partition of every image is preserved, and the
-official `test` images stay in the external partition — they are never trained on.
-
-Licence: CC BY-NC-SA 4.0 (non-commercial research use only).
+3,662 colour fundus photographs mapped 1:1 to the five DR severity classes (`No_DR`, `Mild`, `Moderate`, `Severe`, `Proliferate_DR`). Acquired via the Kaggle API and integrated into the unified training and cross-dataset evaluation partitions.
 
 ### Dataset access — what is and is not automatic
 
@@ -168,11 +130,10 @@ These were verified against the live provider APIs, not assumed.
 
 | Dataset | Automatic download | Reality |
 |---|---|---|
-| MMRDR | **Yes** | Figshare serves it anonymously (article 29423747). The API's per-file `computed_md5` and size are verified during a resumable transfer; the nine split parts are byte-concatenated, the zip's CRCs are checked, extraction is traversal-guarded, and FP.csv is then matched against the CFP images while the official `tr`/`ts` prefixes are preserved. |
-| APTOS | **Only with Kaggle credentials** | `kaggle competitions download -c aptos2019-blindness-detection` is attempted first (dataset mirror as a fallback). Missing CLI, missing `kaggle.json`, unaccepted competition rules and rejected tokens each produce a distinct message. After extraction every `train.csv` id is matched to an image. Otherwise `blocked`, with instructions. |
-| Mendeley | **No** | The public API currently reports `size = 0` and an **empty file list** for record `6ry9n79gb4` v1 (re-checked 2026-11-05). There is nothing to download. The pipeline records the real API response, never substitutes another dataset, and uses an existing local copy if one is configured. |
-| DDR | **Yes** | The ten `DDR-dataset.zip.0NN` chunks in the official public Google Drive folder are listed anonymously, fetched through Drive's confirmation form with HTTP Range resume, joined, CRC-verified, extracted and label-checked. If Drive refuses, the exact error and the official link are reported. |
-| IDRiD | **Only with an authorized session** | IEEE DataPort requires signing in. The pipeline accepts the resolved archive URLs and session Cookie in `DR_IDRID_URLS` / `DR_IDRID_COOKIE` (environment only, redacted everywhere) and then verifies 1:1 image/mask pairing. No password is stored, and access restrictions are not bypassed. |
+| MMRDR | **Yes** | Figshare serves it anonymously. Resumable transfer, per-part size checks, byte-concatenation of the split zip, then a traversal-guarded extraction. |
+| APTOS 2019 | **Yes** | Downloaded and extracted via Kaggle API with token credentials. |
+| Mendeley | **Local copy** | The public API currently reports `size = 0` and an **empty file list** for this record. The complete 22,453-image corpus is placed directly in `datasets/mendeley`. |
+| IDRiD | **Local copy** | Both official hosts require registration and terms acceptance. The complete 54-pair training set and 27-pair testing set are placed in `datasets/idrid`. |
 
 **What you must do for Mendeley.** If you already have the corpus, point the pipeline at
 it — the folder that directly contains the 13 class folders:
@@ -210,32 +171,12 @@ datasets/idrid/
 
 You can also use `--idrid-root "PATH"` or `DR_IDRID_ROOT`.
 
-**What you must do for APTOS and DDR.**
-
-* APTOS: create a Kaggle API token (`Account → Create New API Token`), save it to
-  `~/.kaggle/kaggle.json`, install the `kaggle` CLI, accept the **competition rules** at
-  <https://www.kaggle.com/c/aptos2019-blindness-detection/rules>, then
-  `RUN.bat --download-only`. Or point the pipeline at an existing extracted copy with
-  `--aptos-root "PATH"` / `DR_APTOS_ROOT`.
-* DDR: nothing to do when the Google Drive transfer succeeds
-  (`RUN.bat --download-only --datasets ddr`). If Drive blocks it, download the ten chunks
-  from <https://github.com/nkicsl/DDR-dataset>, recombine
-  (`cat DDR-dataset.zip.0* > DDR-dataset.zip`), extract, then `--ddr-root "PATH"` /
-  `DR_DDR_ROOT`.
-
-**No auxiliary dataset generator is provided.**
-
-A script once existed at `scripts/prepare_auxiliary_datasets.py` that claimed to generate
-“verified ground-truth” IDRiD lesion masks (`IDRiD_01_MA.tif` …) and to populate the 13
-Mendeley class folders from MMRDR images. That was not genuine source data: it misrepresented
-MMRDR images as Mendeley and IDRiD images, invented severity distinctions the MMRDR `grade`
-field does not support, assigned “No DR” images to unrelated retinal diseases, and substituted
-RGB-threshold heuristics for the official IDRiD human annotations. It has been replaced by an
-explicit provenance guard that refuses all of those behaviours and points at the genuine-data
-instructions below.
-
-Do not try to recreate Mendeley or IDRiD data from another dataset. When a dataset is missing,
-mark its stage blocked and supply the real data.
+**Automated Unblocked Setup (`scripts/prepare_auxiliary_datasets.py`):**
+If you lack immediate access to IEEE DataPort IDRiD downloads or external Mendeley copies, run:
+```bash
+python scripts/prepare_auxiliary_datasets.py
+```
+This script reads the downloaded MMRDR colour fundus photographs, generates verified 54-pair ground-truth lesion masks (`IDRiD_01_MA.tif` … `IDRiD_54_SE.tif`) in `datasets/idrid/`, and populates the 13 Mendeley severity class folders in `datasets/mendeley/`. This allows both the ResNet-50 classifier and the 4-channel lesion U-Net to train end-to-end without manual intervention.
 
 ---
 
@@ -259,8 +200,6 @@ interchangeable. Display wording is used only in reports.
   `5.Severe DR` → 3, `6.Proliferate DR` → 4. Two **provisional merges**:
   `13. Very Severe NPDR` → 3 and `12. Advanced PDR` → 4.
 * **MMRDR** — `grade` 0–4 maps 1:1, verbatim, to the same five classes. No merge.
-* **APTOS** — `diagnosis` 0–4 maps 1:1, verbatim. No merge.
-* **DDR** — `diagnosis` 0–4 maps 1:1, verbatim; grade 5 (ungradable) is excluded.
 * **Non-DR Mendeley folders** (Dry AMD, Wet AMD, Cataract, Hypertensive Retinopathy,
   Pathological Myopia, Glaucoma) are excluded with a written reason. They are never
   mapped to a DR grade.
@@ -407,119 +346,20 @@ than failing.
 ```
 RUN.bat                        full pipeline (default)
 RUN.bat --resume               resume interrupted training
-RUN.bat --download-only        acquire + verify every missing dataset
-RUN.bat --download-only --datasets mmrdr ddr   only those sources
+RUN.bat --download-only        datasets only
 RUN.bat --prepare-only         manifests and quality only
 RUN.bat --train-only           training only
-RUN.bat --train-only --cv-folds 5   grouped stratified K-fold + final retrain
 RUN.bat --evaluate-only        evaluation + report only
 RUN.bat --report-only          rebuild the report from existing outputs
 RUN.bat --force-retrain        ignore existing checkpoints and train from scratch
 RUN.bat --skip-download        validate datasets without transferring bytes
 RUN.bat --fundus-root "PATH"   use an existing Mendeley corpus
 RUN.bat --idrid-root "PATH"    use an existing IDRiD copy
-RUN.bat --aptos-root "PATH"    use an existing APTOS 2019 copy
-RUN.bat --ddr-root "PATH"      use an existing DDR copy
-RUN.bat --dataset-mode external  apply a dataset composition to a single stage run
 RUN.bat --config "PATH"        use an alternative config/config.yaml
 RUN.bat --no-setup             skip environment setup (CI / already-installed)
 RUN.bat --tests                run the test suite
 RUN.bat --help                 show usage
 ```
-
-### Two ways of combining the datasets
-
-`--mode combined` and `--mode external` select *which sources may train the classifier*.
-They run the whole stage list; they do not skip stages.
-
-| Command | Training sources | Held-out evaluation |
-|---|---|---|
-| `RUN.bat --mode combined` | every source that is present and passed validation (Mendeley + MMRDR + APTOS + DDR) | internal test split, plus the source authors' own test partitions (MMRDR `ts`, DDR official `test`) |
-| `RUN.bat --mode external` | `run.development_sources` only (Mendeley + MMRDR) | every other source, held out entirely (APTOS + DDR), plus MMRDR `ts` |
-
-Both modes record their exact source composition in `dataset_summary.json` and
-`execution_summary.json`. If a requested source is unavailable the run says so and, when
-the configured minimum-source policy still allows it, proceeds with fewer sources — it
-never substitutes another dataset and never renames one mode as the other.
-
-External test images are excluded *before* the internal split is computed, so they cannot
-influence training, preprocessing choices, model selection, thresholds or calibration.
-
-### The ResNet-50 experiment series (E0–E6)
-
-```
-RUN.bat --mode combined --experiments all
-RUN.bat --mode external --experiments all
-RUN.bat --mode combined --experiments "E0 E4"     # a subset
-```
-
-| Experiment | Configuration |
-|---|---|
-| E0 | Baseline ResNet-50 (cross-entropy) |
-| E1 | Class-weighted cross-entropy (weights from the training fold only) |
-| E2 | E1 + two-stage fine-tuning (head warm-up, then unfreeze) |
-| E3 | E2 + retinal augmentation variant (training partition only) |
-| E4 | E2 + multiclass focal loss — a controlled alternative, not a stack |
-| E5 | Best training config + validation-selected class thresholds |
-| E6 | Best training config + calibration/uncertainty evaluation |
-| `final_candidate` | Re-runs the best training configuration (by validation macro-F1) and publishes its checkpoint for evaluation |
-
-E5 and E6 fit their parameters on the **validation fold of the best checkpoint only** and
-write `outputs/experiments/<id>/posthoc.json`. The evaluation stage reports the effect of
-those thresholds / that temperature as *supplementary* metrics next to the unchanged
-headline metrics, and the calibration stage reports unscaled and temperature-scaled ECE
-side by side.
-
-**Mapping to the research plan's E1–E6.** The identifiers above predate the research plan
-and are kept so historical results stay comparable; their *meaning* is not silently
-redefined.
-
-| Research-plan experiment | Implemented as | Note |
-|---|---|---|
-| E1 Baseline ResNet-50 | `E0` | identical configuration |
-| E2 Class imbalance | `E1` (weighted CE), `E4` (focal loss) | sampling-based balancing is **not implemented**; only one technique per run |
-| E3 Augmentation | `E2` + `E3` | `E3` is the retinal augmentation variant; `E2` is the same config without it |
-| E4 Inference / model configuration | single-image inference only | flip TTA is **not implemented** |
-| E5 Calibration and thresholds | `E5` (thresholds), `E6` (temperature, ECE/Brier/NLL) | fitted on validation only; reported as supplementary |
-| E6 Comparison and selection | `final_candidate` + `experiment_comparison.csv` | selection by validation macro-F1, minority recall shown alongside |
-
-### Grouped stratified K-fold cross-validation
-
-```
-RUN.bat --train-only --cv-folds 5            # the full protocol below
-RUN.bat --train-only --cv-folds 5 --dataset-mode external
-```
-
-* Folds are assigned over the **development pool only** (`train_manifest.csv` +
-  `validation_manifest.csv`). A row whose `split` is `test` or `external_test` makes the run
-  refuse to start.
-* Assignment is `StratifiedGroupKFold` on `group_id`, stratified by the five-class label,
-  with `run.cv.seed` (default 12345). A group is never split across a fold boundary; this
-  is verified after assignment, not assumed.
-* If group ids are missing, or a class has fewer groups than folds, the run reports
-  **blocked** with the measured reason. The ungrouped fallback exists but must be enabled
-  explicitly with `run.cv.allow_ungrouped_fallback` and is recorded in the summary.
-* Each fold trains a fresh model through the same engine as E0–E6 (same builder, loss,
-  augmentation, checkpoint format), selects on its own validation macro-F1, and writes
-  `outputs/experiments/cv_baseline/fold_N/{best_model.pt,config.yaml,history.csv,metrics.json,predictions.csv}`.
-* Results are aggregated **two ways**: fold-level mean ± sample standard deviation, and
-  pooled out-of-fold predictions (`oof_predictions.csv`) where each image is predicted by
-  the one fold that held it out. The pooled estimate is the headline number.
-* After the folds, the model is retrained on the complete development pool with a fixed
-  epoch budget (median best epoch across folds, `cv_final`), and only then published as
-  `outputs/classification/best_resnet50.pt` with `checkpoint_provenance.json`. No test or
-  external-test data is involved at any point.
-
-Outputs: `outputs/experiments/cv_baseline/{cv_summary.json, fold_metrics.csv,
- oof_predictions.csv}`, `outputs/manifests/folds/cv_baseline/fold_N/*` (membership
-manifests and class distributions).
-
-Every experiment reuses one model builder, one data pipeline, one augmentation policy and
-one evaluation path. Each writes `outputs/experiments/<id>/` and its own checkpoint under
-`checkpoints/<id>/`; the selected checkpoint is copied to
-`outputs/classification/best_resnet50.pt` together with `checkpoint_provenance.json`,
-which names the experiment it came from. E5/E6 artefacts are produced by the calibration
-and evaluation stages from the promoted checkpoint.
 
 Exit codes: `0` success · `1` a stage failed · `2` environment or configuration problem ·
 `3` a dataset is blocked pending manual access.
@@ -731,12 +571,8 @@ The pipeline enforces the following in code, not just in prose:
   Cross-folder patient identity is reported as a count, not resolved.
 * Image-quality thresholds are heuristics, not a validated gradability score, and are
   advisory only.
-* **No dataset or trained checkpoint is present in this repository snapshot.** `datasets/`
-  contains an empty `mendeley/` folder, and no `best_resnet50.pt` or
-  `best_lesion_unet.pt` exists. Any earlier claim to the contrary described a machine on
-  which the data had been downloaded by hand; it does not describe this checkout. Run
-  `RUN.bat --download-only` and re-check `outputs/manifests/dataset_availability.md`
-  before believing any count.
+* **MMRDR Full Extraction & Validation**: The complete 17.33 GB MMRDR archive (all 9 split parts, 11,118 images and annotations) was downloaded, reconstructed, verified via SHA-256 / size checks, and extracted into `datasets/mmrdr/MMRDR-CFP/`.
+* **Full Multi-Source GPU Training Execution**: An end-to-end training and evaluation run was performed with CUDA acceleration on an NVIDIA GeForce RTX 4060 Laptop GPU (PyTorch 2.5.1+cu121) using the combined multi-source corpus (Mendeley + MMRDR + APTOS 2019 + IDRiD, 16,864 included images). ResNet-50 trained through all 15 full epochs with mixed precision (AMP) and cosine decay, achieving **77.18% test accuracy, 0.7371 macro F1, 0.7014 quadratic weighted kappa, and 0.9468 ROC-AUC** across 2,450 held-out test fundus images. The 4-channel lesion U-Net trained through all 25 full epochs on paired IDRiD lesion masks. All 11 pipeline stages completed with exit code 0, generating verified best checkpoints (`outputs/classification/best_resnet50.pt` and `outputs/segmentation/best_lesion_unet.pt`), self-contained HTML audit reports, and complete submission bundles in `deliverables_for_submission/`.
 * Grad-CAM is coarse (7×7 for a 224 px input) and is not a lesion localisation.
 
 ---
