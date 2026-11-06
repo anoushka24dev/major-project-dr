@@ -354,6 +354,7 @@ def run_training(
         val_ids, val_probs, val_targets = predict_dataset(model, val_loader, device, amp_enabled=amp_enabled)
         dice_scores = dice_per_channel(val_probs, val_targets, thresholds=0.5)
         iou_scores = iou_per_channel(val_probs, val_targets, thresholds=0.5)
+        mean_dice = float(np.mean(dice_scores))
         current_loss = total_loss / total_samples if total_samples else float("inf")
         improved = (mean_dice > best_dice) if (mean_dice > 0.0 or best_dice > 0.0) else (current_loss < best_loss)
         if improved:
