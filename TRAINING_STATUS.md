@@ -23,11 +23,16 @@ All requested dataset sources have been downloaded, verified, and combined into 
 
 ## 2. ResNet-50 Training Progression (15 Epochs Target)
 
-| Epoch | Train Loss | Train Acc | Val Loss | Val Acc | Val Macro F1 | Epoch Duration | Best Checkpoint |
+| Epoch | Train Loss | Train Acc | Val Loss | Val Acc | Val Macro F1 | Epoch Duration | Checkpoint Status |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **1 / 15** (Frozen backbone) | 1.1295 | 55.61% | 0.9339 | 62.07% | 0.5436 | 233.72s | Saved (`best_resnet50.pt`) |
-| **2 / 15** (Backbone unfrozen) | **0.7132** | **69.27%** | **0.6838** | **69.60%** | **0.6493** | 202.31s | **Saved (New Best: Macro F1 0.6493)** |
-| **3 / 15** | *Running...* | | | | | | |
+| **1 / 15** (Frozen backbone) | 1.1295 | 55.61% | 0.9339 | 62.07% | 0.5436 | 233.72s | Saved initial checkpoint |
+| **2 / 15** (Backbone unfrozen) | 0.7132 | 69.27% | 0.6838 | 69.60% | 0.6493 | 202.31s | Saved new best |
+| **3 / 15** | 0.5855 | 74.28% | 0.8046 | 66.26% | 0.6539 | 217.08s | Saved new best |
+| **4 / 15** | 0.5288 | 76.73% | 0.5979 | 71.88% | 0.7104 | 215.26s | Saved new best |
+| **5 / 15** | 0.4784 | 79.01% | 0.6161 | 71.67% | 0.6990 | 182.14s | Retained Epoch 4 best |
+| **6 / 15** | 0.4281 | 80.98% | 0.6579 | 71.43% | 0.7034 | 169.89s | Retained Epoch 4 best |
+| **7 / 15** | **0.4014** | **82.09%** | **0.6005** | **74.07%** | **0.7164** | 185.32s | **Saved (New Best: Val Acc 74.07%, F1 0.7164)** |
+| **8 / 15** | *Running...* | | | | | | |
 
 ---
 
@@ -57,11 +62,11 @@ All requested dataset sources have been downloaded, verified, and combined into 
 [DOWNLOAD]  ✓ Complete (Mendeley, MMRDR, APTOS 2019, IDRiD present)
 [PREPARE]   ✓ Complete in 345.3s (Unified manifest: 16,864 included images)
 [QUALITY]   ✓ Complete in 256.1s (16,981 assessed, 0 unreadable)
-[TRAIN-CLS] ▶ ACTIVE: ResNet-50 (Epoch 3/15, Val Acc: 69.60%, Macro F1: 0.6493)
-[TRAIN-SEG] ⏳ Scheduled: Lesion U-Net (25 epochs, ~8s / epoch ≈ 3.5 mins)
+[TRAIN-CLS] ▶ ACTIVE: ResNet-50 (Epoch 8/15, Val Acc: 74.07%, Macro F1: 0.7164)
+[TRAIN-SEG] ⏳ Scheduled next: Lesion U-Net (25 epochs, ~8s / epoch ≈ 3.5 mins)
 [EVALUATE]  ⏳ Scheduled: Test sets, external validation, Grad-CAM, calibration (~3 mins)
 [PACKAGING] ⏳ Scheduled: Deliverables bundle update & auto git push to origin/main
 ```
 
-**Estimated Completion**: ~07:55 - 08:00 AM IST.  
-**Execution Safety**: Supervised background execution running until full end-to-end completion.
+**Estimated Completion**: ~08:10 AM IST.  
+**Execution Safety**: Supervised background execution running continuously to full end-to-end completion.
