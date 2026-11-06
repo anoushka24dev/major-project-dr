@@ -529,6 +529,60 @@ def scan_mmrdr(
     return records, info
 
 
+def scan_aptos(
+    cfg: Config,
+    mapper: LabelMapper,
+    index: ImageIndex,
+    logger,
+) -> Tuple[List[ImageRecord], Dict[str, Any]]:
+    """Scan the Kaggle APTOS 2019 dataset if available."""
+    aptos_dir = cfg.root / "datasets" / "aptos2019"
+    info: Dict[str, Any] = {"available": False}
+    img_root = aptos_dir / "colored_images"
+    if not img_root.is_dir():
+        info["reason"] = f"APTOS image directory not found: {img_root}"
+        return [], info
+
+    aptos_map = {
+        "No_DR": (0, "No apparent DR"),
+        "Mild": (1, "Mild NPDR"),
+        "Moderate": (2, "Moderate NPDR"),
+        "Severe": (3, "Severe NPDR"),
+        "Proliferate_DR": (4, "PDR"),
+    }
+    records: List[ImageRecord] = []
+    for folder_name, (class_idx, class_name) in aptos_map.items():
+        folder_path = img_root / folder_name
+        if not folder_path.is_dir():
+            continue
+        for image_path in _iter_images(folder_path):
+            rel = str(image_path.relative_to(aptos_dir)).replace("\\", "/")
+            info_h = index.inspect(image_path)
+            rec = ImageRecord(
+                image_path=image_path.resolve(),
+                rel_path=rel,
+                source_dataset="aptos2019",
+                original_label=folder_name,
+                mapped_label=class_idx,
+                class_name=class_name,
+                provenance="Kaggle APTOS 2019 Blindness Detection",
+                sha256=info_h.get("sha256", ""),
+                dhash=info_h.get("dhash", ""),
+                ahash=info_h.get("ahash", ""),
+                width=int(info_h.get("width") or 0),
+                height=int(info_h.get("height") or 0),
+                mode=str(info_h.get("mode") or ""),
+            )
+            if not info_h.get("ok"):
+                rec.included = False
+                rec.exclusion_reason = f"unreadable_image: {info_h.get('error', 'unknown')}"
+            records.append(rec)
+    info["available"] = True
+    info["images_scanned"] = len(records)
+    logger.info("APTOS 2019 (Kaggle): %d images scanned from %s", len(records), img_root)
+    return records, info
+
+
 # ---------------------------------------------------------------------------
 # Duplicate + group construction
 # ---------------------------------------------------------------------------
@@ -913,9 +967,11 @@ def run_prepare(cfg: Config, logger, events=None) -> Dict[str, Any]:
     else:
         logger.warning("MMRDR unavailable: %s", mmrdr_info.get("reason"))
 
+    aptos_records, aptos_info = scan_aptos(cfg, mapper, index, logger)
+
     index.flush()
 
-    all_records = mendeley_records + mmrdr_records
+    all_records = mendeley_records + mmrdr_records + aptos_records
     if not all_records:
         raise PrepareError(
             "No images were found in any classification source. "
@@ -1092,7 +1148,7 @@ def run_prepare(cfg: Config, logger, events=None) -> Dict[str, Any]:
             class_totals[record.class_name] += 1
 
     sources_present = sorted({r.source_dataset for r in final_included})
-    combined = set(sources_present) == {"mendeley", "mmrdr"}
+    combined = "mendeley" in sources_present and "mmrdr" in sources_present
 
     summary = {
         "manifest_version": manifest_version,
@@ -1100,7 +1156,7 @@ def run_prepare(cfg: Config, logger, events=None) -> Dict[str, Any]:
         "seed": seed,
         "mode": "combined" if combined else "partial",
         "combined_note": (
-            "Mendeley + MMRDR are both present and form one five-class dataset."
+            "Multi-source dataset combining: " + ", ".join(sources_present) + "."
             if combined
             else "Only these sources contributed usable images: "
             + ", ".join(sources_present)
@@ -1108,7 +1164,7 @@ def run_prepare(cfg: Config, logger, events=None) -> Dict[str, Any]:
         ),
         "taxonomy": {"index_to_class": {i: name for i, name in enumerate(cfg.classes)},
                      "lesion_channels": list(cfg.lesion_channels)},
-        "sources": {"mendeley": mendeley_source_info, "mmrdr": mmrdr_info},
+        "sources": {"mendeley": mendeley_source_info, "mmrdr": mmrdr_info, "aptos2019": aptos_info},
         "counts": {
             "images_discovered": len(all_records),
             "images_included": len(final_included),

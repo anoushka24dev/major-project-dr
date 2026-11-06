@@ -109,6 +109,7 @@ def source_roots(cfg: Config) -> Dict[str, Path]:
     mendeley = fundus if (fundus and fundus.is_dir()) else cfg.path("paths.mendeley_dir")
     roots["mendeley"] = mendeley
     roots["mmrdr"] = cfg.path("paths.mmrdr_dir")
+    roots["aptos2019"] = cfg.root / "datasets" / "aptos2019"
     return roots
 
 

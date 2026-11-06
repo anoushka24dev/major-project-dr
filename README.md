@@ -118,6 +118,12 @@ Purpose: lesion segmentation and annotation-based explanation validation.
 
 Provides the fundus images and the four per-lesion annotation sets (MA, HE, EX, SE).
 
+### 4. APTOS 2019 Blindness Detection (Kaggle)
+
+Purpose: ResNet-50 classification training and multi-source cross-dataset generalisation.
+
+3,662 colour fundus photographs mapped 1:1 to the five DR severity classes (`No_DR`, `Mild`, `Moderate`, `Severe`, `Proliferate_DR`). Acquired via the Kaggle API and integrated into the unified training and cross-dataset evaluation partitions.
+
 ### Dataset access — what is and is not automatic
 
 These were verified against the live provider APIs, not assumed.
@@ -125,8 +131,9 @@ These were verified against the live provider APIs, not assumed.
 | Dataset | Automatic download | Reality |
 |---|---|---|
 | MMRDR | **Yes** | Figshare serves it anonymously. Resumable transfer, per-part size checks, byte-concatenation of the split zip, then a traversal-guarded extraction. |
-| Mendeley | **No** | The public API currently reports `size = 0` and an **empty file list** for this record, and the dataset page shows no files. There is nothing to download. The pipeline records the real API response and will use an existing local copy instead. |
-| IDRiD | **No** | Both official hosts require registration and terms acceptance. Access restrictions are not bypassed. |
+| APTOS 2019 | **Yes** | Downloaded and extracted via Kaggle API with token credentials. |
+| Mendeley | **Local copy** | The public API currently reports `size = 0` and an **empty file list** for this record. The complete 22,453-image corpus is placed directly in `datasets/mendeley`. |
+| IDRiD | **Local copy** | Both official hosts require registration and terms acceptance. The complete 54-pair training set and 27-pair testing set are placed in `datasets/idrid`. |
 
 **What you must do for Mendeley.** If you already have the corpus, point the pipeline at
 it — the folder that directly contains the 13 class folders:

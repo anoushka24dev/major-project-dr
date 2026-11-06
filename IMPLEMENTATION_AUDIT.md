@@ -300,3 +300,27 @@ tests/test_unified_pipeline.py         README.md
   - `calibration`: completed (0.5s, ECE 0.1011 over 15 bins)
   - `cross_dataset`: completed (16.8s)
   - `report`: completed (0.1s, generated `outputs/reports/final_report.html`)
+
+### 10.3 Multi-Source Integration & GPU Training (2026-11-06)
+
+- **Datasets Incorporated**:
+  - **Mendeley Data**: 22,453 images across all 13 official class folders in `datasets/mendeley`.
+  - **MMRDR**: 11,118 images and annotations (`FP.csv`) in `datasets/mmrdr/MMRDR-CFP`.
+  - **Kaggle APTOS 2019**: 3,662 images across 5 DR severity classes in `datasets/aptos2019`.
+  - **IDRiD**: 54 training + 27 testing fundus images with full 4-channel ground truths (`MA`, `HE`, `EX`, `SE`) in `datasets/idrid`.
+- **Unified Manifest Partitioning**:
+  - Total scanned: **37,233 images**.
+  - Included after deduplication and quarantine: **16,864 images** (11,453 train, 2,457 validation, 2,450 test, 504 external test).
+  - Assessed quality: 16,981 images, 0 unreadable.
+- **Model Training & Evaluation Results**:
+  - ResNet-50 Classifier: Peak validation accuracy **71.88%**, Macro-F1 **0.7104**.
+  - Final Held-Out Test Evaluation (2,450 images):
+    - Accuracy: **61.18%**
+    - Macro ROC-AUC: **0.8721**
+    - Cohen's Kappa: **0.4816**
+    - Calibration ECE: **0.0684** (15 bins)
+  - Cross-Dataset Validation:
+    - Mendeley: 61.58% accuracy, 0.5488 macro-F1
+    - APTOS 2019 (Kaggle): 60.47% accuracy, 0.4218 macro-F1
+    - MMRDR: 58.89% accuracy (internal test), 57.54% (official external test partition)
+  - All 11 pipeline stages completed with **exit code 0**. Output deliverables bundled in `deliverables_for_submission/`.
