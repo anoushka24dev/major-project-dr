@@ -1,0 +1,163 @@
+{
+  "experiment": {
+    "name": "demo-resnet50-50train-10test",
+    "title": "Small-sample ResNet-50 demonstration: 50 training images, 10 held-out test images",
+    "purpose": "A small, fully reproducible companion experiment to the main pipeline. It reuses the repository's ResNet-50 builder, preprocessing and metrics, and reports only metrics computed from real predictions on a 10-image held-out test set.",
+    "seed": 12345,
+    "expected_train_total": 50,
+    "expected_test_total": 10
+  },
+  "model": {
+    "architecture": "resnet50",
+    "builder": "src.models.build_resnet50",
+    "pretrained": "torchvision ResNet50_Weights.IMAGENET1K_V1",
+    "num_classes": 5,
+    "image_size": 224,
+    "preprocessing": "repo default: aspect-ratio-preserving resize-and-pad to 224x224, then ImageNet mean/std normalisation (colab/colab_helpers._resize_and_pad + src.data.normalize). No crop."
+  },
+  "training": {
+    "optimizer": "AdamW",
+    "loss": "cross-entropy",
+    "class_weights": "inverse-frequency, computed from the fit rows only",
+    "batch_size": 8,
+    "num_workers": 0,
+    "batchnorm": "kept in eval mode while fine-tuning: with 41 fit images per epoch the batch statistics are far too noisy to overwrite ImageNet statistics",
+    "early_stopping_patience": 8,
+    "selection_rule": "best validation macro-F1, ties broken by lower validation loss; validation images are carved out of the 50 training images and never come from the test set",
+    "stages": [
+      {
+        "name": "head_warmup",
+        "trainable": [
+          "fc"
+        ],
+        "epochs": 8,
+        "lr": 0.001,
+        "weight_decay": 0.0001
+      },
+      {
+        "name": "finetune_top_blocks",
+        "trainable": [
+          "layer3",
+          "layer4",
+          "fc"
+        ],
+        "epochs": 30,
+        "lr": 0.0001,
+        "weight_decay": 0.0001
+      }
+    ]
+  },
+  "sampling": {
+    "method": "class-aware, per-class, without replacement, seeded and stratified. Test images are drawn first, then the validation carve-out, then the fit set, all from the same deduplicated class pools.",
+    "test_per_class": {
+      "0": 3,
+      "1": 1,
+      "2": 2,
+      "3": 2,
+      "4": 2
+    },
+    "validation_per_class": {
+      "0": 2,
+      "1": 1,
+      "2": 2,
+      "3": 2,
+      "4": 2
+    },
+    "fit_per_class": {
+      "0": 11,
+      "1": 4,
+      "2": 9,
+      "3": 10,
+      "4": 7
+    }
+  },
+  "taxonomy": {
+    "classes": [
+      "No apparent DR",
+      "Mild NPDR",
+      "Moderate NPDR",
+      "Severe NPDR",
+      "PDR"
+    ],
+    "display_names": [
+      "No Apparent DR",
+      "Mild NPDR",
+      "Moderate NPDR",
+      "Severe NPDR",
+      "Proliferative DR (PDR)"
+    ]
+  },
+  "label_mapping": {
+    "1. No DR signs": {
+      "mapped_label": 0,
+      "class_name": "No apparent DR",
+      "provenance": "verbatim: the archive's no-DR-signs folder. 'No apparent DR' means no DR is visible according to the source label; it does not mean clinically healthy."
+    },
+    "2. Mild (or early) NPDR": {
+      "mapped_label": 1,
+      "class_name": "Mild NPDR",
+      "provenance": "verbatim: the archive's mild (or early) NPDR folder. 'or early' is the archive's own wording; no re-grading is applied."
+    },
+    "3. Moderate NPDR": {
+      "mapped_label": 2,
+      "class_name": "Moderate NPDR",
+      "provenance": "verbatim: the archive's moderate NPDR folder."
+    },
+    "4. Severe NPDR": {
+      "mapped_label": 3,
+      "class_name": "Severe NPDR",
+      "provenance": "verbatim: the archive's severe NPDR folder."
+    },
+    "5. Very Severe NPDR": {
+      "mapped_label": 3,
+      "class_name": "Severe NPDR",
+      "provenance": "PROVISIONAL merge of Very Severe NPDR into Severe NPDR, exactly the same policy the repository already applies to the Mendeley folder '13. Very Severe NPDR' in config/config.yaml (label_mapping.mendeley). Recorded as a merge, not as a verbatim grade."
+    },
+    "6. PDR": {
+      "mapped_label": 4,
+      "class_name": "PDR",
+      "provenance": "verbatim: the archive's PDR folder."
+    },
+    "7. Advanced PDR": {
+      "mapped_label": 4,
+      "class_name": "PDR",
+      "provenance": "PROVISIONAL merge of Advanced PDR into PDR, exactly the same policy the repository already applies to the Mendeley folder '12. Advanced PDR' in config/config.yaml (label_mapping.mendeley). Recorded as a merge, not as a verbatim grade."
+    }
+  },
+  "augmentation": {
+    "source": "applied by src.data.ClassifierDataset, driven by config/config.yaml (preprocessing.classification.augmentation) so the demo and the main pipeline share one implementation",
+    "transforms": [
+      "horizontal flip (anatomically admissible for fundus laterality)",
+      "rotation +/- 10 degrees (bilinear, black fill)",
+      "brightness jitter +/- 0.08",
+      "contrast jitter +/- 0.08"
+    ],
+    "disabled_on_purpose": [
+      "vertical flip (not anatomically neutral for fundus images)",
+      "random crop / centre crop (can remove border lesions)"
+    ]
+  },
+  "resolved": {
+    "device": "cpu",
+    "torch_version": "2.14.0+cpu",
+    "torchvision_version": "0.29.1+cpu",
+    "python_version": "3.11.15",
+    "batch_size": 8,
+    "num_workers": 0,
+    "fit_images": 41,
+    "validation_images": 9,
+    "epochs_planned": 38,
+    "epochs_run": 18,
+    "class_weights": [
+      0.745455,
+      2.05,
+      0.911111,
+      0.82,
+      1.171429
+    ],
+    "optimizer": "AdamW",
+    "loss": "CrossEntropyLoss(weight=class_weights)",
+    "scheduler": "CosineAnnealingLR per stage",
+    "batchnorm": "kept in eval mode while fine-tuning: with 41 fit images per epoch the batch statistics are far too noisy to overwrite ImageNet statistics"
+  }
+}

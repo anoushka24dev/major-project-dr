@@ -1,0 +1,9 @@
+class,precision,recall,f1_score,support
+No apparent DR,0.375,1.0,0.545455,3
+Mild NPDR,0.0,0.0,0.0,1
+Moderate NPDR,0.0,0.0,0.0,2
+Severe NPDR,1.0,1.0,1.0,2
+PDR,0.0,0.0,0.0,2
+macro avg,0.275,0.4,0.309091,10
+weighted avg,0.3125,0.5,0.363636,10
+accuracy,,,0.5,10

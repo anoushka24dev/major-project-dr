@@ -1,0 +1,10 @@
+filename,rel_path,source_class,mapped_label,class_name,used_for,split,sha256,width,height,mapping_provenance
+21.jpg,1. No DR signs/21.jpg,1. No DR signs,0,No apparent DR,validation,train,be7da95922602f366cffc20270039fa7a3c188713f7188153ba086c0b31a1416,2124,2056,verbatim: the archive's no-DR-signs folder. 'No apparent DR' means no DR is visible according to the source label; it does not mean clinically healthy.
+420.jpg,1. No DR signs/420.jpg,1. No DR signs,0,No apparent DR,validation,train,412285c85d9b21db7ff7aa7c4b107284b648f443b2803bda600a74cca5fcb9fd,2124,2056,verbatim: the archive's no-DR-signs folder. 'No apparent DR' means no DR is visible according to the source label; it does not mean clinically healthy.
+713.jpg,2. Mild (or early) NPDR/713.jpg,2. Mild (or early) NPDR,1,Mild NPDR,validation,train,33e4b3c13a0222bc2a67415630df2e07d3fb659f80201a727e066f4c2ebdae4e,2124,2056,verbatim: the archive's mild (or early) NPDR folder. 'or early' is the archive's own wording; no re-grading is applied.
+751.jpg,3. Moderate NPDR/751.jpg,3. Moderate NPDR,2,Moderate NPDR,validation,train,e9a292a9bd4a715f688b1c557891fd84bc11261932b6da9ad89f6f5b2fee2716,2124,2056,verbatim: the archive's moderate NPDR folder.
+753.jpg,3. Moderate NPDR/753.jpg,3. Moderate NPDR,2,Moderate NPDR,validation,train,f29cd3fa50f79881d9e6b959cc3954d1e5c61d9052c5a5fa76e7611fad6af181,2124,2056,verbatim: the archive's moderate NPDR folder.
+870.jpg,4. Severe NPDR/870.jpg,4. Severe NPDR,3,Severe NPDR,validation,train,ead5d1d9fbe38e9263f40dc34970cb4b062a90faa905b9cffef4dc888e55a007,2124,2056,verbatim: the archive's severe NPDR folder.
+926.jpg,4. Severe NPDR/926.jpg,4. Severe NPDR,3,Severe NPDR,validation,train,4f89ef1aa3212e694e76c4ca89394d86cabd4db0b135683f3f284a274a14d39c,2124,2056,verbatim: the archive's severe NPDR folder.
+1203.jpg,6. PDR/1203.jpg,6. PDR,4,PDR,validation,train,5ca52b570e0311ab5eb798d211713b771d2978f22ec434e53137c133026adfb5,2124,2056,verbatim: the archive's PDR folder.
+1254.jpg,6. PDR/1254.jpg,6. PDR,4,PDR,validation,train,a7689c5361daaa5e37bdc25328658d21c3759602aeba370f8df1cacfb921770c,2124,2056,verbatim: the archive's PDR folder.

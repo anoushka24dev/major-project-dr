@@ -1,0 +1,75 @@
+{
+  "archive_name": "Dataset from fundus images for the study of diabetic retinopathy_V03.zip",
+  "archive_size_bytes": 1523619607,
+  "archive_untouched": true,
+  "archive_structure": {
+    "per_folder": {
+      "1. No DR signs": {
+        ".jpg": 711
+      },
+      "2. Mild (or early) NPDR": {
+        ".jpg": 6
+      },
+      "3. Moderate NPDR": {
+        ".jpg": 110
+      },
+      "4. Severe NPDR": {
+        ".jpg": 210
+      },
+      "5. Very Severe NPDR": {
+        ".jpg": 139
+      },
+      "6. PDR": {
+        ".jpg": 116
+      },
+      "7. Advanced PDR": {
+        ".jpg": 145
+      },
+      "": {
+        ".xlsx": 1
+      }
+    },
+    "image_files": 1437,
+    "non_image_entries": [
+      "Annotations of the classifications.xlsx"
+    ]
+  },
+  "seed": 12345,
+  "usable_images_in_archive": 1437,
+  "images_per_source_class": {
+    "1. No DR signs": 711,
+    "2. Mild (or early) NPDR": 6,
+    "3. Moderate NPDR": 110,
+    "4. Severe NPDR": 210,
+    "5. Very Severe NPDR": 139,
+    "6. PDR": 116,
+    "7. Advanced PDR": 145
+  },
+  "images_per_mapped_class": {
+    "No apparent DR": 711,
+    "Mild NPDR": 6,
+    "Moderate NPDR": 110,
+    "Severe NPDR": 349,
+    "PDR": 261
+  },
+  "corrupt_images": [],
+  "duplicate_file_count": 0,
+  "images_in_unknown_folders": [],
+  "train_total": 50,
+  "test_total": 10,
+  "train_per_class": {
+    "0": 13,
+    "1": 5,
+    "2": 11,
+    "3": 12,
+    "4": 9
+  },
+  "test_per_class": {
+    "0": 3,
+    "1": 1,
+    "2": 2,
+    "3": 2,
+    "4": 2
+  },
+  "overlap_check": "disjoint by filename and sha256"
+}

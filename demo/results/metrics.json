@@ -1,0 +1,155 @@
+{
+  "status": "completed",
+  "evaluated_at": "2026-11-06T05:53:11+00:00",
+  "test_images": 10,
+  "num_samples": 10,
+  "class_order": [
+    "No apparent DR",
+    "Mild NPDR",
+    "Moderate NPDR",
+    "Severe NPDR",
+    "PDR"
+  ],
+  "accuracy": 0.5,
+  "macro_precision": 0.275,
+  "macro_recall": 0.4,
+  "macro_f1": 0.3090909090909091,
+  "weighted_precision": 0.3125,
+  "weighted_recall": 0.5,
+  "weighted_f1": 0.36363636363636365,
+  "cohen_kappa": 0.3055555555555555,
+  "roc_auc": {
+    "per_class": {
+      "0": 0.9047619047619049,
+      "1": 0.7777777777777778,
+      "2": 0.25,
+      "3": 1.0,
+      "4": 0.8125
+    },
+    "macro": 0.7490079365079365,
+    "reason": ""
+  },
+  "per_class": {
+    "No apparent DR": {
+      "precision": 0.375,
+      "recall": 1.0,
+      "sensitivity": 1.0,
+      "specificity": 0.2857142857142857,
+      "f1": 0.5454545454545454,
+      "support": 3,
+      "predicted": 8,
+      "tp": 3,
+      "fp": 5,
+      "fn": 0,
+      "tn": 2
+    },
+    "Mild NPDR": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "sensitivity": 0.0,
+      "specificity": 1.0,
+      "f1": 0.0,
+      "support": 1,
+      "predicted": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 1,
+      "tn": 9
+    },
+    "Moderate NPDR": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "sensitivity": 0.0,
+      "specificity": 1.0,
+      "f1": 0.0,
+      "support": 2,
+      "predicted": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 2,
+      "tn": 8
+    },
+    "Severe NPDR": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "sensitivity": 1.0,
+      "specificity": 1.0,
+      "f1": 1.0,
+      "support": 2,
+      "predicted": 2,
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "tn": 8
+    },
+    "PDR": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "sensitivity": 0.0,
+      "specificity": 1.0,
+      "f1": 0.0,
+      "support": 2,
+      "predicted": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 2,
+      "tn": 8
+    }
+  },
+  "confusion_matrix": [
+    [
+      3,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      2,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      2,
+      0
+    ],
+    [
+      2,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "checkpoint": "demo/model/best_model.pt",
+  "checkpoint_selected_on": "selected on validation images carved out of the 50 training images; test images were never loaded",
+  "best_val_macro_f1": 0.5666666666666667,
+  "seed": 12345,
+  "image_size": 224,
+  "architecture": "resnet50",
+  "device": "cpu",
+  "software": {
+    "torch": "2.14.0+cpu",
+    "python": "3.11.15"
+  },
+  "self_check": {
+    "rows_written": 10,
+    "correct_rows": 5,
+    "accuracy_from_rows": 0.5,
+    "accuracy_matches_metrics": true,
+    "confusion_matrix_matches_predictions": true,
+    "train_test_overlap": 0
+  }
+}

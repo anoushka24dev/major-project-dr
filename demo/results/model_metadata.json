@@ -1,0 +1,161 @@
+{
+  "experiment": "demo-resnet50-50train-10test",
+  "status": "completed",
+  "architecture": "resnet50",
+  "model_builder": "src.models.build_resnet50",
+  "pretrained_weights": "torchvision ResNet50_Weights.IMAGENET1K_V1",
+  "num_classes": 5,
+  "class_index_to_name": {
+    "0": "No apparent DR",
+    "1": "Mild NPDR",
+    "2": "Moderate NPDR",
+    "3": "Severe NPDR",
+    "4": "PDR"
+  },
+  "label_mapping": {
+    "1. No DR signs": {
+      "mapped_label": 0,
+      "class_name": "No apparent DR",
+      "provenance": "verbatim: the archive's no-DR-signs folder. 'No apparent DR' means no DR is visible according to the source label; it does not mean clinically healthy."
+    },
+    "2. Mild (or early) NPDR": {
+      "mapped_label": 1,
+      "class_name": "Mild NPDR",
+      "provenance": "verbatim: the archive's mild (or early) NPDR folder. 'or early' is the archive's own wording; no re-grading is applied."
+    },
+    "3. Moderate NPDR": {
+      "mapped_label": 2,
+      "class_name": "Moderate NPDR",
+      "provenance": "verbatim: the archive's moderate NPDR folder."
+    },
+    "4. Severe NPDR": {
+      "mapped_label": 3,
+      "class_name": "Severe NPDR",
+      "provenance": "verbatim: the archive's severe NPDR folder."
+    },
+    "5. Very Severe NPDR": {
+      "mapped_label": 3,
+      "class_name": "Severe NPDR",
+      "provenance": "PROVISIONAL merge of Very Severe NPDR into Severe NPDR, exactly the same policy the repository already applies to the Mendeley folder '13. Very Severe NPDR' in config/config.yaml (label_mapping.mendeley). Recorded as a merge, not as a verbatim grade."
+    },
+    "6. PDR": {
+      "mapped_label": 4,
+      "class_name": "PDR",
+      "provenance": "verbatim: the archive's PDR folder."
+    },
+    "7. Advanced PDR": {
+      "mapped_label": 4,
+      "class_name": "PDR",
+      "provenance": "PROVISIONAL merge of Advanced PDR into PDR, exactly the same policy the repository already applies to the Mendeley folder '12. Advanced PDR' in config/config.yaml (label_mapping.mendeley). Recorded as a merge, not as a verbatim grade."
+    }
+  },
+  "seed": 12345,
+  "image_size": 224,
+  "preprocessing": "repo default: aspect-ratio-preserving resize-and-pad to 224x224, then ImageNet mean/std normalisation (colab/colab_helpers._resize_and_pad + src.data.normalize). No crop.",
+  "augmentation": {
+    "source": "applied by src.data.ClassifierDataset, driven by config/config.yaml (preprocessing.classification.augmentation) so the demo and the main pipeline share one implementation",
+    "transforms": [
+      "horizontal flip (anatomically admissible for fundus laterality)",
+      "rotation +/- 10 degrees (bilinear, black fill)",
+      "brightness jitter +/- 0.08",
+      "contrast jitter +/- 0.08"
+    ],
+    "disabled_on_purpose": [
+      "vertical flip (not anatomically neutral for fundus images)",
+      "random crop / centre crop (can remove border lesions)"
+    ]
+  },
+  "device": "cpu",
+  "torch_version": "2.14.0+cpu",
+  "torchvision_version": "0.29.1+cpu",
+  "python_version": "3.11.15",
+  "fit_images": [
+    "1. No DR signs/10.jpg",
+    "1. No DR signs/3.jpg",
+    "1. No DR signs/338.jpg",
+    "1. No DR signs/379.jpg",
+    "1. No DR signs/39.jpg",
+    "1. No DR signs/404.jpg",
+    "1. No DR signs/515.jpg",
+    "1. No DR signs/520.jpg",
+    "1. No DR signs/530.jpg",
+    "1. No DR signs/545.jpg",
+    "1. No DR signs/585.jpg",
+    "2. Mild (or early) NPDR/712.jpg",
+    "2. Mild (or early) NPDR/714.jpg",
+    "2. Mild (or early) NPDR/716.jpg",
+    "2. Mild (or early) NPDR/717.jpg",
+    "3. Moderate NPDR/722.jpg",
+    "3. Moderate NPDR/724.jpg",
+    "3. Moderate NPDR/731.jpg",
+    "3. Moderate NPDR/760.jpg",
+    "3. Moderate NPDR/771.jpg",
+    "3. Moderate NPDR/786.jpg",
+    "3. Moderate NPDR/791.jpg",
+    "3. Moderate NPDR/797.jpg",
+    "3. Moderate NPDR/803.jpg",
+    "4. Severe NPDR/1000.jpg",
+    "5. Very Severe NPDR/1060.jpg",
+    "5. Very Severe NPDR/1074.jpg",
+    "5. Very Severe NPDR/1146.jpg",
+    "4. Severe NPDR/894.jpg",
+    "4. Severe NPDR/902.jpg",
+    "4. Severe NPDR/903.jpg",
+    "4. Severe NPDR/961.jpg",
+    "4. Severe NPDR/965.jpg",
+    "4. Severe NPDR/996.jpg",
+    "6. PDR/1190.jpg",
+    "6. PDR/1216.jpg",
+    "7. Advanced PDR/1327.jpg",
+    "7. Advanced PDR/1329.jpg",
+    "7. Advanced PDR/1331.jpg",
+    "7. Advanced PDR/1396.jpg",
+    "7. Advanced PDR/1424.jpg"
+  ],
+  "validation_images": [
+    "1. No DR signs/21.jpg",
+    "1. No DR signs/420.jpg",
+    "2. Mild (or early) NPDR/713.jpg",
+    "3. Moderate NPDR/751.jpg",
+    "3. Moderate NPDR/753.jpg",
+    "4. Severe NPDR/870.jpg",
+    "4. Severe NPDR/926.jpg",
+    "6. PDR/1203.jpg",
+    "6. PDR/1254.jpg"
+  ],
+  "fit_class_counts": {
+    "0": 11,
+    "1": 4,
+    "2": 9,
+    "3": 10,
+    "4": 7
+  },
+  "validation_class_counts": {
+    "0": 2,
+    "1": 1,
+    "2": 2,
+    "3": 2,
+    "4": 2
+  },
+  "training_manifest": "demo/manifests/selected_train.csv",
+  "test_manifest": "demo/manifests/selected_test.csv",
+  "test_images_used_in_training": 0,
+  "selected_files_digest": "61a174201f924b6a52b5abaef21e3ad38f9f706824914ed2f98d928f54ba64f5",
+  "best_checkpoint": "demo/model/best_model.pt",
+  "best_epoch": 10,
+  "best_stage": "finetune_top_blocks",
+  "best_val_macro_f1": 0.566667,
+  "best_val_loss": 1.443618,
+  "best_val_accuracy": 0.666667,
+  "epochs_completed": 18,
+  "training_seconds": 730.6,
+  "early_stopped": true,
+  "class_weights": {
+    "0": 0.745455,
+    "1": 2.05,
+    "2": 0.911111,
+    "3": 0.82,
+    "4": 1.171429
+  },
+  "completed_at": "2026-11-06T05:21:25+00:00"
+}

@@ -1,0 +1,11 @@
+filename,rel_path,source_class,true_label,true_class,predicted_label,predicted_class,confidence,correct,status,prob_0_No_apparent_DR,prob_1_Mild_NPDR,prob_2_Moderate_NPDR,prob_3_Severe_NPDR,prob_4_PDR
+220.jpg,1. No DR signs/220.jpg,1. No DR signs,0,No apparent DR,0,No apparent DR,0.348274,True,correct,0.348274,0.186084,0.167151,0.191519,0.106972
+394.jpg,1. No DR signs/394.jpg,1. No DR signs,0,No apparent DR,0,No apparent DR,0.384661,True,correct,0.384661,0.186427,0.156321,0.147212,0.125379
+621.jpg,1. No DR signs/621.jpg,1. No DR signs,0,No apparent DR,0,No apparent DR,0.350186,True,correct,0.350186,0.166057,0.172934,0.160177,0.150646
+715.jpg,2. Mild (or early) NPDR/715.jpg,2. Mild (or early) NPDR,1,Mild NPDR,0,No apparent DR,0.317941,False,incorrect,0.317941,0.181738,0.185523,0.170116,0.144682
+769.jpg,3. Moderate NPDR/769.jpg,3. Moderate NPDR,2,Moderate NPDR,0,No apparent DR,0.35547,False,incorrect,0.35547,0.177673,0.163901,0.160481,0.142475
+819.jpg,3. Moderate NPDR/819.jpg,3. Moderate NPDR,2,Moderate NPDR,0,No apparent DR,0.310286,False,incorrect,0.310286,0.130466,0.172353,0.18289,0.204006
+955.jpg,4. Severe NPDR/955.jpg,4. Severe NPDR,3,Severe NPDR,3,Severe NPDR,0.267345,True,correct,0.203196,0.103674,0.226503,0.267345,0.199283
+966.jpg,4. Severe NPDR/966.jpg,4. Severe NPDR,3,Severe NPDR,3,Severe NPDR,0.282675,True,correct,0.192261,0.113178,0.209731,0.282675,0.202155
+1281.jpg,6. PDR/1281.jpg,6. PDR,4,PDR,0,No apparent DR,0.308335,False,incorrect,0.308335,0.176925,0.171141,0.181087,0.162511
+1347.jpg,7. Advanced PDR/1347.jpg,7. Advanced PDR,4,PDR,0,No apparent DR,0.256999,False,incorrect,0.256999,0.116511,0.174433,0.19557,0.256487

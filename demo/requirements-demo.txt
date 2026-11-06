@@ -1,0 +1,17 @@
+# Dependencies for the demo/ 50-train / 10-test ResNet-50 experiment.
+#
+# These are the same libraries the main pipeline needs (see ../requirements.txt).
+# PyTorch is listed with a minimum only: install the build that matches your
+# machine (CUDA wheel for an NVIDIA GPU, CPU wheel otherwise). The demo detects
+# the device at runtime and reports it in results/training_config.json.
+
+torch>=2.0
+torchvision>=0.15
+
+numpy>=1.24,<3
+pandas>=2.0,<4
+Pillow>=10.0
+scikit-learn>=1.3,<2
+matplotlib>=3.7,<4
+PyYAML>=6.0,<7
+tqdm>=4.66,<5
