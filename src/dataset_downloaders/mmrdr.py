@@ -27,6 +27,7 @@ partition and are never trained on.
 
 from __future__ import annotations
 
+import csv
 import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -73,6 +74,7 @@ def classify_files(article: Dict[str, Any]) -> Dict[str, Any]:
                     "size": int(entry.get("size") or 0),
                     "download_url": entry.get("download_url"),
                     "id": entry.get("id"),
+                    "md5": entry.get("computed_md5") or entry.get("supplied_md5"),
                 }
             )
         else:
@@ -81,6 +83,7 @@ def classify_files(article: Dict[str, Any]) -> Dict[str, Any]:
                     "name": name,
                     "size": int(entry.get("size") or 0),
                     "download_url": entry.get("download_url"),
+                    "md5": entry.get("computed_md5") or entry.get("supplied_md5"),
                 }
             )
     parts.sort(key=lambda p: p["index"])
@@ -120,15 +123,82 @@ def validate_cfp(cfp_root: Optional[Path]) -> Dict[str, Any]:
     }
 
 
+def read_annotations(path: Path) -> Dict[str, Dict[str, str]]:
+    """Return ``{image_filename_lower: row}`` from the official FP.csv."""
+    rows: Dict[str, Dict[str, str]] = {}
+    with Path(path).open(newline="", encoding="utf-8-sig") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            identifier = str(row.get("image") or row.get("img") or row.get("filename") or "").strip()
+            if not identifier:
+                # The published FP.csv indexes images by row order; the first column is
+                # the file name, whatever its header is called.
+                identifier = str(next(iter(row.values()), "") or "").strip()
+            if identifier:
+                rows[identifier.lower()] = {str(k): str(v) for k, v in row.items()}
+    return rows
+
+
+def verify_cfp_records(cfp_root: Path) -> Dict[str, Any]:
+    """Verify that CFP images correspond to FP.csv rows and keep tr/ts apart."""
+    info: Dict[str, Any] = {
+        "annotations": 0,
+        "images": 0,
+        "missing_annotation": 0,
+        "annotation_without_image": 0,
+        "partitions": {},
+        "grade_counts": {},
+        "ok": False,
+    }
+    root = Path(cfp_root)
+    csv_candidates = sorted(p for p in root.glob("*.csv") if p.name.upper().startswith("FP"))
+    img_dir = root / "img"
+    if not csv_candidates or not img_dir.is_dir():
+        info["reason"] = "FP.csv or img/ is missing"
+        return info
+    annotations = read_annotations(csv_candidates[0])
+    images = [p for p in img_dir.iterdir() if p.is_file() and p.suffix.lower() in {".jpg", ".jpeg", ".png"}]
+    info["annotations"] = len(annotations)
+    info["images"] = len(images)
+
+    names = {path.name.lower() for path in images}
+    info["missing_annotation"] = len(names - set(annotations))
+    info["annotation_without_image"] = len(set(annotations) - names)
+
+    partitions: Dict[str, int] = {}
+    grades: Dict[str, int] = {}
+    for path in images:
+        preface = "tr" if path.name.lower().startswith("tr") else "ts" if path.name.lower().startswith("ts") else "unknown"
+        partitions[preface] = partitions.get(preface, 0) + 1
+        row = annotations.get(path.name.lower())
+        if row is not None:
+            grade = str(row.get("grade", "")).strip()
+            grades[grade] = grades.get(grade, 0) + 1
+    info["partitions"] = partitions
+    info["grade_counts"] = dict(sorted(grades.items()))
+    info["ok"] = bool(images) and info["missing_annotation"] == 0
+    if not info["ok"] and not info.get("reason"):
+        info["reason"] = (
+            f"{info['missing_annotation']} CFP image(s) have no FP.csv row"
+        )
+    return info
+
+
 def run(
     cfg: Config,
     logger,
     manifest: DownloadManifest,
     *,
+    root: Optional[Path] = None,
     skip_download: bool = False,
 ) -> DownloadResult:
-    """Acquire MMRDR and validate the CFP subset."""
-    mmrdr_dir = cfg.path("paths.mmrdr_dir", create=True)
+    """Acquire MMRDR and validate the CFP subset.
+
+    ``root`` (``--mmrdr-root`` / ``DR_MMRDR_ROOT``) lets the caller point at an
+    already downloaded copy instead of the configured default directory.
+    """
+    mmrdr_dir = Path(root).expanduser() if root else cfg.mmrdr_root()
+    mmrdr_dir.mkdir(parents=True, exist_ok=True)
     cache_dir = cfg.path("paths.cache_dir", create=True) / SOURCE
 
     existing_cfp = locate_cfp_root(mmrdr_dir)
@@ -137,12 +207,17 @@ def run(
         logger.info("MMRDR CFP subset already present at %s", existing_cfp)
         manifest.add("already_present", source=SOURCE, root=str(existing_cfp),
                      image_count=existing_check.get("image_count"))
+        records = verify_cfp_records(Path(existing_cfp)) if existing_cfp else {"ok": False}
         return DownloadResult(
             source=SOURCE,
-            status=DownloadResult.OK_ALREADY_PRESENT,
-            detail="MMRDR-CFP subset already extracted and validated",
+            status=DownloadResult.FAILED if not records.get("ok") else DownloadResult.OK_ALREADY_PRESENT,
+            detail=(
+                "MMRDR-CFP subset already extracted and validated"
+                if records.get("ok")
+                else f"MMRDR-CFP is present but its labels are unusable: {records.get('reason')}"
+            ),
             root=Path(existing_cfp) if existing_cfp else mmrdr_dir,
-            metadata={"cfp": existing_check},
+            metadata={"cfp": existing_check, "records": records},
         )
 
     try:
@@ -228,6 +303,7 @@ def run(
                 url,
                 cache_dir / part["name"],
                 expected_size=part["size"] or None,
+                expected_md5=part.get("md5"),
                 chunk_size=int(cfg.get("download.chunk_size", 1048576)),
                 timeout=float(cfg.get("download.timeout_seconds", 120)),
                 resume=bool(cfg.get("download.resume", True)),
@@ -241,6 +317,22 @@ def run(
         except Exception as exc:
             manifest.add("download", source=SOURCE, file=part["name"], ok=False, error=str(exc))
             logger.error("failed to download %s: %s", part["name"], exc)
+
+    # The article's README is small, authoritative and worth keeping next to the data.
+    for other in plan["others"]:
+        if str(other.get("name", "")).lower() != "readme.md" or not other.get("download_url"):
+            continue
+        try:
+            path = download_file(
+                other["download_url"],
+                cache_dir / "README.md",
+                expected_size=other.get("size") or None,
+                expected_md5=other.get("md5"),
+                logger=logger,
+            )
+            manifest.add("download", source=SOURCE, file=str(path), bytes=path.stat().st_size, ok=True)
+        except Exception as exc:
+            logger.warning("could not download the MMRDR README: %s", exc)
 
     if len(downloaded) != plan["part_count"]:
         return DownloadResult(
@@ -282,11 +374,27 @@ def run(
             metadata={"cfp": check},
         )
 
+    records = verify_cfp_records(Path(check["csv"]).parent)
+    manifest.add("verify_labels", source=SOURCE, ok=records.get("ok"), records=records)
+    if not records.get("ok"):
+        return DownloadResult(
+            source=SOURCE,
+            status=DownloadResult.FAILED,
+            detail=f"MMRDR labels do not match the images: {records.get('reason')}",
+            root=Path(cfp_root) if cfp_root else mmrdr_dir,
+            metadata={"cfp": check, "records": records},
+        )
+
     return DownloadResult(
         source=SOURCE,
         status=DownloadResult.OK,
         detail=f"downloaded {len(downloaded)} part(s) ({total_gb:.1f} GB), reconstructed and extracted",
         root=Path(cfp_root) if cfp_root else mmrdr_dir,
         files=[str(p) for p in downloaded],
-        metadata={"cfp": check, "part_count": plan["part_count"], "total_bytes": plan["total_bytes"]},
+        metadata={
+            "cfp": check,
+            "records": records,
+            "part_count": plan["part_count"],
+            "total_bytes": plan["total_bytes"],
+        },
     )

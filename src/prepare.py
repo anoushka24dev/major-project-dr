@@ -899,8 +899,32 @@ def apply_quality_exclusions(cfg: Config, records: Sequence[ImageRecord], logger
     return excluded
 
 
-def run_prepare(cfg: Config, logger, events=None) -> Dict[str, Any]:
-    """Build the unified manifests and audits. Returns a summary dict."""
+def run_prepare(
+    cfg: Config,
+    logger,
+    events=None,
+    *,
+    dataset_mode: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Build the unified manifests and audits. Returns a summary dict.
+
+    ``dataset_mode`` is accepted because the orchestrator selects the dataset
+    composition before this stage runs. Only ``combined`` is implemented here: making
+    the manifests mode-aware means excluding ``run.development_sources`` from every
+    training partition, and silently building a combined manifest for a request that
+    asked for external validation would train on the held-out sources. Until that is
+    implemented, an ``external`` request stops with an explicit error.
+    """
+    mode = str(dataset_mode or cfg.dataset_mode).strip().lower()
+    if mode not in {"combined", "external"}:
+        raise PrepareError(f"Unknown dataset_mode {mode!r}; expected 'combined' or 'external'.")
+    if mode == "external":
+        raise PrepareError(
+            "dataset_mode='external' is not implemented in the prepare stage. Building the "
+            "manifests anyway would place the held-out sources in the training pool, so the "
+            "run stops instead. Use --mode combined, or implement development-source "
+            "filtering in prepare.py first."
+        )
     output_dir = cfg.outputs_dir("manifests")
     cache_dir = cfg.path("paths.cache_dir", create=True)
     manifest_version = cfg.manifest_version

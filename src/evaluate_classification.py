@@ -35,6 +35,13 @@ from .metrics import (
     predictive_entropy,
 )
 from .models import build_resnet50
+from .tta import (
+    TTAError,
+    build_views as build_tta_views,
+    predict as tta_predict,
+    selected_view_names,
+    selection_path,
+)
 
 
 class EvaluationError(RuntimeError):
@@ -128,6 +135,130 @@ def _plot_confusion(matrix: np.ndarray, class_names: List[str], path: Path, titl
     fig.savefig(path, dpi=150)
     plt.close(fig)
     return path
+
+
+def _posthoc_for_published_checkpoint(cfg: Config, out_dir: Path) -> Optional[Dict[str, Any]]:
+    """Return the post-hoc parameters attached to the published checkpoint, if any.
+
+    Only the experiment whose checkpoint was actually published can contribute
+    thresholds or a temperature, so an experiment's parameters can never be applied
+    to a different model.
+    """
+    provenance = out_dir / "checkpoint_provenance.json"
+    if not provenance.is_file():
+        return None
+    try:
+        published = json.loads(provenance.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    experiment = published.get("source_experiment")
+    if not experiment:
+        return None
+    parameter_path = cfg.outputs_dir("experiments", str(experiment)) / "posthoc.json"
+    if not parameter_path.is_file():
+        return None
+    try:
+        payload = json.loads(parameter_path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    payload["source_experiment"] = experiment
+    payload["parameter_file"] = str(parameter_path)
+    return payload
+
+
+def _softmax_rows(logits: np.ndarray) -> np.ndarray:
+    shifted = logits - logits.max(axis=1, keepdims=True)
+    exp = np.exp(shifted)
+    return exp / exp.sum(axis=1, keepdims=True)
+
+
+def _supplementary_metrics(
+    cfg: Config,
+    posthoc: Optional[Dict[str, Any]],
+    *,
+    probabilities: np.ndarray,
+    logits: np.ndarray,
+    y_true: np.ndarray,
+    class_names: List[str],
+    out_dir: Path,
+    all_meta: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Turn validation-fitted parameters into clearly labelled supplementary results.
+
+    The headline metrics are always the plain argmax of the model's own probabilities.
+    Thresholds and temperature are reported here so a threshold shift can never be
+    presented as a model improvement.
+    """
+    supplementary: Dict[str, Any] = {}
+    if not posthoc:
+        return supplementary
+
+    offsets = posthoc.get("class_offsets") or {}
+    if offsets:
+        vector = np.asarray([float(offsets.get(name, 0.0)) for name in class_names])
+        thresholded_predictions = (probabilities + vector).argmax(axis=1)
+        thresholded = classification_metrics(
+            y_true, thresholded_predictions, probabilities=probabilities,
+            class_names=class_names, compute_auc=False,
+        )
+        supplementary["thresholded"] = {
+            "class_offsets": dict(offsets),
+            "accuracy": thresholded["accuracy"],
+            "macro_f1": thresholded["macro_f1"],
+            "macro_precision": thresholded["macro_precision"],
+            "macro_recall": thresholded["macro_recall"],
+            "predicted_class_counts": {
+                name: stats["predicted"] for name, stats in thresholded["per_class"].items()
+            },
+            "selected_on": "validation fold of experiment " + str(posthoc.get("source_experiment")),
+            "note": (
+                "Offsets are added to each class's softmax score before argmax. They can "
+                "shift the precision/recall balance; they do not change the model."
+            ),
+        }
+        with (Path(out_dir) / "test_predictions_thresholded.csv").open(
+            "w", newline="", encoding="utf-8"
+        ) as handle:
+            writer = csv.writer(handle)
+            writer.writerow([
+                "image_path", "source_dataset", "true_index", "predicted_index",
+                "predicted_class", "confidence", "correct",
+            ])
+            for index, meta in enumerate(all_meta):
+                truth = int(y_true[index])
+                predicted = int(thresholded_predictions[index])
+                writer.writerow([
+                    meta.get("image_path", ""),
+                    meta.get("source_dataset", ""),
+                    truth,
+                    predicted,
+                    class_names[predicted],
+                    f"{float(probabilities[index].max()):.6f}",
+                    int(truth == predicted),
+                ])
+
+    temperature = posthoc.get("temperature")
+    if temperature:
+        scaled = _softmax_rows(logits / float(temperature))
+        scaled_metrics = classification_metrics(
+            y_true, scaled.argmax(axis=1), probabilities=scaled,
+            class_names=class_names, compute_auc=False,
+        )
+        supplementary["temperature_scaled"] = {
+            "temperature": float(temperature),
+            "accuracy": scaled_metrics["accuracy"],
+            "macro_f1": scaled_metrics["macro_f1"],
+            "mean_confidence": float(scaled.max(axis=1).mean()),
+            "selected_on": "validation fold of experiment " + str(posthoc.get("source_experiment")),
+            "note": (
+                "One-parameter temperature scaling cannot change predictions; accuracy "
+                "is reported only to show that it did not."
+            ),
+        }
+
+    if supplementary:
+        supplementary["posthoc_parameter_file"] = posthoc.get("parameter_file")
+    return supplementary
 
 
 def _plot_roc(
@@ -226,30 +357,50 @@ def run_evaluation(cfg: Config, logger, events=None) -> Dict[str, Any]:
     dataset = ClassifierDataset(rows, cfg, train=False, image_size=image_size)
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
-    all_probs: List[np.ndarray] = []
-    all_labels: List[int] = []
-    all_meta: List[Dict[str, Any]] = []
-    with torch.no_grad():
-        for inputs, labels, meta in loader:
-            inputs = inputs.to(device, non_blocking=True)
-            logits = model(inputs)
-            all_probs.append(torch.softmax(logits, dim=1).float().cpu().numpy())
-            all_labels.extend(int(v) for v in labels)
-            count = inputs.size(0)
-            all_meta.extend(
-                {key: (meta[key][i] if isinstance(meta[key], (list, tuple)) else meta[key])
-                 for key in meta}
-                for i in range(count)
-            )
+    # TTA is applied only when the validation comparison already selected it. With no
+    # saved selection this is exactly one forward pass per batch, i.e. ordinary
+    # inference. The choice was made before this partition was opened.
+    selection_file = selection_path(cfg)
+    try:
+        selected_views = selected_view_names(cfg)
+    except TTAError as exc:
+        logger.warning("TTA configuration is invalid (%s); using ordinary inference", exc)
+        selected_views = None
+    view_functions = build_tta_views(selected_views) if selected_views else None
 
-    probabilities = np.concatenate(all_probs, axis=0)
-    y_true = np.asarray(all_labels)
+    inference = tta_predict(
+        model,
+        loader,
+        device,
+        views=view_functions,
+        num_classes=len(class_names),
+    )
+    probabilities = inference["probabilities"]
+    logits_array = inference["logits"]
+    y_true = np.asarray(inference["labels"])
+    all_meta = inference["meta"]
     y_pred = probabilities.argmax(axis=1)
 
     metrics = classification_metrics(
         y_true, y_pred, probabilities=probabilities, class_names=class_names,
         compute_auc=bool(cfg.get("evaluation.roc_auc.enabled", True)),
     )
+
+    # E5 / E6: report the effect of validation-selected thresholds and temperature
+    # scaling as clearly separated supplementary results, never as the headline metric.
+    posthoc = _posthoc_for_published_checkpoint(cfg, out_dir)
+    supplementary = _supplementary_metrics(
+        cfg,
+        posthoc,
+        probabilities=probabilities,
+        logits=logits_array,
+        y_true=y_true,
+        class_names=class_names,
+        out_dir=out_dir,
+        all_meta=all_meta,
+    )
+    if supplementary:
+        metrics["supplementary"] = supplementary
     metrics["partition"] = "test"
     metrics["checkpoint"] = str(checkpoint_path)
     metrics["checkpoint_fingerprint"] = fingerprint
@@ -258,6 +409,23 @@ def run_evaluation(cfg: Config, logger, events=None) -> Dict[str, Any]:
         "Reported on the held-out test partition only. No threshold, checkpoint or "
         "hyper-parameter was chosen using this partition."
     )
+    metrics["inference"] = {
+        "mode": inference["mode"],
+        "views": list(inference["views"]),
+        "reduction": (
+            "mean of per-view class probabilities"
+            if inference["mode"] == "tta"
+            else "single forward pass"
+        ),
+        "selection_file": str(selection_file) if selection_file.is_file() else None,
+        "selected_on": (
+            "validation partition" if inference["mode"] == "tta" else "not applied"
+        ),
+        "note": (
+            "TTA, when used, was selected on the validation partition before this "
+            "partition was opened. The test metrics below are reported, not tuned."
+        ),
+    }
 
     metrics_path = out_dir / "classification_metrics.json"
     metrics_path.write_text(json.dumps(metrics, indent=2, default=str), encoding="utf-8")
@@ -300,6 +468,7 @@ def run_evaluation(cfg: Config, logger, events=None) -> Dict[str, Any]:
     np.savez_compressed(
         out_dir / "test_probabilities.npz",
         probabilities=probabilities,
+        logits=logits_array,
         y_true=y_true,
         y_pred=y_pred,
         sources=np.array([m.get("source_dataset", "") for m in all_meta]),
@@ -320,6 +489,9 @@ def run_evaluation(cfg: Config, logger, events=None) -> Dict[str, Any]:
         "roc_curves_png": str(roc_png) if roc_png else None,
         "predictions_csv": str(predictions_csv),
         "device": str(device),
+        "posthoc_applied": sorted(supplementary) if supplementary else [],
+        "inference_mode": inference["mode"],
+        "inference_views": list(inference["views"]),
     }
     logger.info(
         "test: accuracy %.4f | macro F1 %.4f | kappa %.4f | AUC %s",

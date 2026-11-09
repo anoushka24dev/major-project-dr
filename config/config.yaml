@@ -406,3 +406,31 @@ run:
     - calibration
     - cross_dataset
     - report
+
+inference:
+  # Optional test-time augmentation (TTA). Ordinary inference (one forward pass) is
+  # always the default and remains available even when TTA is enabled.
+  tta:
+    # false = the pipeline never runs TTA and the evaluation stage uses ordinary
+    # inference. true = compare ordinary inference against TTA on the VALIDATION
+    # partition after training, then apply whichever wins to the test partition.
+    enabled: false
+    # Both modes are measured on validation before the test partition is opened.
+    compare_on_validation: true
+    # Average class probabilities (never labels). "mean" is the only implemented
+    # reduction; a label vote would discard the model's confidence.
+    reduction: "mean"
+    selection_metric: "macro_f1"
+    # The unmodified image is always one of the averaged views.
+    include_original: true
+    # Medically defensible views only: mirror, +/-10 degrees rotation (the range the
+    # training augmentation already uses) and +/-10% exposure gain. Vertical flip,
+    # cropping and large rotations are excluded because they are not anatomically
+    # neutral for fundus photographs.
+    transforms:
+      - "hflip"
+      - "rotate_p10"
+      - "rotate_m10"
+      - "brightness_p10"
+      - "brightness_m10"
+

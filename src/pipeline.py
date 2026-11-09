@@ -131,6 +131,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--project-root", default=None, help="repository root")
     parser.add_argument("--fundus-root", default=None,
                         help="root of a pre-existing Mendeley corpus (13 class folders)")
+    parser.add_argument("--mmrdr-root", default=None,
+                        help="root of a pre-existing MMRDR copy")
     parser.add_argument("--idrid-root", default=None, help="root of a pre-existing IDRiD copy")
     parser.add_argument("--aptos-root", default=None,
                         help="root of a pre-existing APTOS 2019 copy")
@@ -224,26 +226,71 @@ def _limitations(cfg: Config, summary: Dict[str, Any], stage_records: Dict[str, 
     return items
 
 
+#: CLI root overrides and the environment variable each one feeds. The config
+#: module is the only reader of these variables, so a single application point is
+#: enough for every stage to see the same path.
+ROOT_OVERRIDE_FLAGS: Sequence[tuple] = (
+    ("fundus_root", "DR_FUNDUS_ROOT", "Mendeley corpus"),
+    ("mmrdr_root", "DR_MMRDR_ROOT", "MMRDR copy"),
+    ("idrid_root", "DR_IDRID_ROOT", "IDRiD copy"),
+    ("aptos_root", "DR_APTOS_ROOT", "APTOS 2019 copy"),
+    ("ddr_root", "DR_DDR_ROOT", "DDR copy"),
+)
+
+
+def apply_root_overrides(args: argparse.Namespace) -> Dict[str, str]:
+    """Expose every ``--*-root`` flag as its ``DR_*_ROOT`` environment variable.
+
+    A malformed path is reported as a configuration error instead of surfacing later
+    as a mysterious stage failure. A path that does not exist yet is *not* an error:
+    the acquisition stage must be able to report a missing dataset honestly.
+    """
+    import os
+
+    applied: Dict[str, str] = {}
+    for attribute, env_var, label in ROOT_OVERRIDE_FLAGS:
+        raw = getattr(args, attribute, None)
+        if raw is None or str(raw).strip() == "":
+            continue
+        try:
+            resolved = str(Path(str(raw)).expanduser().resolve())
+        except (OSError, ValueError, RuntimeError) as exc:
+            raise ConfigError(
+                f"--{attribute.replace('_', '-')} {raw!r} is not a usable path for the "
+                f"{label}: {exc}"
+            ) from exc
+        os.environ[env_var] = resolved
+        applied[env_var] = resolved
+    return applied
+
+
+def _maybe_select_tta(cfg: Config, logger, events, training_summary: Dict[str, Any]) -> None:
+    """Compare ordinary inference with TTA on validation after training, if enabled.
+
+    A failure here is recorded and never turned into a training failure: TTA is an
+    optional inference feature, and the model that was just trained stays usable.
+    """
+    from .tta import compare_on_validation
+
+    try:
+        selection = compare_on_validation(cfg, logger, events=events)
+    except Exception as exc:  # noqa: BLE001 - optional feature must not break training
+        logger.warning("TTA selection skipped: %s: %s", type(exc).__name__, exc)
+        training_summary["tta"] = {
+            "status": "failed",
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+        return
+    if selection:
+        training_summary["tta"] = selection
+
+
 def run_pipeline(args: argparse.Namespace) -> Dict[str, Any]:
     """Execute the requested mode and return an execution summary."""
     cfg = load_config(args.config, root=args.project_root)
 
-    if args.fundus_root:
-        import os
-
-        os.environ["DR_FUNDUS_ROOT"] = str(Path(args.fundus_root).resolve())
-    if args.idrid_root:
-        import os
-
-        os.environ["DR_IDRID_ROOT"] = str(Path(args.idrid_root).resolve())
-    if args.aptos_root:
-        import os
-
-        os.environ["DR_APTOS_ROOT"] = str(Path(args.aptos_root).resolve())
-    if args.ddr_root:
-        import os
-
-        os.environ["DR_DDR_ROOT"] = str(Path(args.ddr_root).resolve())
+    # Every --*-root flag becomes its DR_*_ROOT variable, which config.py reads.
+    apply_root_overrides(args)
 
     # Re-load so environment overrides take effect.
     cfg = load_config(args.config, root=args.project_root)
@@ -311,6 +358,13 @@ def run_pipeline(args: argparse.Namespace) -> Dict[str, Any]:
                 outputs[stage_name] = _run_stage(
                     stage_name, cfg, logger, events, args, dataset_mode
                 )
+
+                # Optional TTA comparison on validation, right after training and
+                # before any stage that would open the test partition.
+                if stage_name == "train_classification" and isinstance(
+                    outputs[stage_name], dict
+                ):
+                    _maybe_select_tta(cfg, logger, events, outputs[stage_name])
                 if isinstance(outputs[stage_name], dict):
                     stage_records[stage_name] = {
                         "status": outputs[stage_name].get("status", "completed"),

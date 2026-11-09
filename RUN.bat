@@ -23,6 +23,7 @@ REM    RUN.bat --report-only          rebuild the report from existing outputs
 REM    RUN.bat --force-retrain        ignore existing checkpoints
 REM    RUN.bat --skip-download        do not transfer bytes
 REM    RUN.bat --fundus-root "PATH"   use an existing Mendeley corpus
+REM    RUN.bat --mmrdr-root "PATH"    use an existing MMRDR copy
 REM    RUN.bat --idrid-root "PATH"    use an existing IDRiD copy
 REM    RUN.bat --aptos-root "PATH"    use an existing APTOS 2019 copy
 REM    RUN.bat --ddr-root "PATH"      use an existing DDR copy
@@ -39,6 +40,7 @@ REM    RUN.bat --mode external --experiments all
 REM    RUN.bat --config "PATH"        use an alternative config.yaml
 REM    RUN.bat --no-setup             skip the environment setup step
 REM    RUN.bat --tests                run the test suite instead
+REM    RUN.bat --smoke                quick dataset-free check (config, model, TTA)
 REM    RUN.bat --help                 show the Python-level usage
 REM
 REM  set DR_PYTHON=C:\Python311\python.exe   force a specific interpreter
@@ -52,6 +54,7 @@ cd /d "%~dp0"
 title Diabetic Retinopathy Research Pipeline
 
 set "SKIP_SETUP=0"
+set "INFORMATIONAL=0"
 
 echo.
 echo ==========================================================================
@@ -85,9 +88,15 @@ exit /b 2
 echo       interpreter: %BASE_PY%
 "%BASE_PY%" -c "import sys;print('      version     :',sys.version.split()[0]);print('      architecture:',('64-bit' if sys.maxsize>2**32 else '32-bit - NOT SUPPORTED'))"
 
-REM Detect --no-setup in Python so quoted arguments cannot break the batch parser.
-"%BASE_PY%" -c "import sys;sys.exit(0 if '--no-setup' in sys.argv else 1)" %*
+REM Probe the forwarded arguments in Python: an argument containing spaces must not
+REM break the batch parser, so no string matching is done in batch itself.
+REM   --no-setup / -h / --help  -> skip environment setup (no install before usage);
+REM   -h / --help / --tests / --smoke / --validate-config
+REM                              -> informational run, no pipeline result is claimed.
+"%BASE_PY%" -c "import sys;a=sys.argv[1:];sys.exit(0 if ('--no-setup' in a or '-h' in a or '--help' in a) else 1)" %*
 if not errorlevel 1 set "SKIP_SETUP=1"
+"%BASE_PY%" -c "import sys;a=sys.argv[1:];sys.exit(0 if ('-h' in a or '--help' in a or '--tests' in a or '--smoke' in a or '--validate-config' in a) else 1)" %*
+if not errorlevel 1 set "INFORMATIONAL=1"
 
 if "%SKIP_SETUP%"=="1" goto skip_setup
 echo.
@@ -113,7 +122,7 @@ exit /b 2
 
 :skip_setup
 echo.
-echo [2/4] Environment setup skipped (--no-setup).
+echo [2/4] Environment setup skipped (--no-setup or --help was requested).
 
 :setup_done
 set "RUN_PY=%BASE_PY%"
@@ -128,7 +137,8 @@ set "RC=%ERRORLEVEL%"
 
 echo.
 echo [4/4] Finished with exit code %RC%.
-if "%RC%"=="0" echo        Success. See outputs\reports\final_report.html
+if "%RC%"=="0" if not "%INFORMATIONAL%"=="1" echo        Success. See outputs\reports\final_report.html
+if "%RC%"=="0" if "%INFORMATIONAL%"=="1" echo        Finished. Informational run (--help/--tests/--smoke/--validate-config): no pipeline report was produced.
 if "%RC%"=="1" echo        A pipeline stage failed. The failing stage and its error are listed
 if "%RC%"=="1" echo        above and in outputs\reports\execution_summary.json.
 if "%RC%"=="2" echo        Configuration or environment problem. Fix it and run RUN.bat again.
@@ -137,8 +147,8 @@ if "%RC%"=="3" echo        is printed above and saved in outputs\manifests\downl
 if "%RC%"=="3" echo        Provide the data, then run:  RUN.bat --resume
 
 echo.
-echo Results : outputs\reports\final_report.html
-echo Metrics : outputs\evaluation\metrics_summary.csv
+if not "%INFORMATIONAL%"=="1" echo Results : outputs\reports\final_report.html
+if not "%INFORMATIONAL%"=="1" echo Metrics : outputs\evaluation\metrics_summary.csv
 if "%DR_NO_OPEN%"=="1" goto skip_open
 if not exist "%~dp0outputs\reports\final_report.html" goto skip_open
 echo.

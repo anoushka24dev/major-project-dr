@@ -1,0 +1,187 @@
+{
+  "policy_version": "data-integrity-v1-2026-11-09",
+  "created": "2026-11-09T14:04:51Z",
+  "note": "Artifacts listed here were produced before the clean data policy. They are kept for history only and must not be cited as final results or loaded for evaluation.",
+  "artifacts": [
+    {
+      "path": "cpu_runs/canary/best_checkpoint/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/canary/checkpoints/epoch_0000/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/canary/checkpoints/epoch_0001/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/canary/checkpoints/epoch_0002/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/full_restart2/best_checkpoint/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/full_restart2/checkpoints/epoch_0000/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/full_restart2/checkpoints/epoch_0001/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/full_restart2/checkpoints/epoch_0002/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/full_restart2/checkpoints/epoch_0003/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/full_restart2/checkpoints/epoch_0004/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/full_restart2/checkpoints/epoch_0005/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/full_restart2/checkpoints/epoch_0006/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/full_restart2/checkpoints/epoch_0007/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/full_restart2/checkpoints/epoch_0008/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "cpu_runs/full_restart2/checkpoints/epoch_0009/model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "demo/model/best_model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "work/demo_run_v1/best_model.pt",
+      "category": "checkpoint",
+      "status": "invalid_for_final_evaluation",
+      "reason": "trained before the clean-manifest policy; no clean manifest digest is recorded, so its training data cannot be shown to be free of fabricated labels/masks"
+    },
+    {
+      "path": "outputs/evaluation/metrics_summary.csv",
+      "category": "metric_or_report",
+      "status": "invalid_for_final_evaluation",
+      "reason": "metrics computed from a manifest that predates the clean policy"
+    },
+    {
+      "path": "outputs/segmentation/segmentation_metrics.json",
+      "category": "metric_or_report",
+      "status": "invalid_for_final_evaluation",
+      "reason": "metrics computed from a manifest that predates the clean policy"
+    },
+    {
+      "path": "outputs/segmentation/segmentation_summary.json",
+      "category": "metric_or_report",
+      "status": "invalid_for_final_evaluation",
+      "reason": "metrics computed from a manifest that predates the clean policy"
+    },
+    {
+      "path": "outputs/reports/final_report.html",
+      "category": "metric_or_report",
+      "status": "invalid_for_final_evaluation",
+      "reason": "metrics computed from a manifest that predates the clean policy"
+    },
+    {
+      "path": "demo/results/metrics.json",
+      "category": "metric_or_report",
+      "status": "invalid_for_final_evaluation",
+      "reason": "metrics computed from a manifest that predates the clean policy"
+    },
+    {
+      "path": "demo/results/DEMO_RESULTS.md",
+      "category": "metric_or_report",
+      "status": "invalid_for_final_evaluation",
+      "reason": "metrics computed from a manifest that predates the clean policy"
+    },
+    {
+      "path": "provisional_primary_split/provisional_primary_split.csv",
+      "category": "manifest",
+      "status": "invalid_for_final_evaluation",
+      "reason": "manifest built before the clean policy; provenance and duplicate audit incomplete"
+    },
+    {
+      "path": "audit_output/pretraining_audit/PROVISIONAL_ELIGIBILITY_PRIMARY.csv",
+      "category": "manifest",
+      "status": "invalid_for_final_evaluation",
+      "reason": "manifest built before the clean policy; provenance and duplicate audit incomplete"
+    },
+    {
+      "path": "audit_output/pretraining_audit/PROVISIONAL_ELIGIBILITY_SECONDARY.csv",
+      "category": "manifest",
+      "status": "invalid_for_final_evaluation",
+      "reason": "manifest built before the clean policy; provenance and duplicate audit incomplete"
+    },
+    {
+      "path": "audit_output/pretraining_audit/PROVENANCE_MANIFEST.csv",
+      "category": "manifest",
+      "status": "invalid_for_final_evaluation",
+      "reason": "manifest built before the clean policy; provenance and duplicate audit incomplete"
+    },
+    {
+      "path": "demo/manifests/selected_train.csv",
+      "category": "manifest",
+      "status": "invalid_for_final_evaluation",
+      "reason": "manifest built before the clean policy; provenance and duplicate audit incomplete"
+    },
+    {
+      "path": "demo/manifests/selected_test.csv",
+      "category": "manifest",
+      "status": "invalid_for_final_evaluation",
+      "reason": "manifest built before the clean policy; provenance and duplicate audit incomplete"
+    },
+    {
+      "path": "demo/manifests/dataset_inventory.csv",
+      "category": "manifest",
+      "status": "invalid_for_final_evaluation",
+      "reason": "manifest built before the clean policy; provenance and duplicate audit incomplete"
+    }
+  ]
+}

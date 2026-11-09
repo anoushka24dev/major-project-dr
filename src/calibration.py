@@ -76,6 +76,38 @@ def _reliability_diagram(bins: Dict[str, Any], ece: float, path: Path) -> Option
     return path
 
 
+def _posthoc_temperature(cfg: Config, classification_dir: Path) -> Optional[float]:
+    """Return the validation-fitted temperature for the published checkpoint, if any."""
+    provenance = Path(classification_dir) / "checkpoint_provenance.json"
+    if not provenance.is_file():
+        return None
+    try:
+        published = json.loads(provenance.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    experiment = published.get("source_experiment")
+    if not experiment:
+        return None
+    parameter_path = cfg.outputs_dir("experiments", str(experiment)) / "posthoc.json"
+    if not parameter_path.is_file():
+        return None
+    try:
+        payload = json.loads(parameter_path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    temperature = payload.get("temperature")
+    try:
+        return float(temperature) if temperature else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _softmax_rows(logits: np.ndarray) -> np.ndarray:
+    shifted = logits - logits.max(axis=1, keepdims=True)
+    exp = np.exp(shifted)
+    return exp / exp.sum(axis=1, keepdims=True)
+
+
 def run_calibration(cfg: Config, logger, events=None) -> Dict[str, Any]:
     out_dir = cfg.outputs_dir("evaluation")
     probability_path = cfg.outputs_dir("classification") / "test_probabilities.npz"
@@ -105,6 +137,30 @@ def run_calibration(cfg: Config, logger, events=None) -> Dict[str, Any]:
     )
 
     overall_accuracy = float((np.asarray(y_pred) == np.asarray(y_true)).mean())
+
+    # E6: if the published checkpoint has a validation-fitted temperature, report the
+    # calibrated ECE next to the unscaled one. The headline ECE stays unscaled so the
+    # two are never confused.
+    temperature_scaled: Optional[Dict[str, Any]] = None
+    temperature = _posthoc_temperature(cfg, probability_path.parent)
+    if temperature and "logits" in data:
+        scaled_probabilities = _softmax_rows(np.asarray(data["logits"]) / temperature)
+        scaled_binning = calibration_bins(
+            scaled_probabilities, y_true, bins=bins_count, strategy=strategy
+        )
+        temperature_scaled = {
+            "temperature": temperature,
+            "ece": scaled_binning["ece"],
+            "accuracy": float(
+                (scaled_probabilities.argmax(axis=1) == np.asarray(y_true)).mean()
+            ),
+            "note": (
+                "Temperature fitted on the validation fold. Temperature scaling has one "
+                "parameter and cannot change the predicted class, so accuracy should be "
+                "unchanged; only confidence and ECE move."
+            ),
+        }
+
     diagram_path = _reliability_diagram(binning, binning["ece"], out_dir / "reliability_diagram.png")
 
     result = {
@@ -120,6 +176,11 @@ def run_calibration(cfg: Config, logger, events=None) -> Dict[str, Any]:
                 "includes 1.0. ECE is the count-weighted |accuracy - mean confidence|."
             ),
             "bins": binning["bins"],
+            **(
+                {"temperature_scaled": temperature_scaled}
+                if temperature_scaled
+                else {}
+            ),
         },
         "uncertainty": uncertainty,
         "review_policy": {

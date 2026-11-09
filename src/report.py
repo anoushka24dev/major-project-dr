@@ -170,10 +170,16 @@ def write_metrics_csv(path: Path, metrics: Dict[str, Any]) -> Path:
             if isinstance(entry, dict) and entry.get("available"):
                 add(f"cross_dataset[{source}]", "accuracy", entry.get("accuracy"))
                 add(f"cross_dataset[{source}]", "macro_f1", entry.get("macro_f1"))
-        external = (cross.get("external_partition") or {}).get("metrics") or {}
+        external_partition = cross.get("external_partition") or {}
+        external = external_partition.get("metrics") or {}
         if external.get("available"):
-            add("cross_dataset[mmrdr_official_test]", "accuracy", external.get("accuracy"))
-            add("cross_dataset[mmrdr_official_test]", "macro_f1", external.get("macro_f1"))
+            label = external_partition.get("name") or "external_test"
+            add(f"cross_dataset[{label}]", "accuracy", external.get("accuracy"))
+            add(f"cross_dataset[{label}]", "macro_f1", external.get("macro_f1"))
+            for source, entry in (external_partition.get("per_source") or {}).items():
+                if isinstance(entry, dict) and entry.get("available"):
+                    add(f"cross_dataset[{label}:{source}]", "accuracy", entry.get("accuracy"))
+                    add(f"cross_dataset[{label}:{source}]", "macro_f1", entry.get("macro_f1"))
 
     dataset = metrics.get("dataset_summary")
     if dataset:
@@ -426,10 +432,16 @@ def _render_html(cfg: Config, metrics: Dict[str, Any], execution: Dict[str, Any]
             for source, entry in within.items()
             if isinstance(entry, dict) and entry.get("available")
         ]
-        external = (cross.get("external_partition") or {}).get("metrics") or {}
+        external_partition = cross.get("external_partition") or {}
+        external = external_partition.get("metrics") or {}
         if external.get("available"):
-            rows.append(["MMRDR official test (external)", _fmt(external.get("accuracy")),
+            label = external_partition.get("name") or "external_test"
+            rows.append([f"{label} (all held-out sources)", _fmt(external.get("accuracy")),
                          _fmt(external.get("macro_f1")), external.get("num_samples")])
+            for source, entry in (external_partition.get("per_source") or {}).items():
+                if isinstance(entry, dict) and entry.get("available"):
+                    rows.append([f"{label}:{source}", _fmt(entry.get("accuracy")),
+                                 _fmt(entry.get("macro_f1")), entry.get("num_samples")])
         shift = cross.get("domain_shift") or {}
         parts.append(
             _section(

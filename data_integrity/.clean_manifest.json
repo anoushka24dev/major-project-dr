@@ -1,0 +1,27 @@
+{
+  "policy_version": "data-integrity-v1-2026-11-09",
+  "created": "2026-11-09T13:36:41Z",
+  "digest": "4956b105459d8267f455ce03e0bce7f302c9a0f91687c310145357b34e9d0c97",
+  "files": [
+    "cleaned_classification_manifest.csv",
+    "cleaned_segmentation_manifest.csv"
+  ],
+  "counts": {
+    "images_included": 15894,
+    "images_excluded": 7996,
+    "classification_rows": 14457,
+    "segmentation_rows": 0
+  },
+  "source_statuses": {
+    "mendeley": "LIKELY",
+    "mmrdr": "BLOCKED",
+    "aptos2019": "NOT AVAILABLE",
+    "ddr": "NOT AVAILABLE",
+    "idrid": "BLOCKED",
+    "zenodo_v03_reference": "VERIFIED"
+  },
+  "contaminated": false,
+  "clean": true,
+  "seed": 12345,
+  "isolation_checks_passed": false
+}

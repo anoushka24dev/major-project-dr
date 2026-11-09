@@ -126,6 +126,17 @@ def _sha256_of(path: Path, chunk_size: int = 1024 * 1024) -> str:
     return digest.hexdigest()
 
 
+def _md5_of(path: Path, chunk_size: int = 1024 * 1024) -> str:
+    digest = hashlib.md5()
+    with path.open("rb") as handle:
+        while True:
+            block = handle.read(chunk_size)
+            if not block:
+                break
+            digest.update(block)
+    return digest.hexdigest()
+
+
 def _safe_replace(source: Path, destination: Path, max_attempts: int = 10, delay: float = 1.0) -> None:
     for attempt in range(max_attempts):
         try:
@@ -142,6 +153,7 @@ def download_file(
     destination: Path,
     *,
     expected_sha256: Optional[str] = None,
+    expected_md5: Optional[str] = None,
     expected_size: Optional[int] = None,
     chunk_size: int = 1024 * 1024,
     timeout: float = 120.0,
@@ -150,6 +162,7 @@ def download_file(
     backoff: float = 3.0,
     logger=None,
     progress_callback: Optional[Callable[[int, Optional[int]], None]] = None,
+    headers: Optional[Dict[str, str]] = None,
 ) -> Path:
     """Download ``url`` to ``destination``, resuming and verifying as configured.
 
@@ -160,12 +173,17 @@ def download_file(
     destination.parent.mkdir(parents=True, exist_ok=True)
 
     if destination.exists():
-        if expected_size is not None and destination.stat().st_size == expected_size:
-            if not expected_sha256 or _sha256_of(destination) == expected_sha256.lower():
-                if logger:
-                    logger.info("already downloaded and verified: %s", destination.name)
-                return destination
-        if expected_size is None and expected_sha256 is None:
+        has_digest = bool(expected_sha256 or expected_md5)
+        checksum_ok = True
+        if expected_sha256:
+            checksum_ok = _sha256_of(destination) == expected_sha256.lower()
+        elif expected_md5:
+            checksum_ok = _md5_of(destination) == expected_md5.lower()
+        if expected_size is not None and destination.stat().st_size == expected_size and checksum_ok:
+            if logger:
+                logger.info("already downloaded and verified: %s", destination.name)
+            return destination
+        if expected_size is None and not has_digest:
             if logger:
                 logger.info("already present (unverified, no metadata): %s", destination.name)
             return destination
@@ -184,10 +202,12 @@ def download_file(
         if expected_size is not None and existing == expected_size:
             break
 
-        headers = {"User-Agent": USER_AGENT, "Accept": "*/*"}
+        request_headers = {"User-Agent": USER_AGENT, "Accept": "*/*"}
+        if headers:
+            request_headers.update(headers)
         if existing:
-            headers["Range"] = f"bytes={existing}-"
-        request = urllib.request.Request(url, headers=headers)
+            request_headers["Range"] = f"bytes={existing}-"
+        request = urllib.request.Request(url, headers=request_headers)
         try:
             with urllib.request.urlopen(request, timeout=timeout) as response:
                 status = getattr(response, "status", response.getcode())
@@ -237,6 +257,15 @@ def download_file(
             )
         if logger:
             logger.info("sha256 verified for %s", destination.name)
+    elif expected_md5:
+        actual = _md5_of(part)
+        if actual.lower() != expected_md5.lower():
+            part.unlink(missing_ok=True)
+            raise DownloadError(
+                f"md5 mismatch for {destination.name}: got {actual}, expected {expected_md5}"
+            )
+        if logger:
+            logger.info("md5 verified for %s", destination.name)
 
     _safe_replace(part, destination)
     return destination
@@ -290,6 +319,21 @@ def safe_extract_zip(
     if logger:
         logger.info("extracted %s -> %s", archive_path.name, destination)
     return destination
+
+
+def verify_zip(archive_path: Path) -> None:
+    """Raise :class:`DownloadError` unless the zip's central directory and CRCs are valid."""
+    try:
+        with zipfile.ZipFile(archive_path) as archive:
+            bad = archive.testzip()
+            if bad is not None:
+                raise DownloadError(
+                    f"archive {Path(archive_path).name} is corrupt: first bad member is {bad!r}"
+                )
+    except zipfile.BadZipFile as exc:
+        raise DownloadError(
+            f"not a valid zip archive: {Path(archive_path).name} ({exc})"
+        ) from exc
 
 
 def safe_extract_tar(archive_path: Path, destination: Path, *, logger=None) -> Path:

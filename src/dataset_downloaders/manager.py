@@ -88,7 +88,11 @@ def _call(source: str, cfg: Config, logger, manifest: DownloadManifest, *, skip_
     if source == "mmrdr":
         from . import mmrdr as module
 
-        return module.run(cfg, logger, manifest, skip_download=skip_download)
+        return module.run(
+            cfg, logger, manifest,
+            root=cfg.mmrdr_root(),
+            skip_download=skip_download,
+        )
     if source == "aptos":
         from . import aptos as module
 
@@ -109,7 +113,7 @@ def _source_root(cfg: Config, source: str) -> Optional[Path]:
         if source == "mendeley":
             return cfg.fundus_root() or cfg.path("paths.mendeley_dir")
         if source == "mmrdr":
-            return cfg.path("paths.mmrdr_dir")
+            return cfg.mmrdr_root()
         if source == "aptos":
             return cfg.aptos_root()
         if source == "ddr":

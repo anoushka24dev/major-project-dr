@@ -68,11 +68,17 @@ def _evaluate_manifest(
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
     probabilities: List[np.ndarray] = []
     labels: List[int] = []
+    sources: List[str] = []
     with torch.no_grad():
-        for inputs, batch_labels, _meta in loader:
+        for inputs, batch_labels, meta in loader:
             logits = model(inputs.to(device, non_blocking=True))
             probabilities.append(torch.softmax(logits, dim=1).float().cpu().numpy())
             labels.extend(int(v) for v in batch_labels)
+            batch_sources = meta.get("source_dataset")
+            if isinstance(batch_sources, (list, tuple)):
+                sources.extend(str(value) for value in batch_sources)
+            else:
+                sources.extend([str(batch_sources)] * inputs.size(0))
     stacked = np.concatenate(probabilities, axis=0)
     truth = np.asarray(labels)
     return {
@@ -80,6 +86,7 @@ def _evaluate_manifest(
         "metrics": _metrics_for_subset(stacked, truth, class_names, manifest_path.stem),
         "probabilities": stacked,
         "y_true": truth,
+        "sources": np.asarray(sources),
     }
 
 
@@ -148,26 +155,47 @@ def run_cross_dataset(cfg: Config, logger, events=None) -> Dict[str, Any]:
         )
         external_saved = evaluated["probabilities"]
         metrics = evaluated["metrics"]
+        external_sources = evaluated["sources"]
         entropy = predictive_entropy(external_saved)
         metrics["mean_confidence"] = float(external_saved.max(axis=1).mean())
         metrics["mean_entropy_nats"] = float(entropy.mean())
+        unique_sources = sorted({str(value) for value in external_sources.tolist()})
+        per_source: Dict[str, Any] = {}
+        for source in unique_sources:
+            mask = external_sources == source
+            per_source[source] = _metrics_for_subset(
+                external_saved[mask], evaluated["y_true"][mask], class_names, source
+            )
         result["external_partition"] = {
-            "name": "mmrdr_official_test",
+            "name": (
+                "mmrdr_official_test"
+                if unique_sources == ["mmrdr"]
+                else "external_test_partition"
+            ),
             "manifest": str(external_manifest),
+            "sources": unique_sources,
             "num_samples": evaluated["samples"],
             "metrics": metrics,
+            "per_source": per_source,
+            "note": (
+                "Every image here is held out from training by construction: MMRDR `ts` and "
+                "DDR official `test` images are excluded by the source authors' own split, and "
+                "in external-validation mode APTOS and DDR are held out entirely."
+            ),
         }
         np.savez_compressed(
             out_dir / "external_test_probabilities.npz",
             probabilities=external_saved,
             y_true=evaluated["y_true"],
+            sources=external_sources,
         )
     else:
         result["external_partition"] = {
             "available": False,
             "reason": (
-                "No MMRDR official test partition (external_test_manifest.csv). It is created "
-                "by the prepare stage when MMRDR-CFP `ts` images are present."
+                "No external test partition (external_test_manifest.csv). It is created by the "
+                "prepare stage from MMRDR-CFP `ts` images, DDR official test images, and in "
+                "external-validation mode from every held-out source."
             ),
         }
 

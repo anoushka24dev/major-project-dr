@@ -98,17 +98,21 @@ class LabelMapper:
 
         self._rules: Dict[str, Dict[str, Dict]] = {}
         self._exclusions: Dict[str, Dict[str, str]] = {}
+        # Every source declared in config label_mapping is registered, so a new
+        # dataset cannot be silently mapped through another dataset's rules.
+        mapping = cfg.get("label_mapping") or {}
+        for source, section in mapping.items():
+            if not isinstance(section, dict) or not section.get("rules"):
+                continue
+            name = str(source).lower()
+            self._rules[name] = {str(k): dict(v) for k, v in section["rules"].items()}
+            self._exclusions[name] = {
+                str(k): str(v)
+                for k, v in (section.get("exclude_non_dr") or {}).items()
+            }
         for source in ("mendeley", "mmrdr"):
-            rules = cfg.get(f"label_mapping.{source}.rules", {}) or {}
-            self._rules[source] = {str(k): dict(v) for k, v in rules.items()}
-        self._exclusions["mendeley"] = {
-            str(k): str(v)
-            for k, v in (cfg.get("label_mapping.mendeley.exclude_non_dr", {}) or {}).items()
-        }
-        self._exclusions["mmrdr"] = {
-            str(k): str(v)
-            for k, v in (cfg.get("label_mapping.mmrdr.exclude_non_dr", {}) or {}).items()
-        }
+            self._rules.setdefault(source, {})
+            self._exclusions.setdefault(source, {})
 
         self._counts: Dict[tuple[str, str], int] = {}
         self._decisions: Dict[tuple[str, str], MappingDecision] = {}

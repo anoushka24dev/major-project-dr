@@ -22,6 +22,12 @@ except ImportError as exc:  # pragma: no cover - environment guard
 CONFIG_ENV_VAR = "DR_CONFIG"
 FUNDUS_ROOT_ENV_VAR = "DR_FUNDUS_ROOT"
 IDRID_ROOT_ENV_VAR = "DR_IDRID_ROOT"
+APTOS_ROOT_ENV_VAR = "DR_APTOS_ROOT"
+DDR_ROOT_ENV_VAR = "DR_DDR_ROOT"
+MMRDR_ROOT_ENV_VAR = "DR_MMRDR_ROOT"
+
+#: Dataset composition modes (which sources train the classifier).
+DATASET_MODES = ("combined", "external")
 
 DEFAULT_CONFIG_RELATIVE = Path("config") / "config.yaml"
 
@@ -207,6 +213,39 @@ class Config:
             return configured
         return self.path("paths.idrid_dir")
 
+    def _env_root(self, env_var: str, dotted: str) -> Path:
+        env = os.environ.get(env_var, "").strip()
+        if env:
+            return Path(env).expanduser().resolve()
+        configured = self.optional_path(dotted)
+        if configured is not None:
+            return configured
+        return self.path(dotted)
+
+    def aptos_root(self) -> Path:
+        """Root of the APTOS 2019 copy (``DR_APTOS_ROOT`` overrides the config)."""
+        return self._env_root(APTOS_ROOT_ENV_VAR, "paths.aptos_dir")
+
+    def ddr_root(self) -> Path:
+        """Root of the DDR copy (``DR_DDR_ROOT`` overrides the config)."""
+        return self._env_root(DDR_ROOT_ENV_VAR, "paths.ddr_dir")
+
+    def mmrdr_root(self) -> Path:
+        """Root of the MMRDR copy (``DR_MMRDR_ROOT`` overrides the config)."""
+        return self._env_root(MMRDR_ROOT_ENV_VAR, "paths.mmrdr_dir")
+
+    @property
+    def dataset_mode(self) -> str:
+        """``combined`` (all validated sources) or ``external`` (held-out sources)."""
+        value = str(self.get("run.dataset_mode", "combined")).strip().lower()
+        return value if value in DATASET_MODES else "combined"
+
+    @property
+    def development_sources(self) -> List[str]:
+        """Sources allowed to train the classifier in external-validation mode."""
+        configured = self.get("run.development_sources") or ["mendeley", "mmrdr"]
+        return [str(source).strip().lower() for source in configured]
+
     def effective_batch_size(self, stage: str = "classification", *, fallback: int = 8) -> int:
         value = self.get(f"{stage}.batch_size", "auto")
         if isinstance(value, str) and value.strip().lower() == "auto":
@@ -301,8 +340,20 @@ def validate_config(cfg: Config) -> None:
     if image_size < 32:
         raise ConfigError(f"preprocessing.classification.image_size={image_size} is too small.")
 
+    mapping_sources = {
+        str(name)
+        for name, section in (cfg.get("label_mapping") or {}).items()
+        if isinstance(section, dict) and section.get("rules")
+    }
+    missing_sources = {"mendeley", "mmrdr"} - mapping_sources
+    if missing_sources:
+        raise ConfigError(
+            f"label_mapping has no rules for {sorted(missing_sources)}. Every classification "
+            "source needs its own audited mapping."
+        )
+
     # Every mapped label must be a valid class index.
-    for source_name in ("mendeley", "mmrdr"):
+    for source_name in sorted(mapping_sources):
         rules = cfg.get(f"label_mapping.{source_name}.rules", {}) or {}
         if not rules:
             raise ConfigError(f"label_mapping.{source_name}.rules must not be empty.")
@@ -318,12 +369,25 @@ def validate_config(cfg: Config) -> None:
                     f"outside 0..{len(classes) - 1}."
                 )
 
-    excluded = cfg.get("label_mapping.mendeley.exclude_non_dr", {}) or {}
-    overlap = set(excluded) & set(cfg.get("label_mapping.mendeley.rules", {}) or {})
-    if overlap:
+    for source_name in sorted(mapping_sources):
+        excluded = cfg.get(f"label_mapping.{source_name}.exclude_non_dr", {}) or {}
+        overlap = set(excluded) & set(cfg.get(f"label_mapping.{source_name}.rules", {}) or {})
+        if overlap:
+            raise ConfigError(
+                f"These {source_name} labels are both mapped and excluded: {sorted(overlap)}. "
+                "A label cannot be both a DR grade and an exclusion."
+            )
+
+    mode = str(cfg.get("run.dataset_mode", "combined")).strip().lower()
+    if mode not in DATASET_MODES:
         raise ConfigError(
-            f"These Mendeley folders are both mapped and excluded: {sorted(overlap)}. "
-            "A label cannot be both a DR grade and a non-DR exclusion."
+            f"run.dataset_mode={mode!r} is not one of {list(DATASET_MODES)}."
+        )
+    development = cfg.get("run.development_sources") or []
+    unknown_development = [s for s in development if str(s).lower() not in mapping_sources]
+    if unknown_development:
+        raise ConfigError(
+            f"run.development_sources contains sources with no label mapping: {unknown_development}"
         )
 
     ece_bins = int(cfg.get("evaluation.calibration.bins", 15))

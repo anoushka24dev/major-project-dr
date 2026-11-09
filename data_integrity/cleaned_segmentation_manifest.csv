@@ -1,0 +1,1 @@
+image_id,source_dataset,rel_path,original_filename,original_label,lesion_channels,mask_paths,patient_group_id,split_group_id,split,annotation_availability,sha256,provenance_status,provenance_evidence

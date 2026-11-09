@@ -32,11 +32,19 @@ IDRiD layout expected (as published):
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from ..config import Config
-from .base import DownloadManifest, DownloadResult, count_files, find_dirs_named
+from .base import (
+    DownloadManifest,
+    DownloadResult,
+    count_files,
+    download_file,
+    extract_archive,
+    find_dirs_named,
+)
 
 SOURCE = "idrid"
 
@@ -209,7 +217,73 @@ def manual_instructions(cfg: Config, target: Path) -> List[str]:
         "  4. Re-run RUN.bat (or `RUN.bat --resume`); the pipeline validates the pairing "
         "and continues automatically.",
         f"  Alternatively set DR_IDRID_ROOT to an existing extracted copy.",
+        "  Or, after signing in, start the download in the browser and copy the archive "
+        "URL(s) and the session Cookie header into the environment, then re-run:",
+        "      set DR_IDRID_URLS=<space-separated archive urls>",
+        "      set DR_IDRID_COOKIE=<cookie header value>",
+        "  Both values stay in your environment: they are never written to config, "
+        "logs or the repository.",
     ]
+
+
+def authenticated_sources() -> Dict[str, Any]:
+    """Read the optional authenticated-download configuration from the environment.
+
+    IEEE DataPort serves the archives only to a signed-in session. Rather than
+    storing or automating a password, the pipeline accepts the *already resolved*
+    archive URLs and the session cookie the user obtained after signing in:
+
+        DR_IDRID_URLS    space-separated direct archive URLs
+        DR_IDRID_COOKIE  the Cookie header value for that session
+
+    Both are read from the environment only, never written to the repository or a
+    log line, and the cookie is redacted from every message.
+    """
+    raw_urls = str(os.environ.get("DR_IDRID_URLS") or "").strip()
+    urls = [part for part in raw_urls.split() if part]
+    cookie = str(os.environ.get("DR_IDRID_COOKIE") or "").strip()
+    return {"urls": urls, "cookie": cookie, "configured": bool(urls)}
+
+
+def _download_authenticated(
+    cfg: Config,
+    logger,
+    manifest: DownloadManifest,
+    target: Path,
+    sources: Dict[str, Any],
+) -> List[Path]:
+    """Download the configured IDRiD archives with the user's session cookie."""
+    cache_dir = cfg.path("paths.cache_dir", create=True) / SOURCE
+    headers = {"Cookie": sources["cookie"]} if sources.get("cookie") else {}
+    downloaded: List[Path] = []
+    for index, url in enumerate(sources["urls"]):
+        name = Path(url.split("?")[0]).name or f"idrid_archive_{index + 1}.zip"
+        try:
+            path = download_file(
+                url,
+                cache_dir / name,
+                chunk_size=int(cfg.get("download.chunk_size", 1048576)),
+                timeout=float(cfg.get("download.timeout_seconds", 120)),
+                resume=bool(cfg.get("download.resume", True)),
+                max_retries=int(cfg.get("download.max_retries", 5)),
+                backoff=float(cfg.get("download.retry_backoff_seconds", 3)),
+                logger=logger,
+                headers=headers,
+            )
+        except Exception as exc:
+            manifest.add("download", source=SOURCE, url=url.split("?")[0], ok=False, error=str(exc))
+            logger.error("IDRiD archive failed: %s", exc)
+            continue
+        manifest.add("download", source=SOURCE, file=str(path), bytes=path.stat().st_size, ok=True)
+        downloaded.append(path)
+        if path.suffix.lower() in {".zip", ".tar", ".gz", ".tgz"}:
+            try:
+                extract_archive(path, target, logger=logger)
+                manifest.add("extract", source=SOURCE, archive=str(path), ok=True)
+            except Exception as exc:
+                manifest.add("extract", source=SOURCE, archive=str(path), ok=False, error=str(exc))
+                logger.error("IDRiD extraction failed: %s", exc)
+    return downloaded
 
 
 def run(
@@ -218,19 +292,33 @@ def run(
     manifest: DownloadManifest,
     *,
     root: Optional[Path] = None,
+    skip_download: bool = False,
 ) -> DownloadResult:
-    """Validate manually-supplied IDRiD data, or report the exact blocker."""
+    """Download authorized IDRiD archives, validate a supplied copy, or report the blocker."""
     target = Path(root) if root else cfg.idrid_root()
     layout = discover_layout(target)
+    source_config = authenticated_sources()
     manifest.add(
         "inspect",
         source=SOURCE,
         root=str(target),
         image_count=layout.get("image_count"),
         missing=layout.get("missing"),
-        auto_download=False,
+        auto_download=bool(source_config["configured"]) and not skip_download,
+        authenticated_urls=len(source_config["urls"]),
+        cookie_present=bool(source_config["cookie"]),
         access_requirement="registration + terms acceptance",
     )
+
+    if not layout["root_exists"] and source_config["configured"] and not skip_download:
+        logger.info("IDRiD: %d authenticated archive URL(s) configured; downloading",
+                    len(source_config["urls"]))
+        downloaded = _download_authenticated(cfg, logger, manifest, target, source_config)
+        layout = discover_layout(target)
+        if not downloaded:
+            logger.error("every configured IDRiD archive failed to download")
+        elif not layout.get("image_count"):
+            logger.error("IDRiD archives downloaded but no images were found after extraction")
 
     if not layout["root_exists"]:
         logger.warning("IDRiD root does not exist yet: %s", target)
@@ -238,7 +326,8 @@ def run(
             source=SOURCE,
             status=DownloadResult.BLOCKED,
             detail=(
-                "IDRiD requires registration; no files are present at the expected location"
+                "IDRiD requires an authenticated download; no files are present at the "
+                "expected location and no DR_IDRID_URLS were configured"
             ),
             root=target,
             requirements=manual_instructions(cfg, target),
