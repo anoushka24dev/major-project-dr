@@ -324,3 +324,19 @@ tests/test_unified_pipeline.py         README.md
     - APTOS 2019 (Kaggle): 60.47% accuracy, 0.4218 macro-F1
     - MMRDR: 58.89% accuracy (internal test), 57.54% (official external test partition)
   - All 11 pipeline stages completed with **exit code 0**. Output deliverables bundled in `deliverables_for_submission/`.
+
+### 10.4 Resume & IDRiD Mask Decoding Fixes + Verified GPU Run (2026-11-12)
+
+- **Technical Fixes Applied**:
+  1. **Interrupted Classifier Resume (`src/train_classifier.py`)**: Guarded `reuse_valid_checkpoints` with `(run_dir / RUN_SUMMARY).is_file()` when `resume=True` so interrupted runs continue instead of returning an incomplete `best_checkpoint`, restored `epochs_without_improvement` from `best_epoch`, and fixed backbone unfreezing (`if backbone_frozen and epoch >= freeze_epochs:`) when resuming past `freeze_backbone_epochs`.
+  2. **IDRiD Palette Mask Decoding & Alignment (`src/data.py`, `src/explainability.py`)**: Replaced `convert("L") > 127` (which converted palette `"P"` red `(255, 0, 0)` annotations to luminance `76` and zeroed 100% of real IDRiD masks) and direct mask stretching with shared `resize_and_pad_mask(...)`, decoding palette/RGB channels cleanly and applying centered aspect-ratio-preserving scale-and-pad alignment matching `_resize_and_pad`.
+  3. **Regression Tests (`tests/test_unified_pipeline.py`)**: Added `test_resize_and_pad_mask_preserves_palette_red_and_geometry` and `test_classifier_resume_continues_incomplete_run_and_unfreezes` (`83 passed, 1 warning` across `tests/test_unified_pipeline.py` and `tests/test_pipeline_entrypoint.py`).
+- **Training & Evaluation Results (RTX 4060 Laptop GPU, AMP, Exit Code 0)**:
+  - **ResNet-50 Classifier (`15/15` epochs, best at epoch 13 with `val_macro_f1: 0.7451`)**:
+    - Held-out internal test (`2,450` images): **77.88% accuracy**, **0.7517 macro F1**, **0.7110 Cohen's kappa**, **0.9456 macro ROC-AUC**.
+    - Calibration (`15` bins): **ECE 0.1297**, **6.82%** (`167/2,450`) flagged for human review.
+    - External MMRDR official test (`504` images): **76.79% accuracy**, **0.6420 macro F1**, **0.6433 kappa**, **0.9220 macro ROC-AUC**.
+  - **Lesion U-Net (`25/25` epochs on `54` paired IDRiD images, best at epoch 6)**:
+    - Validation macro Dice **0.0362**; held-out IDRiD test (`8` images) macro Dice **0.0074**, macro IoU **0.0037** (`HE: 0.0177`, `EX: 0.0102`, `MA: 0.0016`, `SE: 2.77e-10`).
+  - **Grad-CAM Lesion Overlap (`8` external IDRiD images)**: Mean union Dice **0.0778**, Mean union IoU **0.0413**.
+  - Refreshed bundles packaged via `scripts/package_deliverables.py` into `deliverables_for_submission/`.

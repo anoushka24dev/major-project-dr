@@ -380,6 +380,29 @@ def split_idrid_pairs(
     }
 
 
+def resize_and_pad_mask(mask_image: Image.Image, target_size: int) -> np.ndarray:
+    """Decode a binary lesion mask and align it with ``_resize_and_pad`` geometry.
+
+    Converts palette/colour masks (including IDRiD's ``P``-mode red annotations
+    whose luminance drops below 128 under ``convert("L")``) via max-channel
+    intensity before nearest-neighbour scaling and centered padding.
+    """
+    if mask_image.mode in ("P", "PA", "RGB", "RGBA", "CMYK", "YCbCr"):
+        array = np.asarray(mask_image.convert("RGB"))[..., :3].max(axis=-1)
+    else:
+        array = np.asarray(mask_image)
+    threshold = int(array.max()) // 2
+    canonical = Image.fromarray(((array > threshold).astype(np.uint8) * 255), mode="L")
+    width, height = canonical.size
+    scale = min(target_size / width, target_size / height)
+    new_width = max(1, round(width * scale))
+    new_height = max(1, round(height * scale))
+    resized = canonical.resize((new_width, new_height), Image.NEAREST)
+    canvas = Image.new("L", (target_size, target_size), 0)
+    canvas.paste(resized, ((target_size - new_width) // 2, (target_size - new_height) // 2))
+    return np.asarray(canvas) > 127
+
+
 class SegmentationDataset(Dataset):
     """IDRiD image + four binary lesion masks."""
 
@@ -410,11 +433,7 @@ class SegmentationDataset(Dataset):
         for channel_index, channel in enumerate(LESION_ORDER):
             mask_path = Path(pair[f"mask_{channel}"])
             with Image.open(mask_path) as mask_image:
-                mask = mask_image.convert("L").resize(
-                    (self.image_size, self.image_size), Image.NEAREST
-                )
-                array = np.asarray(mask)
-            masks[channel_index] = (array > 127).astype(np.float32)
+                masks[channel_index] = resize_and_pad_mask(mask_image, self.image_size).astype(np.float32)
 
         meta = {"image_id": pair["image_id"], "image_path": pair["image_path"]}
         return tensor, torch.from_numpy(masks), meta

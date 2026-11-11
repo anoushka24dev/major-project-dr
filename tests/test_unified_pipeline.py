@@ -855,6 +855,111 @@ def test_smoke_full_chain_on_synthetic_fixture(tmp_path, monkeypatch):
     assert "IDRiD" in (result["detail"] or "")
 
 
+def test_resize_and_pad_mask_preserves_palette_red_and_geometry(tmp_path):
+    from src.data import SegmentationDataset, resize_and_pad_mask
+    from src.legacy_bridge import load_colab_helpers
+
+    load_colab_helpers(PROJECT_ROOT)
+
+    # Simulate IDRiD palette TIFF: index 0 = black (0, 0, 0), index 1 = red (255, 0, 0).
+    palette = [0, 0, 0, 255, 0, 0] + [0] * (254 * 3)
+    palette_img = Image.fromarray(np.ones((32, 64), dtype=np.uint8), mode="P")
+    palette_img.putpalette(palette)
+    mask = resize_and_pad_mask(palette_img, 32)
+    assert mask.shape == (32, 32)
+    assert mask.dtype == bool
+    assert not mask[:8].any() and not mask[24:].any()
+    assert mask[8:24].all()
+
+    empty = Image.fromarray(np.zeros((32, 64), dtype=np.uint8), mode="L")
+    assert not resize_and_pad_mask(empty, 32).any()
+
+    # Overwrite MA channel of a synthetic IDRiD fixture with a palette red TIFF.
+    root = _make_idrid(tmp_path / "idrid_palette", count=1)
+    ma_path = root / "2. All Segmentation Groundtruths" / "a. Training Set" / "1. Microaneurysms" / "IDRiD_01_MA.tif"
+    ma_raw = np.zeros((56, 72), dtype=np.uint8)
+    ma_raw[20:36, 28:44] = 1
+    ma_tif = Image.fromarray(ma_raw, mode="P")
+    ma_tif.putpalette(palette)
+    ma_tif.save(ma_path)
+
+    cfg = load_config(_write_config(tmp_path, **{"paths.idrid_dir": str(root)}), root=tmp_path)
+    pairing = build_idrid_pairs(cfg, _null_logger())
+    _image, masks, _meta = SegmentationDataset(pairing["pairs"], cfg, image_size=32)[0]
+    assert float(masks[0].sum()) > 0.0
+
+
+def test_classifier_resume_continues_incomplete_run_and_unfreezes(tmp_path, monkeypatch):
+    from src import models as models_mod
+    from src import train_classifier
+    from src.legacy_bridge import load_colab_helpers
+    from src.prepare import run_prepare
+
+    load_colab_helpers(PROJECT_ROOT)
+    real_dataloader = train_classifier._dataloader
+    monkeypatch.setattr(
+        train_classifier,
+        "_dataloader",
+        lambda ds, *, batch_size, shuffle, num_workers, seed: real_dataloader(
+            ds, batch_size=batch_size, shuffle=shuffle, num_workers=0, seed=seed
+        ),
+    )
+
+    corpus = _make_fundus_corpus(tmp_path / "datasets" / "mendeley", per_class=3)
+    cfg_path = _write_config(
+        tmp_path,
+        **{
+            "classification.pretrained": False,
+            "classification.epochs": 3,
+            "classification.freeze_backbone_epochs": 1,
+            "classification.early_stopping_patience": 3,
+            "classification.batch_size": 4,
+            "classification.num_workers": 0,
+            "preprocessing.classification.image_size": 32,
+        },
+    )
+    cfg = load_config(cfg_path, root=tmp_path)
+    monkeypatch.setenv("DR_FUNDUS_ROOT", str(corpus))
+    run_prepare(cfg, _null_logger())
+
+    # Simulate an interrupted run at epoch 2/3 (0-indexed epoch=1) without run_summary.json.
+    run_dir = cfg.path("paths.runs_dir", create=True) / "classification"
+    fingerprint = build_fingerprint(
+        architecture="resnet50",
+        classes=list(cfg.classes),
+        image_size=32,
+        manifest_version=cfg.manifest_version,
+        extra={"task": "five_class_classification"},
+    )
+    seed_model = models_mod.build_resnet50(
+        num_classes=5, pretrained=False, allow_weight_download=False, freeze_backbone=True
+    )
+    history = [
+        {"epoch": 1, "train_loss": 1.6, "train_accuracy": 0.2, "val_loss": 1.6, "val_accuracy": 0.2, "val_macro_f1": 0.1, "lr": 1e-4, "epoch_seconds": 0.1},
+        {"epoch": 2, "train_loss": 1.5, "train_accuracy": 0.25, "val_loss": 1.5, "val_accuracy": 0.25, "val_macro_f1": 0.15, "lr": 1e-4, "epoch_seconds": 0.1},
+    ]
+    for target in (run_dir / "best_checkpoint", run_dir / "last_checkpoint"):
+        save_checkpoint(
+            target, model=seed_model, optimizer=None, scheduler=None,
+            epoch=1, history=history, best_metric=0.15, best_epoch=1, fingerprint=fingerprint,
+        )
+
+    unfrozen_calls = []
+    real_unfreeze = models_mod.unfreeze_all
+
+    def spy_unfreeze(model):
+        unfrozen_calls.append(True)
+        return real_unfreeze(model)
+
+    monkeypatch.setattr(models_mod, "unfreeze_all", spy_unfreeze)
+    result = train_classifier.run_training(cfg, _null_logger(), force_retrain=False, resume=True)
+    assert result["status"] == "completed"
+    assert result["reused"] is False
+    assert len(unfrozen_calls) == 1
+    summary = json.loads((run_dir / "run_summary.json").read_text(encoding="utf-8"))
+    assert summary["epochs_completed"] == 3
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------

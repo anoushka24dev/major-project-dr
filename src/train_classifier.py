@@ -231,7 +231,8 @@ def run_training(
     best_dir = run_dir / BEST_DIR
     last_dir = run_dir / LAST_DIR
 
-    if cfg.get("run.reuse_valid_checkpoints", True) and not force_retrain:
+    run_summary_exists = (run_dir / RUN_SUMMARY).is_file()
+    if cfg.get("run.reuse_valid_checkpoints", True) and not force_retrain and (not resume or run_summary_exists):
         reusable = find_reusable(best_dir, fingerprint)
         if reusable["compatible"]:
             logger.info("Reusing compatible checkpoint at %s", reusable["path"])
@@ -349,6 +350,8 @@ def run_training(
             best_value = float(state.get("best_metric", best_value))
             best_epoch = int(state.get("best_epoch", -1))
             start_epoch = restored["epoch"] + 1
+            if best_epoch >= 0:
+                epochs_without_improvement = max(0, (start_epoch - 1) - best_epoch)
             logger.info(
                 "Resuming from epoch %d (best %s=%s at epoch %s)",
                 start_epoch, monitor, best_value, best_epoch,
@@ -399,13 +402,15 @@ def run_training(
     }
     _atomic_write_json(config_snapshot, run_dir / RUN_META)
 
+    backbone_frozen = freeze_epochs > 0
     started = time.time()
     completed = False
     try:
         for epoch in range(start_epoch, epochs):
             epoch_started = time.time()
-            if freeze_epochs > 0 and epoch == freeze_epochs:
+            if backbone_frozen and epoch >= freeze_epochs:
                 unfreeze_all(model)
+                backbone_frozen = False
                 logger.info("Backbone unfrozen at epoch %d", epoch + 1)
 
             train_stats = _train_epoch(

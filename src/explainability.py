@@ -38,6 +38,7 @@ from .data import (
     load_manifest_rows,
     load_rgb,
     normalize,
+    resize_and_pad_mask,
     split_idrid_pairs,
     to_tensor,
 )
@@ -59,23 +60,6 @@ def _slug(text: str) -> str:
         elif out and out[-1] != "_":
             out.append("_")
     return "".join(out).strip("_") or "item"
-
-
-def _transform_mask(mask_image: Image.Image, target: int) -> np.ndarray:
-    """Resize a lesion mask with the *same geometry* used for the input image.
-
-    The image pipeline scales by ``min(target/w, target/h)`` and pastes the result
-    centred on black. The mask must follow the identical scale and offset so the
-    two stay aligned; only the interpolation differs (nearest, to keep it binary).
-    """
-    width, height = mask_image.size
-    scale = min(target / width, target / height)
-    new_width = max(1, round(width * scale))
-    new_height = max(1, round(height * scale))
-    resized = mask_image.resize((new_width, new_height), Image.NEAREST)
-    canvas = Image.new("L", (target, target), 0)
-    canvas.paste(resized, ((target - new_width) // 2, (target - new_height) // 2))
-    return (np.asarray(canvas) > 127).astype(bool)
 
 
 def _heatmap_image(cam: np.ndarray, grad_mod) -> Image.Image:
@@ -295,7 +279,7 @@ def _validate_against_lesions(
         union = np.zeros((image_size, image_size), dtype=bool)
         for channel in LESION_ORDER:
             with Image.open(Path(pair[f"mask_{channel}"])) as mask_image:
-                array = _transform_mask(mask_image.convert("L"), image_size)
+                array = resize_and_pad_mask(mask_image, image_size)
             masks[channel] = array
             union |= array
 
