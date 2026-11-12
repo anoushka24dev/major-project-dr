@@ -17,6 +17,7 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
 | **Iteration 4** | `convnext_tiny` @ `384x384` + 4-view TTA | Cross-family **ConvNeXt-Tiny** (`27.8M`), `backbone=4.5e-5`, `head=3e-4`, `wd=2e-2`, **Model EMA** (`ema_decay=0.5`), `label_smoothing=0.08`, 15 epochs | `0.8095` (Epoch 8) | `0.7935` (`+1.47%`) | `0.7571` | `0.7258` | `0.9413` | `0.7996` (`+3.17%`) | Completed & evaluated (kept for cross-family ensemble; higher `Mild NPDR` recall `0.5801`) |
 | **Iteration 4b** | **3-Model Ensemble** (`effv2_s_512` `0.40` + `effv2_s_384` `0.45` + `convnext_tiny_384` `0.15`) + 4-view TTA | Cross-family & multi-resolution probability blending tuned strictly on `validation_manifest.csv` (`0.9805` val top-2 acc) | **`0.8189`** | **`0.8167`** (`+3.79%`) | **`0.7784`** | **`0.7550`** | **`0.9568`** | `0.8095` (`0.9446` AUC) | Completed & evaluated |
 | **Iteration 5** | `efficientnet_v2_s` @ `384x384` (`Ben Graham` + `GeM2d` + `OrdinalRetinalLoss`) | `4*(I-Blur(I))+128` local contrast cache (`_bg`), `GeM2d(p=3.0)`, adjacent-grade smoothing `0.10` + expected-grade regression `0.12` | `0.7692` (Ep 5) / `0.7843` (4-TTA) | — (rejected via validation) | — | — | — | — | Stopped early at Ep 7 (`val_loss 0.6975 -> 0.8000`; degraded ensemble) |
+| **Iteration 6** | `convnext_tiny` @ `512x512` (progressive warm-start) + 4-view TTA | Warm-start from `convnext_tiny_384.pt`, `512x512` Raw RGB, `OrdinalRetinalLoss` (`ordinal_smoothing=true`, `0.08`, aux `0.06`), `backbone=2.625e-5`, `head=7.5e-5`, `ema=0.5` | `0.8026` (no TTA) / `0.8099` (4-TTA) | `0.8000` (`+2.12%`) | `0.7645` | `0.7334` | `0.9457` | `0.8135` (`0.6825` F1) | Completed & evaluated (improved `convnext_tiny` +`0.65%` test / +`1.39%` ext) |
 
 ---
 
@@ -74,6 +75,36 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
   - **Generalized Mean Pooling (`GeM2d(p=3.0)` in `src/models.py`)**: Replaces `AdaptiveAvgPool2d(1)` so small high-response lesion patches concentrate rather than diluting across 144 grid cells.
   - **`OrdinalRetinalLoss` (`src/train_classifier.py`)**: Adjacent-grade soft target smoothing (`label_smoothing=0.10`) plus SmoothL1 expected-grade regression (`ordinal_loss_weight=0.12`).
 - **Observed Impact & Why Rejected**: On `efficientnet_v2_s @ 384px`, validation peaked at Epoch 5 (`0.7692` single-view / **`0.7843`** with 4-TTA, `0.7455` macro F1, `0.7134` kappa), while training accuracy climbed rapidly to `0.9343` and validation loss spiked `0.6975 -> 0.8000` by Epoch 7. Adding this checkpoint to the Iteration 4b ensemble on validation (`weights 0.05..0.20`) degraded accuracy (`0.8189 -> 0.8168–0.8185`). Aggressive `4x` high-pass subtraction discards genuine macular exudate/haemorrhage luminance cues while amplifying JPEG/camera texture noise. We keep `GeM2d` and `OrdinalRetinalLoss` in the codebase as clean modular options, revert preprocessing to Raw RGB + autocrop (`enhance_contrast: "none"`), and move to progressive `512px` `ConvNeXt` + `OrdinalRetinalLoss`.
+
+### 13. Progressive 512px ConvNeXt-Tiny & OrdinalRetinalLoss (Iteration 6, Completed)
+- **What it does**: Warm-starts `convnext_tiny` from `runs/models/convnext_tiny_384.pt` at `512x512` on pre-cached Raw-RGB images (`cache/cls_512_crop1`) using `OrdinalRetinalLoss(label_smoothing=0.08, ordinal_smoothing=True, ordinal_loss_weight=0.06)`, differential learning rates (`backbone=2.625e-5`, `head=7.5e-5`), `ema_decay=0.5`, `batch_size=12`, and `grad_accum_steps=2` (early stopped cleanly at Epoch 6).
+- **Observed Impact**: Relative to Iteration 4 (`convnext_tiny @ 384px`), held-out test accuracy improved **`0.7935 -> 0.8000`**, macro F1 improved **`0.7571 -> 0.7645`**, Cohen's Kappa rose **`0.7258 -> 0.7334`**, `PDR` ROC-AUC climbed to **`0.9715`**, and official MMRDR external test accuracy rose **`0.7996 -> 0.8135`** (macro F1 **`0.6413 -> 0.6825`**). On validation (`4-TTA`), it achieved `0.8099` (`0.7768` macro F1) and pushed our 4-model cross-family validation ensemble to **`0.8201`** (`0.7893` macro F1, `0.7597` kappa).
+
+---
+
+## Iteration 6 Per-Class & Per-Source Held-Out Test Metrics (`convnext_tiny` @ `512x512`, 4-TTA)
+
+### Overall Held-Out Test (`outputs/classification/classification_metrics.json`, n = 2,450)
+- **Accuracy**: `0.8000` (`80.00%`, `1,960 / 2,450`)
+- **Macro Precision / Recall / F1**: `0.7772` / `0.7549` / `0.7645`
+- **Weighted F1**: `0.7982`
+- **Cohen's Kappa**: `0.7334`
+- **Macro ROC-AUC**: `0.9457`
+- **Expected Calibration Error (ECE, 15 bins)**: `0.0458` (`9.0%` flagged for review under uncertainty thresholds)
+
+| Class | Support | Precision | Recall (Sensitivity) | Specificity | F1 | ROC-AUC |
+|---|---|---|---|---|---|---|
+| `No apparent DR` | 667 | `0.9865` | `0.9835` | `0.9950` | `0.9850` | `0.9987` |
+| `Mild NPDR` | 362 | `0.5801` | `0.5304` | `0.9334` | `0.5541` | `0.8770` |
+| `Moderate NPDR` | 848 | `0.7576` | `0.8255` | `0.8602` | `0.7901` | `0.9210` |
+| `Severe NPDR` | 299 | `0.7525` | `0.7525` | `0.9656` | `0.7525` | `0.9604` |
+| `PDR` | 274 | `0.8095` | `0.6825` | `0.9798` | `0.7406` | `0.9715` |
+
+### Breakdown by Source Dataset (`outputs/evaluation/cross_dataset_results.json`)
+- **Internal Test — Mendeley** (`n = 1,965`): Accuracy `0.7969`, Macro F1 `0.7720`, Cohen's Kappa `0.7302`
+- **Internal Test — MMRDR** (`n = 270`): Accuracy `0.8259`, Macro F1 `0.7013`, Cohen's Kappa `0.7300`
+- **Internal Test — APTOS 2019** (`n = 215`): Accuracy `0.7953`, Macro F1 `0.6328`, Cohen's Kappa `0.7009`
+- **External Official MMRDR `ts`** (`n = 504`): Accuracy `0.8135`, Macro F1 `0.6825`, Cohen's Kappa `0.7105`, Macro ROC-AUC `0.9286`
 
 ---
 
