@@ -15,6 +15,7 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
 | **Iteration 2** | `efficientnet_v2_s` @ `384x384` + 4-view TTA | **Differential LR** (`backbone=7.5e-5`, `head=3e-4`), CutMix/Mixup removed (`mix_prob=0.0`), `label_smoothing=0.05`, `class_weighting: false`, 4-view TTA | `0.8063` (no TTA) / `0.8091` (4-TTA) | `0.8082` (`+2.94%`) | `0.7632` | `0.7434` | **`0.9518`** | `0.7917` | Completed & evaluated |
 | **Iteration 3** | `efficientnet_v2_s` @ `512x512` (progressive warm-start) + 4-view TTA | Warm-start from Iteration 2 (`effv2_s_384.pt`), `512x512` resolution, **Model EMA** (`ema_decay=0.5`), `backbone=2.4e-5`, `head=6e-5`, `label_smoothing=0.08` | **`0.8140`** (Epoch 6) | **`0.8110`** (`+3.22%`) | **`0.7738`** | **`0.7471`** | `0.9454` | **`0.8214`** (`+5.35%`) | Completed & evaluated |
 | **Iteration 4** | `convnext_tiny` @ `384x384` + 4-view TTA | Cross-family **ConvNeXt-Tiny** (`27.8M`), `backbone=4.5e-5`, `head=3e-4`, `wd=2e-2`, **Model EMA** (`ema_decay=0.5`), `label_smoothing=0.08`, 15 epochs | `0.8095` (Epoch 8) | `0.7935` (`+1.47%`) | `0.7571` | `0.7258` | `0.9413` | `0.7996` (`+3.17%`) | Completed & evaluated (kept for cross-family ensemble; higher `Mild NPDR` recall `0.5801`) |
+| **Iteration 4b** | **3-Model Ensemble** (`effv2_s_512` `0.40` + `effv2_s_384` `0.45` + `convnext_tiny_384` `0.15`) + 4-view TTA | Cross-family & multi-resolution probability blending tuned strictly on `validation_manifest.csv` (`0.9805` val top-2 acc) | **`0.8189`** | **`0.8167`** (`+3.79%`) | **`0.7784`** | **`0.7550`** | **`0.9568`** | `0.8095` (`0.9446` AUC) | Completed & evaluated |
 
 ---
 
@@ -59,7 +60,38 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
 
 ### 10. Cross-Family Architecture Diversity (`convnext_tiny`, Iteration 4, Completed)
 - **What it does**: Trains a modern ConvNet (`convnext_tiny`, `7x7` depthwise convolutions, LayerNorm, inverted bottlenecks) from `384x384` cached fundus images using conservative differential learning rates (`backbone=4.5e-5`, `head=3e-4`, `weight_decay=2e-2`), `label_smoothing=0.08`, and `ema_decay=0.5`.
-- **Why used**: Adding architectural diversity outside the EfficientNetV2 family for multi-model probability ensembling. While standalone held-out test accuracy (`0.7935`, `1944/2450`) sits below `efficientnet_v2_s @ 512px` (`0.8110`), `convnext_tiny` achieves substantially higher `Mild NPDR` recall (`0.5801` vs `0.5083`) and strong `PDR` detection on external MMRDR (`0.9180` recall, `0.9916` ROC-AUC), making its errors complementary.
+- **Observed Impact**: Adding architectural diversity outside the EfficientNetV2 family for multi-model probability ensembling. While standalone held-out test accuracy (`0.7935`, `1944/2450`) sits below `efficientnet_v2_s @ 512px` (`0.8110`), `convnext_tiny` achieves substantially higher `Mild NPDR` recall (`0.5801` vs `0.5083`) and strong `PDR` detection on external MMRDR (`0.9180` recall, `0.9916` ROC-AUC), making its errors complementary.
+
+### 11. Cross-Family Multi-Resolution Probability Ensembling (Iteration 4b, Completed)
+- **What it does**: Averages calibrated 4-view TTA probability distributions across `effv2_s_512` (`0.40`), `effv2_s_384` (`0.45`), and `convnext_tiny_384` (`0.15`), with weights chosen strictly via grid search on `validation_manifest.csv`.
+- **Why used**: Combines `512px` micro-lesion detail, `384px` multi-scale receptive field stability, and `ConvNeXt` depthwise spatial priors. Noticeable gains appear in both calibration (`ECE: 0.0451 -> 0.0292`), discrimination (`Macro ROC-AUC: 0.9454 -> 0.9568`), and overall held-out accuracy (`0.8110 -> 0.8167`).
+- **Diagnostic Note on Error Floor**: On `validation_manifest.csv`, this ensemble reaches **`98.05%` top-2 accuracy** and **`98.78%` ±1 grade accuracy**, and even on the `2,092/2,457` validation cases where all 3 models **unanimously agree**, exact-label agreement is `86.57%` (`cross_label_conflict_pairs = 815,246` and `879` cross-folder patient ID collisions documented by the dataset manifest audit). Closing remaining clean signal errors therefore requires stronger micro-lesion visual enhancement (Ben Graham local contrast normalization + GeM spatial pooling + Transformer diversity).
+
+---
+
+## Iteration 4b Per-Class & Per-Source Held-Out Test Metrics (3-Model Ensemble, 4-TTA)
+
+### Overall Held-Out Test (`outputs/classification/classification_metrics.json`, n = 2,450)
+- **Accuracy**: `0.8167` (`81.67%`, `2,001 / 2,450`)
+- **Macro Precision / Recall / F1**: `0.7947` / `0.7680` / `0.7784`
+- **Weighted F1**: `0.8128`
+- **Cohen's Kappa**: `0.7550`
+- **Macro ROC-AUC**: `0.9568`
+- **Expected Calibration Error (ECE, 15 bins)**: `0.0292` (`13.3%` flagged for review under uncertainty thresholds)
+
+| Class | Support | Precision | Recall (Sensitivity) | Specificity | F1 | ROC-AUC |
+|---|---|---|---|---|---|---|
+| `No apparent DR` | 667 | `0.9851` | `0.9895` | `0.9944` | `0.9873` | `0.9997` |
+| `Mild NPDR` | 362 | `0.6416` | `0.5193` | `0.9497` | `0.5740` | `0.9166` |
+| `Moderate NPDR` | 848 | `0.7711` | `0.8620` | `0.8645` | `0.8140` | `0.9421` |
+| `Severe NPDR` | 299 | `0.7540` | `0.7793` | `0.9647` | `0.7664` | `0.9712` |
+| `PDR` | 274 | `0.8217` | `0.6898` | `0.9812` | `0.7500` | `0.9545` |
+
+### Breakdown by Source Dataset (`outputs/evaluation/cross_dataset_results.json`)
+- **Internal Test — Mendeley** (`n = 1,965`): Accuracy `0.8158`, Macro F1 `0.7883`, Cohen's Kappa `0.7545`
+- **Internal Test — MMRDR** (`n = 270`): Accuracy `0.8222`, Macro F1 `0.6341`, Cohen's Kappa `0.7198`
+- **Internal Test — APTOS 2019** (`n = 215`): Accuracy `0.8186`, Macro F1 `0.6834`, Cohen's Kappa `0.7355`
+- **External Official MMRDR `ts`** (`n = 504`): Accuracy `0.8095`, Macro F1 `0.6431`, Cohen's Kappa `0.6949`, Macro ROC-AUC `0.9446`
 
 ---
 
