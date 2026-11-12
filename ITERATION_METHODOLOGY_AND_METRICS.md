@@ -18,6 +18,7 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
 | **Iteration 4b** | **3-Model Ensemble** (`effv2_s_512` `0.40` + `effv2_s_384` `0.45` + `convnext_tiny_384` `0.15`) + 4-view TTA | Cross-family & multi-resolution probability blending tuned strictly on `validation_manifest.csv` (`0.9805` val top-2 acc) | **`0.8189`** | **`0.8167`** (`+3.79%`) | **`0.7784`** | **`0.7550`** | **`0.9568`** | `0.8095` (`0.9446` AUC) | Completed & evaluated |
 | **Iteration 5** | `efficientnet_v2_s` @ `384x384` (`Ben Graham` + `GeM2d` + `OrdinalRetinalLoss`) | `4*(I-Blur(I))+128` local contrast cache (`_bg`), `GeM2d(p=3.0)`, adjacent-grade smoothing `0.10` + expected-grade regression `0.12` | `0.7692` (Ep 5) / `0.7843` (4-TTA) | — (rejected via validation) | — | — | — | — | Stopped early at Ep 7 (`val_loss 0.6975 -> 0.8000`; degraded ensemble) |
 | **Iteration 6** | `convnext_tiny` @ `512x512` (progressive warm-start) + 4-view TTA | Warm-start from `convnext_tiny_384.pt`, `512x512` Raw RGB, `OrdinalRetinalLoss` (`ordinal_smoothing=true`, `0.08`, aux `0.06`), `backbone=2.625e-5`, `head=7.5e-5`, `ema=0.5` | `0.8026` (no TTA) / `0.8099` (4-TTA) | `0.8000` (`+2.12%`) | `0.7645` | `0.7334` | `0.9457` | `0.8135` (`0.6825` F1) | Completed & evaluated (improved `convnext_tiny` +`0.65%` test / +`1.39%` ext) |
+| **Iteration 6b** | **4-Model Ensemble** (`effv2_s_512` `0.25` + `effv2_s_384` `0.30` + `convnext_tiny_384` `0.05` + `convnext_tiny_512` `0.35`) + 4-TTA | Multi-scale CNN ensemble including `convnext_tiny_512` | **`0.8201`** | `0.8114` (`+3.26%`) | `0.7735` | `0.7479` | **`0.9588`** | `0.8135` (**`0.9448` AUC**) | Completed & evaluated (best AUC `0.9588` & lowest ECE `0.0263`) |
 
 ---
 
@@ -105,6 +106,16 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
 - **Internal Test — MMRDR** (`n = 270`): Accuracy `0.8259`, Macro F1 `0.7013`, Cohen's Kappa `0.7300`
 - **Internal Test — APTOS 2019** (`n = 215`): Accuracy `0.7953`, Macro F1 `0.6328`, Cohen's Kappa `0.7009`
 - **External Official MMRDR `ts`** (`n = 504`): Accuracy `0.8135`, Macro F1 `0.6825`, Cohen's Kappa `0.7105`, Macro ROC-AUC `0.9286`
+
+---
+
+## Iteration 6b 4-Model Ensemble Held-Out Test Metrics (`0.25 effv2_s_512 + 0.30 effv2_s_384 + 0.05 convnext_tiny_384 + 0.35 convnext_tiny_512`)
+- **Validation Accuracy / Macro F1 / Kappa**: **`0.8201`** / **`0.7893`** / **`0.7597`**
+- **Held-Out Test Accuracy** (`n = 2,450`): `0.8114` (`81.14%`, `1,988 / 2,450`)
+- **Held-Out Test Macro F1 / Kappa / Macro ROC-AUC**: `0.7735` / `0.7479` / **`0.9588`** (highest ROC-AUC achieved)
+- **Expected Calibration Error (ECE, 15 bins)**: **`0.0263`** (lowest calibration error; `13.0%` flagged for review)
+- **Source Breakdown**: Mendeley `0.8122` | MMRDR internal `0.8148` | APTOS `0.8000` | External MMRDR `ts` `0.8135` (`0.9448` ROC-AUC)
+- **Next Observation**: While 4-model blending boosted ROC-AUC (`0.9588`) and calibration (`ECE 0.0263`), higher `convnext_tiny_512` weight slightly softened `Mild <-> Moderate` boundary decisions on test vs Iteration 4b (`0.8167`). Adding a **Vision Transformer (`swin_v2_t`)** in Iteration 7 introduces self-attention inductive bias outside the CNN family.
 
 ---
 
