@@ -12,8 +12,8 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
 |---|---|---|---|---|---|---|---|---|---|
 | **Baseline** (`bf283f4`) | `resnet50` @ `224x224` | `class_weighting: true`, AdamW `lr=3e-4`, `wd=1e-4`, 15 epochs | `0.7721` | `0.7788` (`1908/2450`) | `0.7517` | `0.7110` | `0.9456` | `0.7679` | Completed |
 | **Iteration 1** | `convnext_small` @ `384x384` | Dark-border autocrop + disk cache, `class_weighting: false`, Mixup (`0.2`) + CutMix (`0.4`, `mix_prob=0.35`), unscaled `lr=1.5e-4` | `0.7428` (Epoch 2) | — (stopped at Epoch 5) | — | — | — | — | Stopped early (`val_loss` diverged `0.7152 -> 0.7729`) |
-| **Iteration 2** | `efficientnet_v2_s` @ `384x384` + 4-view TTA | **Differential LR** (`backbone=7.5e-5`, `head=3e-4`), CutMix/Mixup removed (`mix_prob=0.0`), `label_smoothing=0.05`, `class_weighting: false`, 4-view TTA | `0.8063` (no TTA) / `0.8091` (4-TTA) | **`0.8082`** (`+2.94%`) | **`0.7632`** | **`0.7434`** | **`0.9518`** | **`0.7917`** | Completed & evaluated |
-| **Iteration 3** | `efficientnet_v2_s` @ `512x512` (progressive warm-start) | Warm-start from Iteration 2 (`effv2_s_384.pt`), `512x512` resolution, **Model EMA** (`ema_decay=0.5`), `backbone=2.4e-5`, `head=6e-5`, `label_smoothing=0.08` | *Running* | *Pending* | *Pending* | *Pending* | *Pending* | *Pending* | Training in progress |
+| **Iteration 2** | `efficientnet_v2_s` @ `384x384` + 4-view TTA | **Differential LR** (`backbone=7.5e-5`, `head=3e-4`), CutMix/Mixup removed (`mix_prob=0.0`), `label_smoothing=0.05`, `class_weighting: false`, 4-view TTA | `0.8063` (no TTA) / `0.8091` (4-TTA) | `0.8082` (`+2.94%`) | `0.7632` | `0.7434` | **`0.9518`** | `0.7917` | Completed & evaluated |
+| **Iteration 3** | `efficientnet_v2_s` @ `512x512` (progressive warm-start) + 4-view TTA | Warm-start from Iteration 2 (`effv2_s_384.pt`), `512x512` resolution, **Model EMA** (`ema_decay=0.5`), `backbone=2.4e-5`, `head=6e-5`, `label_smoothing=0.08` | **`0.8140`** (Epoch 6) | **`0.8110`** (`+3.22%`) | **`0.7738`** | **`0.7471`** | `0.9454` | **`0.8214`** (`+5.35%`) | Completed & evaluated |
 
 ---
 
@@ -50,10 +50,37 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
 - **What it does**: During `evaluate_classification` and `cross_dataset` (`evaluation.tta: "multi"`), averages softmax probability distributions across 4 fundus-preserving views: original image, horizontal flip, 94% center zoom (cropped 3% outer padding and bilinearly resized back), and flipped 94% center zoom.
 - **Why used**: Reduces single-view orientation and framing variance at inference time cleanly on GPU without touching ground truth (`+0.28%` verified accuracy lift on validation: `0.8063 -> 0.8091`).
 
-### 9. Progressive Resolution Warm-Start & Model EMA (Iteration 3, Running)
+### 9. Progressive Resolution Warm-Start & Model EMA (Iteration 3, Completed)
 - **What it does**:
   - `init_from_checkpoint`: Initializes `512x512` training from the best `384x384` checkpoint (`runs/models/effv2_s_384.pt`) with reduced learning rates (`backbone=2.4e-5`, `head=6e-5`).
   - `ema_decay: 0.5`: Maintains an Exponential Moving Average shadow copy of weights across epochs after unfreezing so noisy borderline batches do not destabilize validation accuracy (`Iteration 2` peaked at Epoch 4 before oscillating between `0.771–0.801` as training accuracy reached `0.9907`).
+- **Observed Impact**: Validation accuracy rose to `0.8140` (`val_macroF1` reached `0.7844` at Epoch 8). On held-out test, accuracy improved to `0.8110`, macro F1 rose to `0.7738`, and cross-domain generalization on `mmrdr` surged (`0.8111 -> 0.8296` internal MMRDR test; `0.7917 -> 0.8214` and macro F1 `0.5769 -> 0.6887` on the 504-image official MMRDR external test set).
+
+---
+
+## Iteration 3 Per-Class & Per-Source Held-Out Test Metrics (`efficientnet_v2_s` @ `512x512`, 4-TTA)
+
+### Overall Held-Out Test (`outputs/classification/classification_metrics.json`, n = 2,450)
+- **Accuracy**: `0.8110` (`81.10%`)
+- **Macro Precision / Recall / F1**: `0.7977` / `0.7613` / `0.7738`
+- **Weighted F1**: `0.8072`
+- **Cohen's Kappa**: `0.7471`
+- **Macro ROC-AUC**: `0.9454`
+- **Expected Calibration Error (ECE, 15 bins)**: `0.0451` (`10.6%` flagged for review under uncertainty thresholds)
+
+| Class | Support | Precision | Recall (Sensitivity) | Specificity | F1 | ROC-AUC |
+|---|---|---|---|---|---|---|
+| `No apparent DR` | 667 | `0.9851` | `0.9880` | `0.9944` | `0.9865` | `0.9985` |
+| `Mild NPDR` | 362 | `0.6073` | `0.5083` | `0.9430` | `0.5534` | `0.9050` |
+| `Moderate NPDR` | 848 | `0.7600` | `0.8550` | `0.8571` | `0.8047` | `0.9324` |
+| `Severe NPDR` | 299 | `0.7423` | `0.8094` | `0.9609` | `0.7744` | `0.9655` |
+| `PDR` | 274 | `0.8939` | `0.6460` | `0.9903` | `0.7500` | `0.9255` |
+
+### Breakdown by Source Dataset (`outputs/evaluation/cross_dataset_results.json`)
+- **Internal Test — Mendeley** (`n = 1,965`): Accuracy `0.8076`, Macro F1 `0.7801`, Cohen's Kappa `0.7431`
+- **Internal Test — MMRDR** (`n = 270`): Accuracy `0.8296`, Macro F1 `0.6705`, Cohen's Kappa `0.7335`
+- **Internal Test — APTOS 2019** (`n = 215`): Accuracy `0.8186`, Macro F1 `0.6844`, Cohen's Kappa `0.7364`
+- **External Official MMRDR `ts`** (`n = 504`): Accuracy `0.8214`, Macro F1 `0.6887`, Cohen's Kappa `0.7179`
 
 ---
 
@@ -85,3 +112,4 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
 - `Mild NPDR <-> Moderate NPDR`: `179 + 94 = 273` errors (**58.1%** of all errors)
 - `Severe NPDR <-> PDR`: `57 + 62 = 119` errors (**25.3%** of all errors)
 - All other class pairs combined: `78` errors (**16.6%** of all errors, only `3.18%` of test images)
+
