@@ -45,7 +45,7 @@ from .data import (
 from .hardware import detect_hardware, resolve_device
 from .legacy_bridge import load_gradcam
 from .metrics import binarise_cam, mask_overlap_scores, predictive_entropy
-from .models import build_resnet50
+from .models import build_classifier
 
 
 class ExplainabilityError(RuntimeError):
@@ -132,7 +132,18 @@ def run_explainability(cfg: Config, logger, events=None) -> Dict[str, Any]:
 
     device = resolve_device("auto")
     payload = torch.load(checkpoint_path, map_location=device, weights_only=False)
-    model = build_resnet50(num_classes=len(class_names), pretrained=False, allow_weight_download=False).to(device)
+    fp = payload.get("fingerprint") or {}
+    arch = str(fp.get("architecture") or cfg.get("classification.architecture", "resnet50"))
+    image_size = int(fp.get("image_size") or image_size)
+    pool_mode = str(fp.get("pooling") or "avg")
+    contrast_mode = str(fp.get("enhance_contrast") or "none")
+    model = build_classifier(
+        architecture=arch,
+        num_classes=len(class_names),
+        pretrained=False,
+        allow_weight_download=False,
+        pooling=pool_mode,
+    ).to(device)
     model.load_state_dict(payload["model_state"])
     model.eval()
 
@@ -148,7 +159,9 @@ def run_explainability(cfg: Config, logger, events=None) -> Dict[str, Any]:
 
     rows = load_manifest_rows(test_path)
     selected = _select_examples(rows, per_class, cfg.seed)
-    dataset = ClassifierDataset(selected, cfg, train=False, image_size=image_size)
+    dataset = ClassifierDataset(
+        selected, cfg, train=False, image_size=image_size, enhance_contrast=contrast_mode
+    )
 
     records: List[Dict[str, Any]] = []
     for index, row in enumerate(selected):

@@ -8,6 +8,7 @@ env/
 # Datasets are downloaded by RUN.bat and are far too large for a repository.
 datasets/
 work/
+cache/
 runs/
 outputs/
 logs/

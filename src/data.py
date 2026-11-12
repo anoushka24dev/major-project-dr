@@ -117,6 +117,160 @@ def source_roots(cfg: Config) -> Dict[str, Path]:
 # Classification dataset
 # ---------------------------------------------------------------------------
 
+def _crop_dark_borders(image: Image.Image, threshold: int = 12, pad_frac: float = 0.01) -> Image.Image:
+    """Trim dark scanner margins around the retinal disc while keeping the full retina."""
+    arr = np.asarray(image)
+    if arr.ndim < 2 or arr.size == 0:
+        return image
+    if arr.ndim == 3:
+        mask = arr.max(axis=2) > int(threshold)
+    else:
+        mask = arr > int(threshold)
+    if not mask.any():
+        return image
+    ys, xs = np.where(mask)
+    y0, y1 = int(ys.min()), int(ys.max()) + 1
+    x0, x1 = int(xs.min()), int(xs.max()) + 1
+    h, w = arr.shape[0], arr.shape[1]
+    box_h, box_w = y1 - y0, x1 - x0
+    # Guard against tiny stray noise or images without meaningful dark margins.
+    if box_h < max(8, int(0.15 * h)) or box_w < max(8, int(0.15 * w)):
+        return image
+    if (box_h * box_w) >= 0.95 * (h * w):
+        return image
+    pad = int(round(max(box_h, box_w) * float(pad_frac)))
+    x0 = max(0, x0 - pad)
+    y0 = max(0, y0 - pad)
+    x1 = min(w, x1 + pad)
+    y1 = min(h, y1 + pad)
+    return image.crop((x0, y0, x1, y1))
+
+
+def _normalize_contrast_mode(mode: Any) -> str:
+    if mode is False or mode is None:
+        return "none"
+    norm = str(mode).strip().lower()
+    if norm in {"false", "none", "off", "0", ""}:
+        return "none"
+    if norm in {"ben_graham", "graham", "local_contrast"}:
+        return "ben_graham"
+    raise ValueError(f"Unsupported enhance_contrast mode {mode!r}; choose 'none' or 'ben_graham'.")
+
+
+def _apply_contrast_enhancement(image: Image.Image, mode: str) -> Image.Image:
+    norm = _normalize_contrast_mode(mode)
+    if norm == "none":
+        return image
+    from PIL import ImageFilter
+
+    w, h = image.size
+    sigma = max(4.0, min(w, h) * 0.04)
+    arr = np.asarray(image, dtype=np.float32)
+    blurred = np.asarray(image.filter(ImageFilter.GaussianBlur(radius=sigma)), dtype=np.float32)
+    mask = (arr.max(axis=2) > 12).astype(np.float32)
+    mask_img = Image.fromarray((mask * 255.0).astype(np.uint8), mode="L")
+    mask_blur = np.asarray(mask_img.filter(ImageFilter.GaussianBlur(radius=sigma * 0.5)), dtype=np.float32) / 255.0
+    inner = np.clip((mask_blur - 0.5) * 2.0, 0.0, 1.0)[..., None]
+    enhanced = np.clip((4.0 * (arr - blurred) + 128.0) * inner, 0.0, 255.0).astype(np.uint8)
+    return Image.fromarray(enhanced, mode="RGB")
+
+
+def _classification_cache_dir(
+    cfg: Config,
+    image_size: int,
+    crop_dark_borders: bool,
+    enhance_contrast: str = "none",
+) -> Path:
+    custom = cfg.get("preprocessing.classification.cache_dir")
+    base = (cfg.root / custom) if custom else (cfg.root / "cache")
+    contrast = _normalize_contrast_mode(enhance_contrast)
+    suffix = "_bg" if contrast == "ben_graham" else ""
+    tag = f"cls_{int(image_size)}_crop{1 if crop_dark_borders else 0}{suffix}"
+    return base / tag
+
+
+def _cache_path_for_row(cache_dir: Path, row: Dict[str, str]) -> Path:
+    import hashlib
+
+    key = str(row.get("image_hash") or "").strip()
+    if not key:
+        raw = f"{row.get('source_dataset', '')}|{row.get('image_path', '')}"
+        key = hashlib.sha1(raw.encode("utf-8")).hexdigest()
+    return cache_dir / key[:2] / f"{key}.jpg"
+
+
+def precache_classification_images(
+    rows: Sequence[Dict[str, str]],
+    cfg: Config,
+    logger=None,
+    *,
+    image_size: Optional[int] = None,
+    enhance_contrast: Optional[Any] = None,
+    max_workers: int = 8,
+) -> Optional[Path]:
+    """Decode, optionally dark-crop, resize-pad, and contrast-normalize images once into ``cache/``."""
+    if not bool(cfg.get("preprocessing.classification.cache_preprocessed", False)):
+        return None
+    from concurrent.futures import ThreadPoolExecutor
+    import os
+
+    size = int(image_size or cfg.require("preprocessing.classification.image_size"))
+    crop = bool(cfg.get("preprocessing.classification.crop_dark_borders", False))
+    contrast = _normalize_contrast_mode(
+        cfg.get("preprocessing.classification.enhance_contrast", "none")
+        if enhance_contrast is None
+        else enhance_contrast
+    )
+    cache_dir = _classification_cache_dir(cfg, size, crop, contrast)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    roots = source_roots(cfg)
+
+    jobs: List[Tuple[Path, Path]] = []
+    seen: set = set()
+    for row in rows:
+        dst = _cache_path_for_row(cache_dir, row)
+        if dst in seen or dst.is_file():
+            seen.add(dst)
+            continue
+        src = resolve_row_path(row, roots)
+        if src is None:
+            raise FileNotFoundError(
+                f"Manifest row points to a missing image: {row.get('image_path')!r} "
+                f"(source {row.get('source_dataset')!r})"
+            )
+        seen.add(dst)
+        jobs.append((src, dst))
+
+    if not jobs:
+        if logger:
+            logger.info("Preprocessed cache ready at %s (%d unique images)", cache_dir, len(seen))
+        return cache_dir
+
+    if logger:
+        logger.info("Precaching %d images to %s (size=%d, crop=%s)...", len(jobs), cache_dir, size, crop)
+
+    def _build_one(item: Tuple[Path, Path]) -> None:
+        src, dst = item
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        img = load_rgb(src)
+        if crop:
+            img = _crop_dark_borders(img)
+        img = _resize_and_pad(img, size, cfg.root)
+        img = _apply_contrast_enhancement(img, contrast)
+        tmp = dst.with_name(f".{dst.name}.{os.getpid()}.tmp.jpg")
+        img.save(tmp, format="JPEG", quality=95, subsampling=0)
+        tmp.replace(dst)
+
+    workers = max(1, min(int(max_workers), os.cpu_count() or 4))
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for _ in pool.map(_build_one, jobs):
+            pass
+
+    if logger:
+        logger.info("Precaching finished (%d new, %d total cached)", len(jobs), len(seen))
+    return cache_dir
+
+
 class ClassifierDataset(Dataset):
     """One partition of a unified manifest."""
 
@@ -127,6 +281,7 @@ class ClassifierDataset(Dataset):
         *,
         train: bool = False,
         image_size: Optional[int] = None,
+        enhance_contrast: Optional[Any] = None,
     ) -> None:
         if not rows:
             raise ValueError("ClassifierDataset requires at least one row")
@@ -136,12 +291,29 @@ class ClassifierDataset(Dataset):
         self.image_size = int(image_size or cfg.require("preprocessing.classification.image_size"))
         self.train = bool(train)
         self.roots = source_roots(cfg)
+        self.crop_dark_borders = bool(cfg.get("preprocessing.classification.crop_dark_borders", False))
+        self.enhance_contrast = _normalize_contrast_mode(
+            cfg.get("preprocessing.classification.enhance_contrast", "none")
+            if enhance_contrast is None
+            else enhance_contrast
+        )
+        self.cache_preprocessed = bool(cfg.get("preprocessing.classification.cache_preprocessed", False))
+        self.cache_dir = (
+            _classification_cache_dir(cfg, self.image_size, self.crop_dark_borders, self.enhance_contrast)
+            if self.cache_preprocessed
+            else None
+        )
 
         aug = cfg.get("preprocessing.classification.augmentation", {}) or {}
         self.hflip = bool(aug.get("horizontal_flip", True)) and self.train
         self.rotation = float(aug.get("rotation_degrees", 0) or 0) if self.train else 0.0
         self.brightness = float(aug.get("brightness", 0) or 0) if self.train else 0.0
         self.contrast = float(aug.get("contrast", 0) or 0) if self.train else 0.0
+        self.saturation = float(aug.get("saturation", 0) or 0) if self.train else 0.0
+        self.hue = float(aug.get("hue", 0) or 0) if self.train else 0.0
+        self.scale_jitter = float(aug.get("scale_jitter", 0) or 0) if self.train else 0.0
+        self.translate_frac = float(aug.get("translate_frac", 0) or 0) if self.train else 0.0
+        self.random_erasing = float(aug.get("random_erasing", 0) or 0) if self.train else 0.0
         if bool(aug.get("random_crop", False)):
             raise ValueError(
                 "preprocessing.classification.augmentation.random_crop is enabled but random "
@@ -154,7 +326,16 @@ class ClassifierDataset(Dataset):
                 "pipeline does not implement it: it is not an anatomically neutral transform "
                 "for fundus images. Set it to false."
             )
-        self._rng = np.random.default_rng(cfg.seed)
+        self._base_seed = int(cfg.seed)
+        self._rng = np.random.default_rng(self._base_seed)
+        self._worker_seeded_id: Optional[int] = None
+
+    def _active_rng(self) -> np.random.Generator:
+        info = torch.utils.data.get_worker_info()
+        if info is not None and self._worker_seeded_id != info.id:
+            self._worker_seeded_id = info.id
+            self._rng = np.random.default_rng(self._base_seed + (info.id + 1) * 1009)
+        return self._rng
 
     def __len__(self) -> int:
         return len(self.rows)
@@ -162,17 +343,36 @@ class ClassifierDataset(Dataset):
     def _augment(self, image: Image.Image) -> Image.Image:
         import torchvision.transforms.functional as TF
 
-        if self.hflip and self._rng.random() < 0.5:
+        rng = self._active_rng()
+        if self.hflip and rng.random() < 0.5:
             image = TF.hflip(image)
-        if self.rotation > 0:
-            angle = float(self._rng.uniform(-self.rotation, self.rotation))
-            image = TF.rotate(image, angle, interpolation=TF.InterpolationMode.BILINEAR, fill=0)
+        if self.rotation > 0 or self.scale_jitter > 0 or self.translate_frac > 0:
+            angle = float(rng.uniform(-self.rotation, self.rotation)) if self.rotation > 0 else 0.0
+            scale = float(rng.uniform(1.0 - self.scale_jitter, 1.0 + self.scale_jitter)) if self.scale_jitter > 0 else 1.0
+            w, h = image.size
+            dx = float(rng.uniform(-self.translate_frac, self.translate_frac) * w) if self.translate_frac > 0 else 0.0
+            dy = float(rng.uniform(-self.translate_frac, self.translate_frac) * h) if self.translate_frac > 0 else 0.0
+            image = TF.affine(
+                image,
+                angle=angle,
+                translate=[dx, dy],
+                scale=scale,
+                shear=[0.0, 0.0],
+                interpolation=TF.InterpolationMode.BILINEAR,
+                fill=0,
+            )
         if self.brightness > 0:
-            factor = float(1.0 + self._rng.uniform(-self.brightness, self.brightness))
+            factor = float(1.0 + rng.uniform(-self.brightness, self.brightness))
             image = TF.adjust_brightness(image, factor)
         if self.contrast > 0:
-            factor = float(1.0 + self._rng.uniform(-self.contrast, self.contrast))
+            factor = float(1.0 + rng.uniform(-self.contrast, self.contrast))
             image = TF.adjust_contrast(image, factor)
+        if self.saturation > 0:
+            factor = float(1.0 + rng.uniform(-self.saturation, self.saturation))
+            image = TF.adjust_saturation(image, factor)
+        if self.hue > 0:
+            factor = float(rng.uniform(-self.hue, self.hue))
+            image = TF.adjust_hue(image, factor)
         return image
 
     def __getitem__(self, index: int) -> Tuple[torch.Tensor, int, Dict[str, Any]]:
@@ -183,11 +383,29 @@ class ClassifierDataset(Dataset):
                 f"Manifest row points to a missing image: {row.get('image_path')!r} "
                 f"(source {row.get('source_dataset')!r})"
             )
-        image = load_rgb(path)
-        if self.train:
-            image = self._augment(image)
-        image = _resize_and_pad(image, self.image_size, self.root)
+        cached_path = _cache_path_for_row(self.cache_dir, row) if self.cache_dir is not None else None
+        if cached_path is not None and cached_path.is_file():
+            image = load_rgb(cached_path)
+            if self.train:
+                image = self._augment(image)
+        else:
+            image = load_rgb(path)
+            if self.crop_dark_borders:
+                image = _crop_dark_borders(image)
+            image = _resize_and_pad(image, self.image_size, self.root)
+            image = _apply_contrast_enhancement(image, self.enhance_contrast)
+            if self.train:
+                image = self._augment(image)
         tensor = normalize(to_tensor(image))
+        if self.train and self.random_erasing > 0:
+            rng = self._active_rng()
+            if rng.random() < self.random_erasing:
+                _, h, w = tensor.shape
+                eh = max(4, int(rng.uniform(0.02, 0.10) * h))
+                ew = max(4, int(rng.uniform(0.02, 0.10) * w))
+                top = int(rng.integers(0, max(1, h - eh + 1)))
+                left = int(rng.integers(0, max(1, w - ew + 1)))
+                tensor[:, top : top + eh, left : left + ew] = 0.0
 
         meta = {
             "image_path": str(path),
@@ -217,6 +435,25 @@ def class_weights_from_rows(rows: Sequence[Dict[str, str]], num_classes: int) ->
     weights[present] = counts[present].sum() / (present.sum() * counts[present])
     weights[~present] = 1.0
     return weights
+
+
+def class_weights_for_mode(
+    rows: Sequence[Dict[str, str]], num_classes: int, mode: Any
+) -> Optional[np.ndarray]:
+    """Compute class weights according to bool or string weighting mode (None if disabled)."""
+    if mode is False or mode is None:
+        return None
+    if isinstance(mode, str):
+        norm = mode.strip().lower()
+        if norm in {"false", "none", "off", "0", ""}:
+            return None
+        if norm in {"sqrt", "pow0.5"}:
+            inv = class_weights_from_rows(rows, num_classes)
+            w = np.sqrt(np.maximum(inv, 1e-8))
+            return w / w.mean()
+        if norm not in {"true", "inverse", "1", "on"}:
+            raise ValueError(f"Unsupported class_weighting mode: {mode!r}")
+    return class_weights_from_rows(rows, num_classes)
 
 
 # ---------------------------------------------------------------------------

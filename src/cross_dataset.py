@@ -27,9 +27,9 @@ from torch.utils.data import DataLoader
 
 from .config import Config
 from .data import ClassifierDataset, load_manifest_rows
+from .evaluate_classification import evaluate_rows_with_checkpoints
 from .hardware import detect_hardware, resolve_device
 from .metrics import classification_metrics, predictive_entropy
-from .models import build_resnet50
 
 
 class CrossDatasetError(RuntimeError):
@@ -56,25 +56,25 @@ def _metrics_for_subset(
 def _evaluate_manifest(
     cfg: Config,
     manifest_path: Path,
-    model,
+    checkpoint_path: Path,
     device: torch.device,
+    amp_enabled: bool,
     class_names: List[str],
-    image_size: int,
     batch_size: int,
     num_workers: int,
+    logger=None,
 ) -> Dict[str, Any]:
     rows = load_manifest_rows(manifest_path)
-    dataset = ClassifierDataset(rows, cfg, train=False, image_size=image_size)
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
-    probabilities: List[np.ndarray] = []
-    labels: List[int] = []
-    with torch.no_grad():
-        for inputs, batch_labels, _meta in loader:
-            logits = model(inputs.to(device, non_blocking=True))
-            probabilities.append(torch.softmax(logits, dim=1).float().cpu().numpy())
-            labels.extend(int(v) for v in batch_labels)
-    stacked = np.concatenate(probabilities, axis=0)
-    truth = np.asarray(labels)
+    stacked, truth, _meta = evaluate_rows_with_checkpoints(
+        cfg,
+        rows,
+        checkpoint_path,
+        device=device,
+        amp_enabled=amp_enabled,
+        batch_size=batch_size,
+        num_workers=num_workers,
+        logger=logger,
+    )
     return {
         "samples": int(len(truth)),
         "metrics": _metrics_for_subset(stacked, truth, class_names, manifest_path.stem),
@@ -86,27 +86,20 @@ def _evaluate_manifest(
 def run_cross_dataset(cfg: Config, logger, events=None) -> Dict[str, Any]:
     out_dir = cfg.outputs_dir("evaluation")
     checkpoint_path = cfg.outputs_dir("classification") / "best_resnet50.pt"
-    if not checkpoint_path.is_file():
+    if not checkpoint_path.is_file() and not cfg.get("evaluation.ensemble_checkpoints"):
         raise CrossDatasetError(f"No classifier checkpoint at {checkpoint_path}.")
 
     class_names = list(cfg.classes)
-    image_size = int(cfg.require("preprocessing.classification.image_size"))
     device = resolve_device("auto")
     hardware = detect_hardware(
         mixed_precision_preference=cfg.mixed_precision_setting("classification"),
         disk_probe=cfg.root,
     )
+    amp_enabled = bool(hardware.mixed_precision)
     batch_size = cfg.effective_batch_size(
         "classification", fallback=hardware.recommended_classification_batch_size
     )
     num_workers = cfg.effective_num_workers("classification") or hardware.recommended_num_workers
-
-    payload = torch.load(checkpoint_path, map_location=device, weights_only=False)
-    model = build_resnet50(
-        num_classes=len(class_names), pretrained=False, allow_weight_download=False
-    ).to(device)
-    model.load_state_dict(payload["model_state"])
-    model.eval()
 
     result: Dict[str, Any] = {
         "available": True,
@@ -144,7 +137,7 @@ def run_cross_dataset(cfg: Config, logger, events=None) -> Dict[str, Any]:
     if external_manifest.is_file():
         logger.info("Evaluating the MMRDR official test partition: %s", external_manifest)
         evaluated = _evaluate_manifest(
-            cfg, external_manifest, model, device, class_names, image_size, batch_size, num_workers
+            cfg, external_manifest, checkpoint_path, device, amp_enabled, class_names, batch_size, num_workers, logger
         )
         external_saved = evaluated["probabilities"]
         metrics = evaluated["metrics"]

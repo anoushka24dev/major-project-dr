@@ -25,6 +25,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import DataLoader
 
 from .checkpoints import (
@@ -43,8 +44,10 @@ from .checkpoints import (
 from .config import Config
 from .data import (
     ClassifierDataset,
+    class_weights_for_mode,
     class_weights_from_rows,
     load_manifest_rows,
+    precache_classification_images,
     write_history_csv,
 )
 from .hardware import detect_hardware, resolve_device
@@ -177,6 +180,205 @@ def _train_epoch(
     }
 
 
+def _apply_mixup_or_cutmix(
+    inputs: torch.Tensor,
+    labels: torch.Tensor,
+    *,
+    num_classes: int,
+    label_smoothing: float,
+    mixup_alpha: float,
+    cutmix_alpha: float,
+    mix_prob: float,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    batch = inputs.size(0)
+    targets = F.one_hot(labels, num_classes=num_classes).float()
+    if label_smoothing > 0.0:
+        targets = targets * (1.0 - label_smoothing) + (label_smoothing / float(num_classes))
+    if batch < 2 or mix_prob <= 0.0 or random.random() >= mix_prob:
+        return inputs, targets
+
+    use_cutmix = cutmix_alpha > 0.0 and (mixup_alpha <= 0.0 or random.random() < 0.5)
+    perm = torch.randperm(batch, device=inputs.device)
+    if use_cutmix:
+        lam = float(np.random.beta(cutmix_alpha, cutmix_alpha))
+        _, _, h, w = inputs.shape
+        cut_rat = math.sqrt(max(0.0, 1.0 - lam))
+        cut_w = int(w * cut_rat)
+        cut_h = int(h * cut_rat)
+        cx = random.randint(0, w - 1)
+        cy = random.randint(0, h - 1)
+        x1 = max(0, cx - cut_w // 2)
+        y1 = max(0, cy - cut_h // 2)
+        x2 = min(w, cx + cut_w // 2)
+        y2 = min(h, cy + cut_h // 2)
+        mixed = inputs.clone()
+        mixed[:, :, y1:y2, x1:x2] = inputs[perm, :, y1:y2, x1:x2]
+        lam = 1.0 - ((x2 - x1) * (y2 - y1) / float(max(1, h * w)))
+    else:
+        alpha = max(1e-4, float(mixup_alpha))
+        lam = float(np.random.beta(alpha, alpha))
+        mixed = lam * inputs + (1.0 - lam) * inputs[perm]
+
+    mixed_targets = lam * targets + (1.0 - lam) * targets[perm]
+    return mixed, mixed_targets
+
+
+def _soft_cross_entropy(
+    logits: torch.Tensor,
+    soft_targets: torch.Tensor,
+    class_weights: Optional[torch.Tensor],
+) -> torch.Tensor:
+    log_probs = F.log_softmax(logits, dim=1)
+    if class_weights is not None:
+        log_probs = log_probs * class_weights.unsqueeze(0)
+        denom = (soft_targets * class_weights.unsqueeze(0)).sum(dim=1).clamp_min(1e-6)
+        return -(soft_targets * log_probs).sum(dim=1).div(denom).mean()
+    return -(soft_targets * log_probs).sum(dim=1).mean()
+
+
+class OrdinalRetinalLoss(nn.Module):
+    """Cross-entropy with adjacent-grade target smoothing and optional expected-grade regression."""
+
+    def __init__(
+        self,
+        num_classes: int,
+        *,
+        label_smoothing: float = 0.0,
+        ordinal_smoothing: bool = False,
+        ordinal_loss_weight: float = 0.0,
+        weight: Optional[torch.Tensor] = None,
+    ) -> None:
+        super().__init__()
+        self.num_classes = int(num_classes)
+        self.label_smoothing = float(label_smoothing)
+        self.ordinal_smoothing = bool(ordinal_smoothing)
+        self.ordinal_loss_weight = float(ordinal_loss_weight)
+        if weight is not None:
+            self.register_buffer("weight", weight)
+        else:
+            self.weight = None
+
+    def forward(self, logits: torch.Tensor, targets: torch.Tensor) -> torch.Tensor:
+        eps = max(0.0, min(0.5, self.label_smoothing))
+        if self.ordinal_smoothing and eps > 0.0:
+            c = self.num_classes
+            smooth = torch.zeros_like(logits, dtype=torch.float32)
+            idx = torch.arange(logits.size(0), device=logits.device)
+            has_left = targets > 0
+            has_right = targets < (c - 1)
+            half = 0.5 * eps
+            smooth[idx[has_left], targets[has_left] - 1] = half
+            smooth[idx[has_right], targets[has_right] + 1] = half
+            center = 1.0 - has_left.float() * half - has_right.float() * half
+            smooth[idx, targets] = center
+            ce = _soft_cross_entropy(logits.float(), smooth, self.weight)
+        else:
+            ce = torch.nn.functional.cross_entropy(
+                logits, targets, weight=self.weight, label_smoothing=eps
+            )
+        if self.ordinal_loss_weight > 0.0:
+            probs = torch.softmax(logits.float(), dim=1)
+            ranks = torch.arange(self.num_classes, device=logits.device, dtype=torch.float32)
+            expected = (probs * ranks.unsqueeze(0)).sum(dim=1)
+            reg = torch.nn.functional.smooth_l1_loss(expected, targets.float(), beta=0.5)
+            return ce + self.ordinal_loss_weight * reg
+        return ce
+
+
+def _train_epoch_advanced(
+    model: nn.Module,
+    loader: DataLoader,
+    loss_fn: nn.Module,
+    optimizer: torch.optim.Optimizer,
+    device: torch.device,
+    *,
+    amp_enabled: bool,
+    scaler,
+    gradient_clip_norm: float,
+    grad_accum_steps: int = 1,
+    num_classes: int = 5,
+    label_smoothing: float = 0.0,
+    class_weights: Optional[torch.Tensor] = None,
+    mixup_alpha: float = 0.0,
+    cutmix_alpha: float = 0.0,
+    mix_prob: float = 0.0,
+) -> Dict[str, Any]:
+    use_mix = mix_prob > 0.0 and (mixup_alpha > 0.0 or cutmix_alpha > 0.0)
+    if not use_mix and grad_accum_steps <= 1:
+        return _train_epoch(
+            model,
+            loader,
+            loss_fn,
+            optimizer,
+            device,
+            amp_enabled=amp_enabled,
+            scaler=scaler,
+            gradient_clip_norm=gradient_clip_norm,
+        )
+
+    model.train()
+    use_amp = bool(amp_enabled and device.type == "cuda")
+    accum = max(1, int(grad_accum_steps))
+    total_loss = 0.0
+    total_samples = 0
+    correct = 0
+    optimizer.zero_grad(set_to_none=True)
+    num_batches = len(loader)
+
+    for step, (inputs, labels, _meta) in enumerate(loader):
+        inputs = inputs.to(device, non_blocking=True)
+        labels = labels.to(device, non_blocking=True)
+        step_inputs = inputs
+        soft_targets = None
+        if use_mix:
+            step_inputs, soft_targets = _apply_mixup_or_cutmix(
+                inputs,
+                labels,
+                num_classes=num_classes,
+                label_smoothing=label_smoothing,
+                mixup_alpha=mixup_alpha,
+                cutmix_alpha=cutmix_alpha,
+                mix_prob=mix_prob,
+            )
+
+        with torch.amp.autocast(device_type=device.type, enabled=use_amp):
+            logits = model(step_inputs)
+            if soft_targets is not None:
+                raw_loss = _soft_cross_entropy(logits, soft_targets, class_weights)
+            else:
+                raw_loss = loss_fn(logits, labels)
+            loss = raw_loss / float(accum)
+
+        if scaler is not None and use_amp:
+            scaler.scale(loss).backward()
+        else:
+            loss.backward()
+
+        should_step = ((step + 1) % accum == 0) or (step + 1 == num_batches)
+        if should_step:
+            if scaler is not None and use_amp:
+                if gradient_clip_norm > 0:
+                    scaler.unscale_(optimizer)
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), gradient_clip_norm)
+                scaler.step(optimizer)
+                scaler.update()
+            else:
+                if gradient_clip_norm > 0:
+                    torch.nn.utils.clip_grad_norm_(model.parameters(), gradient_clip_norm)
+                optimizer.step()
+            optimizer.zero_grad(set_to_none=True)
+
+        total_loss += float(raw_loss.item()) * inputs.size(0)
+        total_samples += inputs.size(0)
+        correct += int((logits.argmax(dim=1) == labels).sum().item())
+
+    return {
+        "loss": total_loss / total_samples if total_samples else float("inf"),
+        "accuracy": correct / total_samples if total_samples else 0.0,
+        "num_samples": total_samples,
+    }
+
+
 def _schedule(total_epochs: int, warmup_epochs: int):
     """Linear warm-up followed by cosine decay, as a per-epoch multiplier."""
     warmup = max(0, int(warmup_epochs))
@@ -199,8 +401,8 @@ def run_training(
     force_retrain: bool = False,
     resume: bool = True,
 ) -> Dict[str, Any]:
-    """Train (or reuse) the five-class ResNet-50."""
-    from .models import build_resnet50, unfreeze_all
+    """Train (or reuse) the five-class retinal classifier."""
+    from .models import build_classifier, unfreeze_all
 
     manifests = cfg.outputs_dir("manifests")
     train_path = manifests / "train_manifest.csv"
@@ -218,12 +420,19 @@ def run_training(
 
     class_names = list(cfg.classes)
     image_size = int(cfg.require("preprocessing.classification.image_size"))
+    pooling = str(cfg.get("classification.pooling", "avg") or "avg").strip().lower()
+    enhance_contrast = str(cfg.get("preprocessing.classification.enhance_contrast", "none") or "none").strip().lower()
+    fp_extra: Dict[str, Any] = {"task": "five_class_classification"}
+    if pooling != "avg":
+        fp_extra["pooling"] = pooling
+    if enhance_contrast not in {"false", "none", "off", "0", ""}:
+        fp_extra["enhance_contrast"] = enhance_contrast
     fingerprint = build_fingerprint(
         architecture=str(cfg.require("classification.architecture")),
         classes=class_names,
         image_size=image_size,
         manifest_version=cfg.manifest_version,
-        extra={"task": "five_class_classification"},
+        extra=fp_extra,
     )
 
     runs_root = cfg.path("paths.runs_dir", create=True) / "classification"
@@ -277,13 +486,26 @@ def run_training(
     label_smoothing = float(cfg.get("classification.label_smoothing", 0.0) or 0.0)
     monitor = str(cfg.get("classification.monitor", "val_macro_f1"))
     monitor_mode = str(cfg.get("classification.monitor_mode", "max"))
+    architecture = str(cfg.require("classification.architecture"))
+    head_dropout = float(cfg.get("classification.dropout", 0.0) or 0.0)
+    ema_decay = float(cfg.get("classification.ema_decay", 0.0) or 0.0)
+    init_from = str(cfg.get("classification.init_from_checkpoint") or "").strip()
+    grad_accum_steps = max(1, int(cfg.get("classification.grad_accum_steps", 1) or 1))
+    mixup_alpha = float(cfg.get("classification.mixup_alpha", 0.0) or 0.0)
+    cutmix_alpha = float(cfg.get("classification.cutmix_alpha", 0.0) or 0.0)
+    mix_prob = float(cfg.get("classification.mix_prob", 0.0) or 0.0)
     seed = cfg.seed
 
     logger.info(
-        "Classification training: device=%s, amp=%s, batch=%d, workers=%d, epochs=%d, "
-        "lr=%g, wd=%g, freeze_backbone_epochs=%d",
-        device, amp_enabled, batch_size, num_workers, epochs, lr, weight_decay, freeze_epochs,
+        "Classification training: arch=%s, size=%d, device=%s, amp=%s, batch=%d (accum=%d), workers=%d, epochs=%d, "
+        "lr=%g, wd=%g, freeze_backbone_epochs=%d, mix_prob=%.2f",
+        architecture, image_size, device, amp_enabled, batch_size, grad_accum_steps, num_workers, epochs, lr, weight_decay, freeze_epochs, mix_prob,
     )
+
+    if device.type == "cuda":
+        torch.backends.cudnn.benchmark = True
+
+    precache_classification_images(train_rows + val_rows, cfg, logger=logger, image_size=image_size)
 
     _seed_everything(seed)
     train_dataset = ClassifierDataset(train_rows, cfg, train=True, image_size=image_size)
@@ -293,36 +515,77 @@ def run_training(
     val_loader = _dataloader(val_dataset, batch_size=batch_size, shuffle=False,
                              num_workers=num_workers, seed=seed)
 
-    model = build_resnet50(
+    model = build_classifier(
+        architecture=architecture,
         num_classes=len(class_names),
         pretrained=bool(cfg.get("classification.pretrained", True)),
         allow_weight_download=bool(cfg.get("classification.allow_weight_download", True)),
         freeze_backbone=freeze_epochs > 0,
+        dropout=head_dropout,
+        pooling=pooling,
         logger=logger,
     ).to(device)
 
     weights = None
     class_weight_values: Dict[str, float] = {}
-    if bool(cfg.get("classification.class_weighting", True)):
-        array = class_weights_from_rows(train_rows, len(class_names))
+    weighting_mode = cfg.get("classification.class_weighting", True)
+    array = class_weights_for_mode(train_rows, len(class_names), weighting_mode)
+    if array is not None:
         weights = torch.tensor(array, dtype=torch.float32, device=device)
         class_weight_values = {
             name: float(array[index]) for index, name in enumerate(class_names)
         }
-        logger.info("class weights (from training partition): %s", class_weight_values)
+        logger.info("class weights (%s, from training partition): %s", weighting_mode, class_weight_values)
+    else:
+        logger.info("class weights: disabled (%s)", weighting_mode)
 
-    loss_fn = nn.CrossEntropyLoss(weight=weights, label_smoothing=label_smoothing)
+    ordinal_smoothing = bool(cfg.get("classification.ordinal_smoothing", False))
+    ordinal_loss_weight = float(cfg.get("classification.ordinal_loss_weight", 0.0) or 0.0)
+    if ordinal_smoothing or ordinal_loss_weight > 0.0:
+        loss_fn: nn.Module = OrdinalRetinalLoss(
+            len(class_names),
+            label_smoothing=label_smoothing,
+            ordinal_smoothing=ordinal_smoothing,
+            ordinal_loss_weight=ordinal_loss_weight,
+            weight=weights,
+        )
+        logger.info(
+            "Loss: OrdinalRetinalLoss(smoothing=%.3f, ordinal_smoothing=%s, ordinal_loss_weight=%.3f)",
+            label_smoothing, ordinal_smoothing, ordinal_loss_weight,
+        )
+    else:
+        loss_fn = nn.CrossEntropyLoss(weight=weights, label_smoothing=label_smoothing)
+    backbone_lr_mult = float(cfg.get("classification.backbone_lr_mult", 1.0) or 1.0)
+    if abs(backbone_lr_mult - 1.0) > 1e-6:
+        head_params = []
+        backbone_params = []
+        for pname, param in model.named_parameters():
+            if pname.startswith(("fc.", "classifier.", "head.", "avgpool.")):
+                head_params.append(param)
+            else:
+                backbone_params.append(param)
+        param_groups = [
+            {"params": backbone_params, "lr": lr * backbone_lr_mult},
+            {"params": head_params, "lr": lr},
+        ]
+        logger.info(
+            "Differential LR: backbone=%g (%d tensors), head=%g (%d tensors)",
+            lr * backbone_lr_mult, len(backbone_params), lr, len(head_params),
+        )
+    else:
+        param_groups = model.parameters()
+
     optimizer_name = str(cfg.require("classification.optimizer")).lower()
     if optimizer_name == "adamw":
         # All parameters are registered with the optimizer even during the frozen
         # warm-up: parameters with requires_grad=False simply receive no gradient,
         # and unfreezing later works without rebuilding (and losing) optimizer state.
         optimizer = torch.optim.AdamW(
-            model.parameters(), lr=lr, weight_decay=weight_decay
+            param_groups, lr=lr, weight_decay=weight_decay
         )
     elif optimizer_name == "sgd":
         optimizer = torch.optim.SGD(
-            model.parameters(), lr=lr, momentum=0.9, weight_decay=weight_decay
+            param_groups, lr=lr, momentum=0.9, weight_decay=weight_decay
         )
     else:
         raise TrainingError(
@@ -402,6 +665,32 @@ def run_training(
     }
     _atomic_write_json(config_snapshot, run_dir / RUN_META)
 
+    def _update_ema(ema_mod: Optional[nn.Module], src_mod: nn.Module, decay: float) -> None:
+        if ema_mod is None or decay < 0.0:
+            return
+        with torch.no_grad():
+            for p_ema, p_src in zip(ema_mod.parameters(), src_mod.parameters()):
+                p_ema.data.mul_(decay).add_(p_src.data, alpha=1.0 - decay)
+            for b_ema, b_src in zip(ema_mod.buffers(), src_mod.buffers()):
+                b_ema.copy_(b_src)
+
+    if init_from and start_epoch == 0:
+        init_path = Path(init_from) if Path(init_from).is_absolute() else (cfg.root / init_from)
+        if not init_path.is_file():
+            raise TrainingError(f"init_from_checkpoint does not exist: {init_path}")
+        init_payload = torch.load(init_path, map_location=device, weights_only=False)
+        model.load_state_dict(init_payload["model_state"])
+        logger.info("Warm-started model weights from %s", init_path)
+
+    ema_model: Optional[nn.Module] = None
+    if ema_decay > 0.0:
+        import copy
+
+        ema_model = copy.deepcopy(model).to(device)
+        for p in ema_model.parameters():
+            p.requires_grad = False
+        logger.info("Model EMA enabled (decay=%.4f)", ema_decay)
+
     backbone_frozen = freeze_epochs > 0
     started = time.time()
     completed = False
@@ -411,13 +700,39 @@ def run_training(
             if backbone_frozen and epoch >= freeze_epochs:
                 unfreeze_all(model)
                 backbone_frozen = False
+                if ema_model is not None:
+                    # Sync EMA cleanly right before full-backbone fine-tuning begins.
+                    import copy
+
+                    ema_model = copy.deepcopy(model).to(device)
+                    for p in ema_model.parameters():
+                        p.requires_grad = False
                 logger.info("Backbone unfrozen at epoch %d", epoch + 1)
 
-            train_stats = _train_epoch(
-                model, train_loader, loss_fn, optimizer, device,
-                amp_enabled=amp_enabled, scaler=scaler, gradient_clip_norm=gradient_clip,
+            train_stats = _train_epoch_advanced(
+                model,
+                train_loader,
+                loss_fn,
+                optimizer,
+                device,
+                amp_enabled=amp_enabled,
+                scaler=scaler,
+                gradient_clip_norm=gradient_clip,
+                grad_accum_steps=grad_accum_steps,
+                num_classes=len(class_names),
+                label_smoothing=label_smoothing,
+                class_weights=weights,
+                mixup_alpha=mixup_alpha,
+                cutmix_alpha=cutmix_alpha,
+                mix_prob=mix_prob,
             )
-            val_metrics = _evaluate(model, val_loader, loss_fn, device, class_names, amp_enabled)
+            _update_ema(
+                ema_model,
+                model,
+                ema_decay if epoch > freeze_epochs else 0.0,
+            )
+            eval_model = ema_model if (ema_model is not None and epoch >= freeze_epochs) else model
+            val_metrics = _evaluate(eval_model, val_loader, loss_fn, device, class_names, amp_enabled)
             scheduler.step()
 
             monitor_key = monitor[4:] if monitor.startswith("val_") else monitor
@@ -459,7 +774,7 @@ def run_training(
             )
             if improved:
                 save_checkpoint(
-                    best_dir, model=model, optimizer=optimizer, scheduler=scheduler,
+                    best_dir, model=eval_model, optimizer=optimizer, scheduler=scheduler,
                     epoch=epoch, history=history, best_metric=best_value, best_epoch=best_epoch,
                     fingerprint=fingerprint, extra={"config": config_snapshot},
                 )

@@ -148,18 +148,26 @@ label_mapping:
 
 preprocessing:
   classification:
-    image_size: 224
-    # Aspect-ratio-preserving resize then symmetric pad. Never crops, so lesions
-    # near the retinal border cannot be cut away.
+    image_size: 512
+    crop_dark_borders: true
+    enhance_contrast: "none"
+    cache_preprocessed: true
+    # Aspect-ratio-preserving resize then symmetric pad. Never crops inside the retina,
+    # while trimming outer scanner margins when crop_dark_borders is enabled.
     resize_mode: "resize_and_pad"
     imagenet_normalize: true
     augmentation:
       horizontal_flip: true
       # Rotation is limited: larger angles force black wedges into the frame and
       # change apparent lesion geometry.
-      rotation_degrees: 10
+      rotation_degrees: 15
       brightness: 0.08
       contrast: 0.08
+      saturation: 0.05
+      hue: 0.0
+      scale_jitter: 0.06
+      translate_frac: 0.02
+      random_erasing: 0.0
       # Explicitly disabled: these would remove or distort lesions.
       random_crop: false
       vertical_flip: false
@@ -198,32 +206,42 @@ split:
     ahash_max_distance: 6
 
 classification:
-  architecture: "resnet50"
+  architecture: "efficientnet_v2_s"
+  pooling: "avg"
   num_classes: 5
   pretrained: true
   allow_weight_download: true
+  # Progressive warm-start used runs/models/effv2_s_384.pt during Iteration 3
+  init_from_checkpoint: ""
   # 0 = train the whole network. >0 = train the head only for that many epochs,
   # then unfreeze. Recorded in run metadata either way.
   freeze_backbone_epochs: 1
-  epochs: 15
+  epochs: 10
   # `auto` resolves from detected hardware at runtime and is recorded.
-  batch_size: "auto"
-  num_workers: "auto"
+  batch_size: 12
+  grad_accum_steps: 2
+  num_workers: 4
   optimizer: "adamw"
-  learning_rate: 3.0e-4
-  weight_decay: 1.0e-4
+  learning_rate: 6.0e-5
+  backbone_lr_mult: 0.40
+  weight_decay: 2.0e-2
   scheduler: "cosine"
   warmup_epochs: 1
-  early_stopping_patience: 15
+  early_stopping_patience: 4
+  ema_decay: 0.5
   # Which validation quantity drives checkpoint selection and early stopping.
-  # val_macro_f1 is preferred over raw accuracy because the classes are imbalanced.
-  monitor: "val_macro_f1"
+  monitor: "val_accuracy"
   monitor_mode: "max"
   # `auto` enables AMP only when a CUDA device is actually usable.
   mixed_precision: "auto"
-  class_weighting: true
+  class_weighting: false
   gradient_clip_norm: 1.0
-  label_smoothing: 0.0
+  label_smoothing: 0.08
+  ordinal_smoothing: false
+  ordinal_loss_weight: 0.0
+  mixup_alpha: 0.0
+  cutmix_alpha: 0.0
+  mix_prob: 0.0
 
 segmentation:
   architecture: "unet4"
@@ -270,6 +288,14 @@ evaluation:
     binarise_percentile: 90
   roc_auc:
     enabled: true
+  tta: "multi"
+  ensemble_checkpoints:
+    - path: "runs/models/effv2_s_512.pt"
+      weight: 0.22
+    - path: "runs/models/effv2_s_384.pt"
+      weight: 0.39
+    - path: "runs/models/convnext_tiny_512.pt"
+      weight: 0.39
 
 cross_dataset:
   enabled: true

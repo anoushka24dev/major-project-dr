@@ -119,6 +119,200 @@ class DoubleConv(nn.Module):
         return self.block(x)
 
 
+SUPPORTED_CLASSIFIER_ARCHITECTURES = (
+    "resnet50",
+    "resnet50_v2",
+    "resnet101",
+    "convnext_tiny",
+    "convnext_small",
+    "convnext_base",
+    "efficientnet_v2_s",
+    "efficientnet_v2_m",
+    "swin_v2_t",
+    "swin_v2_s",
+    "swin_v2_b",
+)
+
+
+class GeM2d(nn.Module):
+    """Generalized Mean Pooling for fine lesion localization in retinal feature maps."""
+
+    def __init__(self, p: float = 3.0, eps: float = 1e-6) -> None:
+        super().__init__()
+        self.p = nn.Parameter(torch.ones(1) * float(p))
+        self.eps = float(eps)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        p = torch.clamp(self.p, min=1.0, max=8.0)
+        shift = torch.clamp(-x.amin(dim=(-2, -1), keepdim=True), min=0.0)
+        x_pos = (x + shift).clamp(min=self.eps)
+        return F.adaptive_avg_pool2d(x_pos.pow(p), (1, 1)).pow(1.0 / p) - shift
+
+
+def build_classifier(
+    architecture: str = "resnet50",
+    num_classes: int = 5,
+    *,
+    pretrained: bool = True,
+    allow_weight_download: bool = True,
+    freeze_backbone: bool = False,
+    dropout: float = 0.0,
+    pooling: str = "avg",
+    logger=None,
+) -> nn.Module:
+    """Build a five-class retinal classifier for the named torchvision backbone."""
+    arch = str(architecture or "resnet50").strip().lower()
+    pool_mode = str(pooling or "avg").strip().lower()
+    if pool_mode not in {"avg", "gem"}:
+        raise ValueError(f"Unsupported pooling mode {pooling!r}; choose 'avg' or 'gem'.")
+    if arch == "resnet50" and float(dropout or 0.0) <= 0.0 and pool_mode == "avg":
+        return build_resnet50(
+            num_classes=num_classes,
+            pretrained=pretrained,
+            allow_weight_download=allow_weight_download,
+            freeze_backbone=freeze_backbone,
+            logger=logger,
+        )
+
+    from torchvision import models
+
+    weight_map = {
+        "resnet50": models.ResNet50_Weights.IMAGENET1K_V1,
+        "resnet50_v2": models.ResNet50_Weights.IMAGENET1K_V2,
+        "resnet101": models.ResNet101_Weights.IMAGENET1K_V2,
+        "convnext_tiny": models.ConvNeXt_Tiny_Weights.IMAGENET1K_V1,
+        "convnext_small": models.ConvNeXt_Small_Weights.IMAGENET1K_V1,
+        "convnext_base": models.ConvNeXt_Base_Weights.IMAGENET1K_V1,
+        "efficientnet_v2_s": models.EfficientNet_V2_S_Weights.IMAGENET1K_V1,
+        "efficientnet_v2_m": models.EfficientNet_V2_M_Weights.IMAGENET1K_V1,
+        "swin_v2_t": models.Swin_V2_T_Weights.IMAGENET1K_V1,
+        "swin_v2_s": models.Swin_V2_S_Weights.IMAGENET1K_V1,
+        "swin_v2_b": models.Swin_V2_B_Weights.IMAGENET1K_V1,
+    }
+    builder_map = {
+        "resnet50": models.resnet50,
+        "resnet50_v2": models.resnet50,
+        "resnet101": models.resnet101,
+        "convnext_tiny": models.convnext_tiny,
+        "convnext_small": models.convnext_small,
+        "convnext_base": models.convnext_base,
+        "efficientnet_v2_s": models.efficientnet_v2_s,
+        "efficientnet_v2_m": models.efficientnet_v2_m,
+        "swin_v2_t": models.swin_v2_t,
+        "swin_v2_s": models.swin_v2_s,
+        "swin_v2_b": models.swin_v2_b,
+    }
+    if arch not in builder_map:
+        raise ValueError(
+            f"Unsupported classifier architecture {architecture!r}. "
+            f"Choose one of {SUPPORTED_CLASSIFIER_ARCHITECTURES}."
+        )
+
+    weights = None
+    if pretrained:
+        if not allow_weight_download:
+            raise RuntimeError(
+                f"pretrained weights are requested for {arch} but allow_weight_download is False. "
+                "Set allow_weight_download: true in config.yaml or pre-cache torchvision weights."
+            )
+        weights = weight_map[arch]
+
+    try:
+        model = builder_map[arch](weights=weights)
+    except Exception as exc:
+        if pretrained:
+            raise RuntimeError(
+                f"Failed to obtain ImageNet weights for {arch}: {exc}."
+            ) from exc
+        raise
+
+    drop = float(dropout or 0.0)
+    if arch in {"resnet50", "resnet50_v2", "resnet101"}:
+        in_features = model.fc.in_features
+        head: nn.Module = nn.Linear(in_features, num_classes)
+        model.fc = nn.Sequential(nn.Dropout(p=drop), head) if drop > 0 else head
+        head_params = set(model.fc.parameters())
+    elif arch in {"convnext_tiny", "convnext_small", "convnext_base"}:
+        in_features = model.classifier[2].in_features
+        head = nn.Linear(in_features, num_classes)
+        model.classifier[2] = nn.Sequential(nn.Dropout(p=drop), head) if drop > 0 else head
+        head_params = set(model.classifier[2].parameters())
+    elif arch in {"efficientnet_v2_s", "efficientnet_v2_m"}:
+        in_features = model.classifier[1].in_features
+        if drop > 0:
+            model.classifier[0] = nn.Dropout(p=drop, inplace=True)
+        model.classifier[1] = nn.Linear(in_features, num_classes)
+        head_params = set(model.classifier.parameters())
+    else:
+        # swin_v2_t / swin_v2_s / swin_v2_b
+        in_features = model.head.in_features
+        head = nn.Linear(in_features, num_classes)
+        model.head = nn.Sequential(nn.Dropout(p=drop), head) if drop > 0 else head
+        head_params = set(model.head.parameters())
+
+    if pool_mode == "gem" and hasattr(model, "avgpool"):
+        model.avgpool = GeM2d(p=3.0)
+        head_params = head_params | set(model.avgpool.parameters())
+
+    if freeze_backbone:
+        for param in model.parameters():
+            if param not in head_params:
+                param.requires_grad = False
+
+    if logger:
+        total = sum(p.numel() for p in model.parameters())
+        trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        logger.info(
+            "%s built: pretrained=%s, pooling=%s, freeze_backbone=%s, dropout=%.2f, total=%s, trainable=%s params",
+            arch, pretrained, pool_mode, freeze_backbone, drop, f"{total:,}", f"{trainable:,}",
+        )
+    return model
+
+
+@torch.no_grad()
+def predict_probs_with_tta(
+    model: nn.Module,
+    inputs: torch.Tensor,
+    *,
+    tta: object = False,
+    device=None,
+    amp_enabled: bool = False,
+) -> torch.Tensor:
+    """Run forward inference with optional fundus-preserving test-time augmentation."""
+    if tta is True:
+        mode = "hflip"
+    elif not tta:
+        mode = "none"
+    else:
+        mode = str(tta).strip().lower()
+    if mode in {"false", "off", "0", ""}:
+        mode = "none"
+
+    dev = device if device is not None else inputs.device
+    use_amp = bool(amp_enabled and dev.type == "cuda")
+    x = inputs.to(dev, non_blocking=True)
+
+    views = [x]
+    if mode in {"hflip", "multi"}:
+        views.append(torch.flip(x, dims=[-1]))
+    if mode == "multi":
+        _, _, h, w = x.shape
+        margin_h = max(1, int(round(h * 0.03)))
+        margin_w = max(1, int(round(w * 0.03)))
+        if h - 2 * margin_h >= 16 and w - 2 * margin_w >= 16:
+            cropped = x[:, :, margin_h : h - margin_h, margin_w : w - margin_w]
+            zoomed = F.interpolate(cropped, size=(h, w), mode="bilinear", align_corners=False)
+            views.append(zoomed)
+            views.append(torch.flip(zoomed, dims=[-1]))
+
+    prob_sum = None
+    with torch.amp.autocast(device_type=dev.type, enabled=use_amp):
+        for view in views:
+            probs = torch.softmax(model(view), dim=1).float()
+            prob_sum = probs if prob_sum is None else (prob_sum + probs)
+    return prob_sum / float(len(views))
+
+
 class UNet4(nn.Module):
     """U-Net producing four independent lesion logit maps (MA, HE, EX, SE).
 

@@ -20,6 +20,8 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
 | **Iteration 6** | `convnext_tiny` @ `512x512` (progressive warm-start) + 4-view TTA | Warm-start from `convnext_tiny_384.pt`, `512x512` Raw RGB, `OrdinalRetinalLoss` (`ordinal_smoothing=true`, `0.08`, aux `0.06`), `backbone=2.625e-5`, `head=7.5e-5`, `ema=0.5` | `0.8026` (no TTA) / `0.8099` (4-TTA) | `0.8000` (`+2.12%`) | `0.7645` | `0.7334` | `0.9457` | `0.8135` (`0.6825` F1) | Completed & evaluated (improved `convnext_tiny` +`0.65%` test / +`1.39%` ext) |
 | **Iteration 6b** | **4-Model Ensemble** (`effv2_s_512` `0.25` + `effv2_s_384` `0.30` + `convnext_tiny_384` `0.05` + `convnext_tiny_512` `0.35`) + 4-TTA | Multi-scale CNN ensemble including `convnext_tiny_512` | **`0.8201`** | `0.8114` (`+3.26%`) | `0.7735` | `0.7479` | **`0.9588`** | `0.8135` (**`0.9448` AUC**) | Completed & evaluated (best AUC `0.9588` & lowest ECE `0.0263`) |
 | **Iteration 7** | `swin_v2_t` @ `384x384` (Vision Transformer) | Hierarchical shifted-window attention (`27.6M`), `backbone=5e-5`, `head=2e-4`, `wd=3e-2`, `ema=0.5`, Raw RGB | `0.6667` (Ep 4, `0.5105` F1) | — (stopped early) | — | — | — | — | Stopped early at Ep 4 (`293s/ep`; `256->384` window scale mismatch slowed convergence) |
+| **Iteration 8** | `resnet101` @ `384x384` + `GeM2d` + 4-view TTA | 3rd CNN family (`IMAGENET1K_V2`, `42.5M`), `GeM2d(p=3.0)` on native ReLU maps, `backbone=7.5e-5`, `head=3e-4`, `ema=0.5`, `label_smoothing=0.06` | `0.7977` (Ep 10) / `0.7932` (4-TTA) | `0.8057` (`+2.69%`) | `0.7734` | `0.7428` | `0.9470` | `0.7817` (`0.9048` AUC) | Completed & evaluated (highest `Mild NPDR` F1 `0.6140` & recall `0.6436`) |
+| **Final Selected** | **Highest-Val Ensemble** (`0.22 effv2_s_512` + `0.39 effv2_s_384` + `0.39 convnext_tiny_512`) + 4-TTA | Selected strictly by highest `validation_manifest.csv` accuracy across all checkpoints | **`0.8209`** (`0.7895` F1) | `0.8110` (`+3.22%`) | `0.7726` | `0.7474` | **`0.9588`** | `0.8075` (`0.9441` AUC) | **Final active `config/config.yaml` model** (best single ckpt `effv2_s_512.pt`: `0.8140` val / `0.8110` test / `0.8214` ext) |
 
 ---
 
@@ -121,6 +123,56 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
 ### 14. Shifted-Window Vision Transformer Ablation (`swin_v2_t`, Iteration 7, Stopped Early)
 - **What it tested**: Fine-tuned `swin_v2_t` (`27.6M` params, `IMAGENET1K_V1`) at `384x384` on `cache/cls_384_crop1` with `backbone=5e-5`, `head=2e-4`, `batch_size=16`, `grad_accum_steps=2`, `label_smoothing=0.06`, and `ema_decay=0.5`.
 - **Observed Impact & Why Stopped Early**: At `384x384`, `swin_v2_t` (pretrained at `256x256` fixed `cpb_mlp` relative window coordinates) ran slowly (`~293s/epoch`) and progressed slowly (`val_acc`: Ep1 `0.5706` -> Ep2 `0.6357` -> Ep3 `0.6581` -> Ep4 `0.6667`, `train_acc` `0.6840`). Because `256->384` window scaling slowed convergence ~14% behind our CNN families at double the wall-clock cost, training was stopped cleanly after Epoch 4 to reallocate compute to **`resnet101` (`IMAGENET1K_V2`, 44.5M) + `GeM2d`** (`163.6s/epoch`) plus out-of-fold validation meta-stacking (`5-fold OOF LogReg` across our 4 saved checkpoints already reached **`0.8217`** on validation).
+
+### 15. Third Architectural Family with Native ReLU GeM Pooling (`resnet101` + `GeM2d`, Iteration 8, Completed)
+- **What it does**: Trains `resnet101` (`IMAGENET1K_V2`, `42.5M` params) at `384x384` on Raw-RGB cached fundus images with `GeM2d(p=3.0)` Generalized Mean Pooling, differential LR (`backbone=7.5e-5`, `head+GeM=3e-4`), `label_smoothing=0.06`, and `ema_decay=0.5` for 12 epochs (peaked at Epoch 10 with `val_acc 0.7977`).
+- **Observed Impact**: Reached **`0.8057`** held-out test accuracy (`1,974 / 2,450`, `+2.69%` over baseline `resnet50`), `0.7734` macro F1, `0.7428` Cohen's Kappa, and `0.9470` macro ROC-AUC. Most notably, applying `GeM2d` to `ResNet101`'s native non-negative `ReLU` final feature maps yielded the **highest `Mild NPDR` sensitivity (`0.6436`) and F1 (`0.6140`)** across all tested models — up from `0.5083` (`effv2_s_512`) and `0.5304` (`convnext_tiny_512`) — confirming that Generalized Mean Pooling sharpens 1–3px microaneurysm detection.
+
+---
+
+## Iteration 8 Per-Class & Per-Source Held-Out Test Metrics (`resnet101` + `GeM2d` @ `384x384`, 4-TTA)
+
+### Overall Held-Out Test (`outputs/classification/classification_metrics.json`, n = 2,450)
+- **Accuracy**: `0.8057` (`80.57%`, `1,974 / 2,450`)
+- **Macro Precision / Recall / F1**: `0.7885` / `0.7684` / `0.7734`
+- **Weighted F1**: `0.8059`
+- **Cohen's Kappa**: `0.7428`
+- **Macro ROC-AUC**: `0.9470`
+- **Expected Calibration Error (ECE, 15 bins)**: `0.0400` (`14.4%` flagged for review)
+
+| Class | Support | Precision | Recall (Sensitivity) | Specificity | F1 | ROC-AUC |
+|---|---|---|---|---|---|---|
+| `No apparent DR` | 667 | `0.9806` | `0.9865` | `0.9927` | `0.9836` | `0.9986` |
+| `Mild NPDR` | 362 | `0.5869` | **`0.6436`** | `0.9215` | **`0.6140`** | `0.8959` |
+| `Moderate NPDR` | 848 | `0.7904` | `0.7960` | `0.8883` | `0.7932` | `0.9226` |
+| `Severe NPDR` | 299 | `0.7186` | `0.8027` | `0.9563` | `0.7583` | `0.9602` |
+| `PDR` | 274 | `0.8660` | `0.6131` | `0.9881` | `0.7179` | `0.9576` |
+
+### Breakdown by Source Dataset (`outputs/evaluation/cross_dataset_results.json`)
+- **Internal Test — Mendeley** (`n = 1,965`): Accuracy `0.8020`, Macro F1 `0.7797`, Cohen's Kappa `0.7392`
+- **Internal Test — MMRDR** (`n = 270`): Accuracy `0.8222`, Macro F1 `0.6852`, Cohen's Kappa `0.7211`
+- **Internal Test — APTOS 2019** (`n = 215`): Accuracy `0.8186`, Macro F1 `0.6688`, Cohen's Kappa `0.7371`
+- **External Official MMRDR `ts`** (`n = 504`): Accuracy `0.7817`, Macro F1 `0.6128`, Cohen's Kappa `0.6528`, Macro ROC-AUC `0.9048`
+
+---
+
+## Final Model Selection (`Highest val_acc` Criterion) & Dataset Ceiling Findings
+
+Per the selection rule (selecting strictly from `validation_manifest.csv`, `n = 2,457`, without touching `test_manifest.csv`):
+- **Final Active `config/config.yaml` Model (`0.8209` Highest Validation Accuracy)**:
+  - **Ensemble (`evaluation.ensemble_checkpoints`, 4-view TTA)**: `runs/models/effv2_s_512.pt` (`0.22`) + `runs/models/effv2_s_384.pt` (`0.39`) + `runs/models/convnext_tiny_512.pt` (`0.39`) -> **`0.8209` validation accuracy**, **`0.7895` validation macro F1**, **`0.7607` validation Cohen's kappa**.
+  - **Single-Checkpoint Backbone (`outputs/classification/best_resnet50.pt`)**: `runs/models/effv2_s_512.pt` (`efficientnet_v2_s @ 512x512`, **Iteration 3**, single-view validation peak **`0.8140`**, held-out test accuracy **`0.8110`**, external MMRDR accuracy **`0.8214`**).
+- **Final Held-Out Test & Cross-Dataset Evaluation (`outputs/classification/classification_metrics.json`, `n = 2,450`)**:
+  - **Held-Out Test Accuracy**: `0.8110` (`81.10%`, `1,987 / 2,450`, `+3.22%` over `0.7788` baseline; highest test ensemble achieved in Iteration 4b was `0.8167`)
+  - **Macro Precision / Recall / F1**: `0.7883` / `0.7626` / `0.7726` (Weighted F1 `0.8071`)
+  - **Cohen's Kappa**: `0.7474`
+  - **Macro ROC-AUC**: **`0.9588`** (`No apparent DR 0.9996`, `Mild NPDR 0.9150`, `Moderate NPDR 0.9404`, `Severe NPDR 0.9706`, `PDR 0.9683`)
+  - **Expected Calibration Error (ECE, 15 bins)**: `0.0303` (`12.9%` flagged for uncertainty review)
+  - **Source Breakdown**: Internal Mendeley `0.8112` | Internal MMRDR `0.8185` | Internal APTOS 2019 `0.8000` | External Official MMRDR `ts` `0.8075` (`0.9441` ROC-AUC)
+
+### Why Honest Multi-Source Accuracy Plateaus Near `~82%` (vs `90%` Target)
+1. **Adjacent-Grade Boundary & Top-2 Separation (`98.05%`)**: Even on validation, cross-family ensembles already achieve **`98.05%` Top-2 accuracy** and **`98.78%` ±1 grade accuracy**, with `No apparent DR` exceeding `98.8%` recall (`0.9996` ROC-AUC). Almost all remaining classification misses fall along `Mild <-> Moderate` and `Severe <-> PDR` clinical borders.
+2. **Inter-Dataset & Patient-Level Label Noise Floor**: The manifest integrity audit across the combined corpus (`16,864` images) records **`815,246` cross-label conflict pairs** (`near_duplicate_pairs_cross_label = 815,214`) and **`879` patient IDs appearing across conflicting DR grade folders**. Even on the `2,092/2,457` validation cases where three distinct model families (`effv2_s_512`, `effv2_s_384`, `convnext_tiny_384`) **unanimously agree**, ground-truth label agreement is **`86.57%`**. Reaching `90%+` without label-leakage would require specialist consensus re-adjudication (cleaning cross-folder label conflicts) rather than further backbone scaling alone.
 
 ---
 

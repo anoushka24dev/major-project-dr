@@ -37,9 +37,14 @@ from src.checkpoints import (  # noqa: E402
 )
 from src.config import ConfigError, load_config, validate_config  # noqa: E402
 from src.data import (  # noqa: E402
+    ClassifierDataset,
     LESION_ORDER,
+    _crop_dark_borders,
     build_idrid_pairs,
+    class_weights_for_mode,
     class_weights_from_rows,
+    load_manifest_rows,
+    precache_classification_images,
     _resize_and_pad,
 )
 from src.dataset_downloaders.base import (  # noqa: E402
@@ -49,7 +54,12 @@ from src.dataset_downloaders.base import (  # noqa: E402
     safe_extract_zip,
 )
 from src.hardware import detect_hardware, resolve_device  # noqa: E402
-from src.models import build_resnet50, build_unet4  # noqa: E402
+from src.models import (  # noqa: E402
+    build_classifier,
+    build_resnet50,
+    build_unet4,
+    predict_probs_with_tta,
+)
 from src.taxonomy import (  # noqa: E402
     LabelMapper,
     UnknownLabelError,
@@ -88,6 +98,8 @@ def _write_config(tmp_path: Path, **overrides) -> Path:
             "idrid_manual_root": "",
         }
     )
+    base.setdefault("classification", {})["init_from_checkpoint"] = ""
+    base.setdefault("evaluation", {})["ensemble_checkpoints"] = []
     for dotted, value in overrides.items():
         node = base
         parts = dotted.split(".")
@@ -958,6 +970,117 @@ def test_classifier_resume_continues_incomplete_run_and_unfreezes(tmp_path, monk
     assert len(unfrozen_calls) == 1
     summary = json.loads((run_dir / "run_summary.json").read_text(encoding="utf-8"))
     assert summary["epochs_completed"] == 3
+
+
+def test_build_classifier_supports_modern_architectures():
+    x = torch.randn(2, 3, 64, 64)
+    for arch in ("convnext_small", "efficientnet_v2_s", "swin_v2_s", "resnet101"):
+        model = build_classifier(
+            architecture=arch,
+            num_classes=5,
+            pretrained=False,
+            allow_weight_download=False,
+        )
+        model.eval()
+        with torch.no_grad():
+            logits = model(x)
+        assert logits.shape == (2, 5), arch
+
+
+def test_crop_dark_borders_and_precache_roundtrip(tmp_path, monkeypatch):
+    from src.legacy_bridge import load_colab_helpers
+    from src.prepare import run_prepare
+
+    load_colab_helpers(PROJECT_ROOT)
+
+    # Synthetic image with wide black margin around a circular bright retina.
+    canvas = Image.new("RGB", (120, 80), (0, 0, 0))
+    draw = ImageDraw.Draw(canvas)
+    draw.ellipse((35, 15, 85, 65), fill=(180, 90, 50))
+    cropped = _crop_dark_borders(canvas, threshold=12)
+    assert cropped.width < canvas.width
+    assert cropped.height <= canvas.height
+
+    corpus = _make_fundus_corpus(tmp_path / "datasets" / "mendeley", per_class=2)
+    cfg_path = _write_config(
+        tmp_path,
+        **{
+            "preprocessing.classification.image_size": 48,
+            "preprocessing.classification.crop_dark_borders": True,
+            "preprocessing.classification.cache_preprocessed": True,
+        },
+    )
+    cfg = load_config(cfg_path, root=tmp_path)
+    monkeypatch.setenv("DR_FUNDUS_ROOT", str(corpus))
+    run_prepare(cfg, _null_logger())
+    train_rows = load_manifest_rows(cfg.outputs_dir("manifests") / "train_manifest.csv")
+    cache_dir = precache_classification_images(train_rows, cfg, logger=_null_logger())
+    assert cache_dir is not None and cache_dir.is_dir()
+    ds = ClassifierDataset(train_rows, cfg, train=False, image_size=48)
+    tensor, label, _meta = ds[0]
+    assert tensor.shape == (3, 48, 48)
+    assert 0 <= label < 5
+
+
+def test_class_weights_modes_and_tta():
+    rows = (
+        [{"mapped_label_int": "0"}] * 20
+        + [{"mapped_label_int": "1"}] * 4
+        + [{"mapped_label_int": "2"}] * 10
+        + [{"mapped_label_int": "3"}] * 5
+        + [{"mapped_label_int": "4"}] * 5
+    )
+    assert class_weights_for_mode(rows, 5, False) is None
+    assert class_weights_for_mode(rows, 5, "none") is None
+    sqrt_w = class_weights_for_mode(rows, 5, "sqrt")
+    assert sqrt_w is not None and abs(float(sqrt_w.mean()) - 1.0) < 1e-6
+    assert sqrt_w[1] > sqrt_w[0]
+
+    model = build_classifier(architecture="resnet50", num_classes=5, pretrained=False, allow_weight_download=False)
+    model.eval()
+    x = torch.randn(2, 3, 64, 64)
+    for tta_mode in (False, "hflip", "multi"):
+        probs = predict_probs_with_tta(model, x, tta=tta_mode)
+        assert probs.shape == (2, 5)
+        assert torch.allclose(probs.sum(dim=1), torch.ones(2), atol=1e-5)
+
+
+def test_gem_pooling_ben_graham_and_ordinal_loss():
+    from src.data import _apply_contrast_enhancement
+    from src.models import GeM2d
+    from src.train_classifier import OrdinalRetinalLoss
+
+    x = torch.randn(2, 3, 64, 64)
+    for arch in ("resnet50", "efficientnet_v2_s", "convnext_tiny", "swin_v2_t"):
+        model = build_classifier(
+            architecture=arch,
+            num_classes=5,
+            pretrained=False,
+            allow_weight_download=False,
+            pooling="gem",
+        )
+        assert isinstance(model.avgpool, GeM2d), arch
+        model.eval()
+        with torch.no_grad():
+            assert model(x).shape == (2, 5), arch
+
+    canvas = Image.new("RGB", (96, 96), (0, 0, 0))
+    draw = ImageDraw.Draw(canvas)
+    draw.ellipse((12, 12, 84, 84), fill=(190, 95, 55))
+    draw.ellipse((45, 45, 51, 51), fill=(240, 220, 80))
+    enhanced = _apply_contrast_enhancement(canvas, "ben_graham")
+    assert enhanced.size == (96, 96)
+    arr = np.asarray(enhanced)
+    assert arr[0, 0].sum() == 0  # Outer black margin stays zeroed
+    assert arr.max() > 128  # Local bright lesion contrast pops above 128 gray baseline
+
+    crit = OrdinalRetinalLoss(5, label_smoothing=0.10, ordinal_smoothing=True, ordinal_loss_weight=0.15)
+    logits = torch.randn(4, 5, requires_grad=True)
+    targets = torch.tensor([0, 1, 2, 4])
+    loss = crit(logits, targets)
+    assert torch.isfinite(loss)
+    loss.backward()
+    assert logits.grad is not None
 
 
 # ---------------------------------------------------------------------------
