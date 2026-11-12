@@ -14,6 +14,7 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
 | **Iteration 1** | `convnext_small` @ `384x384` | Dark-border autocrop + disk cache, `class_weighting: false`, Mixup (`0.2`) + CutMix (`0.4`, `mix_prob=0.35`), unscaled `lr=1.5e-4` | `0.7428` (Epoch 2) | — (stopped at Epoch 5) | — | — | — | — | Stopped early (`val_loss` diverged `0.7152 -> 0.7729`) |
 | **Iteration 2** | `efficientnet_v2_s` @ `384x384` + 4-view TTA | **Differential LR** (`backbone=7.5e-5`, `head=3e-4`), CutMix/Mixup removed (`mix_prob=0.0`), `label_smoothing=0.05`, `class_weighting: false`, 4-view TTA | `0.8063` (no TTA) / `0.8091` (4-TTA) | `0.8082` (`+2.94%`) | `0.7632` | `0.7434` | **`0.9518`** | `0.7917` | Completed & evaluated |
 | **Iteration 3** | `efficientnet_v2_s` @ `512x512` (progressive warm-start) + 4-view TTA | Warm-start from Iteration 2 (`effv2_s_384.pt`), `512x512` resolution, **Model EMA** (`ema_decay=0.5`), `backbone=2.4e-5`, `head=6e-5`, `label_smoothing=0.08` | **`0.8140`** (Epoch 6) | **`0.8110`** (`+3.22%`) | **`0.7738`** | **`0.7471`** | `0.9454` | **`0.8214`** (`+5.35%`) | Completed & evaluated |
+| **Iteration 4** | `convnext_tiny` @ `384x384` + 4-view TTA | Cross-family **ConvNeXt-Tiny** (`27.8M`), `backbone=4.5e-5`, `head=3e-4`, `wd=2e-2`, **Model EMA** (`ema_decay=0.5`), `label_smoothing=0.08`, 15 epochs | `0.8095` (Epoch 8) | `0.7935` (`+1.47%`) | `0.7571` | `0.7258` | `0.9413` | `0.7996` (`+3.17%`) | Completed & evaluated (kept for cross-family ensemble; higher `Mild NPDR` recall `0.5801`) |
 
 ---
 
@@ -55,6 +56,36 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
   - `init_from_checkpoint`: Initializes `512x512` training from the best `384x384` checkpoint (`runs/models/effv2_s_384.pt`) with reduced learning rates (`backbone=2.4e-5`, `head=6e-5`).
   - `ema_decay: 0.5`: Maintains an Exponential Moving Average shadow copy of weights across epochs after unfreezing so noisy borderline batches do not destabilize validation accuracy (`Iteration 2` peaked at Epoch 4 before oscillating between `0.771–0.801` as training accuracy reached `0.9907`).
 - **Observed Impact**: Validation accuracy rose to `0.8140` (`val_macroF1` reached `0.7844` at Epoch 8). On held-out test, accuracy improved to `0.8110`, macro F1 rose to `0.7738`, and cross-domain generalization on `mmrdr` surged (`0.8111 -> 0.8296` internal MMRDR test; `0.7917 -> 0.8214` and macro F1 `0.5769 -> 0.6887` on the 504-image official MMRDR external test set).
+
+### 10. Cross-Family Architecture Diversity (`convnext_tiny`, Iteration 4, Completed)
+- **What it does**: Trains a modern ConvNet (`convnext_tiny`, `7x7` depthwise convolutions, LayerNorm, inverted bottlenecks) from `384x384` cached fundus images using conservative differential learning rates (`backbone=4.5e-5`, `head=3e-4`, `weight_decay=2e-2`), `label_smoothing=0.08`, and `ema_decay=0.5`.
+- **Why used**: Adding architectural diversity outside the EfficientNetV2 family for multi-model probability ensembling. While standalone held-out test accuracy (`0.7935`, `1944/2450`) sits below `efficientnet_v2_s @ 512px` (`0.8110`), `convnext_tiny` achieves substantially higher `Mild NPDR` recall (`0.5801` vs `0.5083`) and strong `PDR` detection on external MMRDR (`0.9180` recall, `0.9916` ROC-AUC), making its errors complementary.
+
+---
+
+## Iteration 4 Per-Class & Per-Source Held-Out Test Metrics (`convnext_tiny` @ `384x384`, 4-TTA)
+
+### Overall Held-Out Test (`outputs/classification/classification_metrics.json`, n = 2,450)
+- **Accuracy**: `0.7935` (`79.35%`, `1,944 / 2,450`)
+- **Macro Precision / Recall / F1**: `0.7651` / `0.7506` / `0.7571`
+- **Weighted F1**: `0.7929`
+- **Cohen's Kappa**: `0.7258`
+- **Macro ROC-AUC**: `0.9413`
+- **Expected Calibration Error (ECE, 15 bins)**: `0.0433` (`10.7%` flagged for review under uncertainty thresholds)
+
+| Class | Support | Precision | Recall (Sensitivity) | Specificity | F1 | ROC-AUC |
+|---|---|---|---|---|---|---|
+| `No apparent DR` | 667 | `0.9791` | `0.9850` | `0.9921` | `0.9821` | `0.9971` |
+| `Mild NPDR` | 362 | `0.5722` | `0.5801` | `0.9248` | `0.5761` | `0.8996` |
+| `Moderate NPDR` | 848 | `0.7698` | `0.8007` | `0.8733` | `0.7850` | `0.9233` |
+| `Severe NPDR` | 299 | `0.7388` | `0.7191` | `0.9647` | `0.7288` | `0.9547` |
+| `PDR` | 274 | `0.7657` | `0.6679` | `0.9743` | `0.7135` | `0.9316` |
+
+### Breakdown by Source Dataset (`outputs/evaluation/cross_dataset_results.json`)
+- **Internal Test — Mendeley** (`n = 1,965`): Accuracy `0.7903`, Macro F1 `0.7655`, Cohen's Kappa `0.7230`
+- **Internal Test — MMRDR** (`n = 270`): Accuracy `0.8148`, Macro F1 `0.6764`, Cohen's Kappa `0.7096`
+- **Internal Test — APTOS 2019** (`n = 215`): Accuracy `0.7953`, Macro F1 `0.6181`, Cohen's Kappa `0.7001`
+- **External Official MMRDR `ts`** (`n = 504`): Accuracy `0.7996`, Macro F1 `0.6413`, Cohen's Kappa `0.6866`, Macro ROC-AUC `0.9295`
 
 ---
 
