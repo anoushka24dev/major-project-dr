@@ -19,6 +19,7 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
 | **Iteration 5** | `efficientnet_v2_s` @ `384x384` (`Ben Graham` + `GeM2d` + `OrdinalRetinalLoss`) | `4*(I-Blur(I))+128` local contrast cache (`_bg`), `GeM2d(p=3.0)`, adjacent-grade smoothing `0.10` + expected-grade regression `0.12` | `0.7692` (Ep 5) / `0.7843` (4-TTA) | — (rejected via validation) | — | — | — | — | Stopped early at Ep 7 (`val_loss 0.6975 -> 0.8000`; degraded ensemble) |
 | **Iteration 6** | `convnext_tiny` @ `512x512` (progressive warm-start) + 4-view TTA | Warm-start from `convnext_tiny_384.pt`, `512x512` Raw RGB, `OrdinalRetinalLoss` (`ordinal_smoothing=true`, `0.08`, aux `0.06`), `backbone=2.625e-5`, `head=7.5e-5`, `ema=0.5` | `0.8026` (no TTA) / `0.8099` (4-TTA) | `0.8000` (`+2.12%`) | `0.7645` | `0.7334` | `0.9457` | `0.8135` (`0.6825` F1) | Completed & evaluated (improved `convnext_tiny` +`0.65%` test / +`1.39%` ext) |
 | **Iteration 6b** | **4-Model Ensemble** (`effv2_s_512` `0.25` + `effv2_s_384` `0.30` + `convnext_tiny_384` `0.05` + `convnext_tiny_512` `0.35`) + 4-TTA | Multi-scale CNN ensemble including `convnext_tiny_512` | **`0.8201`** | `0.8114` (`+3.26%`) | `0.7735` | `0.7479` | **`0.9588`** | `0.8135` (**`0.9448` AUC**) | Completed & evaluated (best AUC `0.9588` & lowest ECE `0.0263`) |
+| **Iteration 7** | `swin_v2_t` @ `384x384` (Vision Transformer) | Hierarchical shifted-window attention (`27.6M`), `backbone=5e-5`, `head=2e-4`, `wd=3e-2`, `ema=0.5`, Raw RGB | `0.6667` (Ep 4, `0.5105` F1) | — (stopped early) | — | — | — | — | Stopped early at Ep 4 (`293s/ep`; `256->384` window scale mismatch slowed convergence) |
 
 ---
 
@@ -116,6 +117,10 @@ All checkpoint selection and hyperparameter choices use **only** `train_manifest
 - **Expected Calibration Error (ECE, 15 bins)**: **`0.0263`** (lowest calibration error; `13.0%` flagged for review)
 - **Source Breakdown**: Mendeley `0.8122` | MMRDR internal `0.8148` | APTOS `0.8000` | External MMRDR `ts` `0.8135` (`0.9448` ROC-AUC)
 - **Next Observation**: While 4-model blending boosted ROC-AUC (`0.9588`) and calibration (`ECE 0.0263`), higher `convnext_tiny_512` weight slightly softened `Mild <-> Moderate` boundary decisions on test vs Iteration 4b (`0.8167`). Adding a **Vision Transformer (`swin_v2_t`)** in Iteration 7 introduces self-attention inductive bias outside the CNN family.
+
+### 14. Shifted-Window Vision Transformer Ablation (`swin_v2_t`, Iteration 7, Stopped Early)
+- **What it tested**: Fine-tuned `swin_v2_t` (`27.6M` params, `IMAGENET1K_V1`) at `384x384` on `cache/cls_384_crop1` with `backbone=5e-5`, `head=2e-4`, `batch_size=16`, `grad_accum_steps=2`, `label_smoothing=0.06`, and `ema_decay=0.5`.
+- **Observed Impact & Why Stopped Early**: At `384x384`, `swin_v2_t` (pretrained at `256x256` fixed `cpb_mlp` relative window coordinates) ran slowly (`~293s/epoch`) and progressed slowly (`val_acc`: Ep1 `0.5706` -> Ep2 `0.6357` -> Ep3 `0.6581` -> Ep4 `0.6667`, `train_acc` `0.6840`). Because `256->384` window scaling slowed convergence ~14% behind our CNN families at double the wall-clock cost, training was stopped cleanly after Epoch 4 to reallocate compute to **`resnet101` (`IMAGENET1K_V2`, 44.5M) + `GeM2d`** (`163.6s/epoch`) plus out-of-fold validation meta-stacking (`5-fold OOF LogReg` across our 4 saved checkpoints already reached **`0.8217`** on validation).
 
 ---
 
